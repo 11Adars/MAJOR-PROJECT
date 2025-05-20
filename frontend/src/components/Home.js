@@ -1,6 +1,5 @@
-// frontend/src/Home.js
 import React from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, Link } from 'react-router-dom';
 import './styles.css';
 
 const Home = () => {
@@ -12,8 +11,9 @@ const Home = () => {
       <div className="button-group">
         <button className="btn" onClick={() => navigate('/register')}>Register (Face)</button>
         <button className="btn" onClick={() => navigate('/login')}>Login (Face)</button>
+        <button className="btn" onClick={() => navigate('/voice/register')}>Register (Voice)</button>
+        <button className="btn" onClick={() => navigate('/voice/login')}>Login (Voice)</button>
         {/* Future buttons */}
-        <button className="btn disabled">Register (Voice) - Coming Soon</button>
         <button className="btn disabled">Login (OTP) - Coming Soon</button>
       </div>
     </div>

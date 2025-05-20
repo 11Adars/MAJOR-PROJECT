@@ -10,8 +10,11 @@ function App() {
     <Router>
       <Routes>
         <Route path="/" element={<Home />} />
-        <Route path="/register" element={<Register />} />
-        <Route path="/login" element={<Login />} />
+        {/* Authentication Routes */}
+        <Route path="/register" element={<Register mode="face" />} />
+        <Route path="/login" element={<Login mode="face" />} />
+        <Route path="/voice/register" element={<Register mode="voice" />} />
+        <Route path="/voice/login" element={<Login mode="voice" />} />
         <Route path="/dashboard" element={<Dashboard />} />
       </Routes>
     </Router>
