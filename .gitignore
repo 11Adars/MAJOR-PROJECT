@@ -1,7 +1,24 @@
+# Virtual Environment
 venv/
+env/
+ENV/
+
+# Specific large files that exceeded GitHub limits
 venv/Lib/site-packages/llvmlite/binding/llvmlite.dll
 venv/Lib/site-packages/torch/lib/torch_cpu.dll
 venv/Lib/site-packages/torch/lib/dnnl.lib
-**/llvmlite/binding/llvmlite.dll
-**/torch/lib/torch_cpu.dll
-**/torch/lib/dnnl.lib
+
+# Python packages and binaries
+*.dll
+*.lib
+*.pyd
+*.so
+*.pyc
+
+# Dependencies
+node_modules/
+package-lock.json
+
+# Project specific
+uploads/
+python_service/__pycache__/
