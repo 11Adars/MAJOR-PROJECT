@@ -14,7 +14,7 @@ const Home = () => {
         <button className="btn" onClick={() => navigate('/voice/register')}>Register (Voice)</button>
         <button className="btn" onClick={() => navigate('/voice/login')}>Login (Voice)</button>
         {/* Future buttons */}
-        <button className="btn disabled">Login (OTP) - Coming Soon</button>
+        <button className="btn" onClick={() => navigate('/otp-login')}>Login (OTP)</button>
       </div>
     </div>
   );

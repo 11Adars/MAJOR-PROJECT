@@ -2,7 +2,7 @@ const express = require('express');
 const multer = require('multer');
 const cors = require('cors');
 const dotenv = require('dotenv');
-const { registerFace, loginFace, registerVoice, loginVoice,getUserData,getLoginHistory,logout } = require('./controllers/userController');
+const { registerFace, loginFace, registerVoice, loginVoice,getUserData,getLoginHistory,logout,sendOtp,verifyOtp } = require('./controllers/userController');
 const path = require('path');
 const authMiddleware = require('./middleware/authMiddleware');
 
@@ -48,6 +48,10 @@ app.use((err, req, res, next) => {
   console.error(err.stack);
   res.status(500).json({ error: err.message });
 });
+
+// OTP Auth Routes
+app.post('/api/otp/send', sendOtp);
+app.post('/api/otp/verify', verifyOtp);
 
 // Start server
 const PORT = process.env.PORT || 5000;

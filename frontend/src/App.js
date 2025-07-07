@@ -4,6 +4,7 @@ import Home from './components/Home';
 import Register from './components/Register';
 import Login from './components/Login';
 import Dashboard from './components/Dashboard';
+import OTPLogin from './components/OTPLogin';
 
 function App() {
   return (
@@ -15,7 +16,9 @@ function App() {
         <Route path="/login" element={<Login mode="face" />} />
         <Route path="/voice/register" element={<Register mode="voice" />} />
         <Route path="/voice/login" element={<Login mode="voice" />} />
+        <Route path="/otp-login" element={<OTPLogin />} />
         <Route path="/dashboard" element={<Dashboard />} />
+        
       </Routes>
     </Router>
   );

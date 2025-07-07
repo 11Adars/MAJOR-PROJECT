@@ -8,6 +8,7 @@ function Dashboard() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [loginHistory, setLoginHistory] = useState([]);
+  const [showProfile, setShowProfile] = useState(false);
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -83,6 +84,12 @@ function Dashboard() {
     }
   };
 
+
+
+  const toggleProfile = () => {
+    setShowProfile(!showProfile);
+  };
+
   if (loading) {
     return (
       <div className="dashboard-container">
@@ -102,60 +109,72 @@ function Dashboard() {
     );
   }
 
+
+  // Helper function to get active auth methods
+  const getActiveAuthMethods = (userData) => {
+    const methods = [];
+    if (userData?.face_registered) methods.push('Face');
+    if (userData?.voice_registered) methods.push('Voice');
+    // Only add OTP if it has been used for login
+    if (loginHistory.some(login => login.auth_method === 'otp')) methods.push('OTP');
+    return methods;
+  };
+
   return (
     <div className="dashboard-container">
       <header className="dashboard-header">
-        <h1>Welcome, {userData?.username}</h1>
-        <button onClick={handleLogout} className="logout-button">
-          Logout
-        </button>
+        <h1>BankAssist AI</h1>
+        <div className="profile-section">
+          <button onClick={toggleProfile} className="profile-button">
+            <span className="profile-icon">👤</span>
+            {userData?.username}
+          </button>
+          {showProfile && (
+            <div className="profile-dropdown">
+              <div className="profile-info">
+                <h3>{userData?.username}</h3>
+                <p>{userData?.email}</p>
+                <div className="auth-methods">
+                  <p>Active Authentication Methods:</p>
+                  <div className="auth-status">
+                    {getActiveAuthMethods(userData).map((method, index) => (
+                      <span key={index} className="auth-method">
+                        {method} Authentication
+                      </span>
+                    ))} 
+                  </div>
+                </div>
+                
+                <div className="recent-activity">
+                  <h4>Recent Login Activity</h4>
+                  <div className="login-history-compact">
+                    {loginHistory.slice(0, 5).map((login, index) => (
+                      <div key={index} className={`history-item ${login.success ? 'success' : 'failed'}`}>
+                        <span className="history-date">
+                          {new Date(login.timestamp).toLocaleDateString()} {new Date(login.timestamp).toLocaleTimeString()}
+                        </span>
+                        <span className="history-method">
+                          {login.auth_method.charAt(0).toUpperCase() + login.auth_method.slice(1)} Auth
+                        </span>
+                        <span className="history-status">
+                          {login.success ? '✅' : '❌'}
+                        </span>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              </div>
+              <button onClick={handleLogout} className="logout-button">
+                Logout
+              </button>
+            </div>
+          )}
+        </div>
       </header>
-
-      <div className="dashboard-content">
-        <section className="user-info-section">
-          <h2>Account Information</h2>
-          <div className="user-details">
-            <p><strong>Email:</strong> {userData?.email}</p>
-            <p><strong>Authentication Methods:</strong></p>
-            <ul>
-              <li>Face Recognition: {userData?.face_registered ? '✅' : '❌'}</li>
-              <li>Voice Recognition: {userData?.voice_registered ? '✅' : '❌'}</li>
-            </ul>
-          </div>
-        </section>
-
-        <section className="login-history-section">
-          <h2>Recent Login Activity</h2>
-          <div className="login-history">
-            {loginHistory.length > 0 ? (
-              <table>
-                <thead>
-                  <tr>
-                    <th>Date</th>
-                    <th>Time</th>
-                    <th>Method</th>
-                    <th>Status</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {loginHistory.map((login, index) => (
-                    <tr key={index}>
-                      <td>{new Date(login.timestamp).toLocaleDateString()}</td>
-                      <td>{new Date(login.timestamp).toLocaleTimeString()}</td>
-                      <td>{login.auth_method}</td>
-                      <td>{login.success ? 'Success' : 'Failed'}</td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            ) : (
-              <p>No login history available</p>
-            )}
-          </div>
-        </section>
-      </div>
     </div>
   );
 }
 
+
+  
 export default Dashboard;

@@ -3,6 +3,7 @@ const jwt = require('jsonwebtoken');
 const axios = require('axios');
 const FormData = require('form-data');
 const fs = require('fs');
+const { sendOTP } = require('../utils/emailService');
 
 const generateToken = (id) =>
   jwt.sign({ id }, process.env.JWT_SECRET, { expiresIn: '1h' });
@@ -418,6 +419,110 @@ const calculateSimilarity = (vec1, vec2) => {
   return dot / (norm1 * norm2);
 };
 
+
+
+
+// ===================== OTP===================== //
+
+
+// Generate 6-digit OTP
+const generateOTP = () => {
+  return Math.floor(100000 + Math.random() * 900000).toString();
+};
+
+exports.sendOtp = async (req, res) => {
+  const { email, username } = req.body;
+
+  try {
+    // Check if user exists and get their registered email
+    const userResult = await pool.query(
+      'SELECT id, email, username FROM users WHERE email = $1 OR username = $2',
+      [email, username]
+    );
+
+    if (userResult.rows.length === 0) {
+      return res.status(404).json({ 
+        error: 'No user found with this email/username' 
+      });
+    }
+
+    const user = userResult.rows[0];
+    const otp = generateOTP();
+    const otpExpires = new Date(Date.now() + 5 * 60 * 1000); // 5 minutes
+
+    // Save OTP to database
+    await pool.query(
+      'UPDATE users SET otp = $1, otp_expires = $2 WHERE id = $3',
+      [otp, otpExpires, user.id]
+    );
+
+    // Send OTP via email
+    const emailSent = await sendOTP(user.email, otp);
+    if (!emailSent) {
+      throw new Error('Failed to send OTP email');
+    }
+
+    // Return masked email for privacy
+    const maskedEmail = user.email.replace(/(?<=.{3}).(?=.*@)/g, '*');
+    
+    res.json({
+      success: true,
+      message: 'OTP sent successfully',
+      email: maskedEmail,
+      username: user.username
+    });
+
+  } catch (err) {
+    console.error('Send OTP error:', err);
+    res.status(500).json({ error: 'Failed to send OTP: ' + err.message });
+  }
+};
+
+exports.verifyOtp = async (req, res) => {
+  const { email, username, otp } = req.body;
+
+  try {
+    // Check OTP for either email or username
+    const userResult = await pool.query(
+      'SELECT * FROM users WHERE (email = $1 OR username = $2) AND otp = $3',
+      [email, username, otp]
+    );
+
+    if (userResult.rows.length === 0) {
+      return res.status(401).json({ error: 'Invalid OTP' });
+    }
+
+    const user = userResult.rows[0];
+    
+    // Check OTP expiration
+    if (new Date() > new Date(user.otp_expires)) {
+      return res.status(401).json({ error: 'OTP has expired' });
+    }
+
+    // Clear OTP after successful verification
+    await pool.query(
+      'UPDATE users SET otp = NULL, otp_expires = NULL WHERE id = $1',
+      [user.id]
+    );
+
+    // Log successful login
+    await pool.query(
+      'INSERT INTO login_history (user_id, auth_method, success) VALUES ($1, $2, $3)',
+      [user.id, 'otp', true]
+    );
+
+    const token = generateToken(user.id);
+    res.json({ 
+      success: true, 
+      token,
+      username: user.username 
+    });
+
+  } catch (err) {
+    console.error('Verify OTP error:', err);
+    res.status(500).json({ error: 'Failed to verify OTP: ' + err.message });
+  }
+};
 
 
 exports.getUserData = async (req, res) => {
