@@ -1,15 +1,23 @@
 import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
+import { FaUserCircle, FaMoneyCheckAlt, FaHistory, FaUserFriends, FaSignOutAlt, FaUser, FaLock}from 'react-icons/fa';
 import './styles.css';
+import BalanceCard from './BalanceCard'; 
 
 function Dashboard() {
+  // User data and authentication state
   const [userData, setUserData] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [loginHistory, setLoginHistory] = useState([]);
   const [showProfile, setShowProfile] = useState(false);
   const navigate = useNavigate();
+
+  // Banking data state
+  const [balance, setBalance] = useState(null);
+  const [transactions, setTransactions] = useState([]);
+  const [bankLoading, setBankLoading] = useState(true);
 
   useEffect(() => {
     const token = localStorage.getItem('token');
@@ -20,52 +28,54 @@ function Dashboard() {
     }
 
     const fetchDashboardData = async () => {
-  try {
-    // Add loading state
-    setLoading(true);
-    setError(null);
+      try {
+        setLoading(true);
+        setError(null);
 
-    const token = localStorage.getItem('token');
-    if (!token) {
-      throw new Error('No authentication token found');
-    }
+        const token = localStorage.getItem('token');
+        if (!token) {
+          throw new Error('No authentication token found');
+        }
 
-    // Add timeout to requests
-    const config = {
-      headers: { Authorization: `Bearer ${token}`, 'Content-Type': 'application/json' },
-      timeout: 5000
+        const config = {
+          headers: { Authorization: `Bearer ${token}`, 'Content-Type': 'application/json' },
+          timeout: 5000
+        };
+
+        // Fetch user data
+        const userResponse = await axios.get('http://127.0.0.1:5000/api/user', config);
+        if (!userResponse.data) {
+          throw new Error('No user data received');
+        }
+        setUserData(userResponse.data);
+
+        // Fetch login history
+        const historyResponse = await axios.get('http://127.0.0.1:5000/api/login-history', config);
+        setLoginHistory(historyResponse.data || []);
+
+        // Fetch banking data
+        const [balanceRes, transactionsRes] = await Promise.all([
+          axios.get('http://127.0.0.1:5000/api/account/balance', config),
+          axios.get('http://127.0.0.1:5000/api/account/history', config)
+        ]);
+        
+        setBalance(balanceRes.data.balance);
+        setTransactions(transactionsRes.data);
+
+      } catch (err) {
+        console.error('Dashboard data fetch error:', err);
+        const errorMessage = err.response?.data?.message || err.message || 'Failed to load dashboard';
+        setError(errorMessage);
+        
+        if (err.response?.status === 401) {
+          localStorage.removeItem('token');
+          navigate('/login');
+        }
+      } finally {
+        setLoading(false);
+        setBankLoading(false);
+      }
     };
-
-    // Fetch user data with error handling
-    console.log('Fetching user data...');
-    const userResponse = await axios.get('http://127.0.0.1:5000/api/user', config);
-    if (!userResponse.data) {
-      throw new Error('No user data received');
-    }
-     console.log('User data received:', userResponse.data);
-    setUserData(userResponse.data);
-
-    // Fetch login history with error handling
-    console.log('Fetching login history...');
-    const historyResponse = await axios.get('http://127.0.0.1:5000/api/login-history', config);
-    console.log('Login history received:', historyResponse.data);
-    setLoginHistory(historyResponse.data || []);
-
-  } catch (err) {
-    console.error('Dashboard data fetch error:', err);
-    const errorMessage = err.response?.data?.message || err.message || 'Failed to load dashboard';
-    setError(errorMessage);
-    
-    // Handle unauthorized access
-    if (err.response?.status === 401) {
-      console.log('Unauthorized access, redirecting to login...');  
-      localStorage.removeItem('token');
-      navigate('/login');
-    }
-  } finally {
-    setLoading(false);
-  }
-};
 
     fetchDashboardData();
   }, [navigate]);
@@ -84,10 +94,16 @@ function Dashboard() {
     }
   };
 
-
-
   const toggleProfile = () => {
     setShowProfile(!showProfile);
+  };
+
+  const getActiveAuthMethods = (userData) => {
+    const methods = [];
+    if (userData?.face_registered) methods.push('Face');
+    if (userData?.voice_registered) methods.push('Voice');
+    if (loginHistory.some(login => login.auth_method === 'otp')) methods.push('OTP');
+    return methods;
   };
 
   if (loading) {
@@ -109,25 +125,16 @@ function Dashboard() {
     );
   }
 
-
-  // Helper function to get active auth methods
-  const getActiveAuthMethods = (userData) => {
-    const methods = [];
-    if (userData?.face_registered) methods.push('Face');
-    if (userData?.voice_registered) methods.push('Voice');
-    // Only add OTP if it has been used for login
-    if (loginHistory.some(login => login.auth_method === 'otp')) methods.push('OTP');
-    return methods;
-  };
-
   return (
-    <div className="dashboard-container">
+    <div className="dashboard-main">
       <header className="dashboard-header">
-        <h1>BankAssist AI</h1>
+        <div className="header-left">
+          <h1>BankAssist AI</h1>
+        </div>
         <div className="profile-section">
           <button onClick={toggleProfile} className="profile-button">
-            <span className="profile-icon">👤</span>
-            {userData?.username}
+            <FaUserCircle size={24} className="profile-icon" />
+            <span>{userData?.username}</span>
           </button>
           {showProfile && (
             <div className="profile-dropdown">
@@ -164,17 +171,89 @@ function Dashboard() {
                   </div>
                 </div>
               </div>
-              <button onClick={handleLogout} className="logout-button">
-                Logout
-              </button>
+              <div className="profile-actions">
+                {/* <button 
+                  onClick={() => navigate('/profile')} 
+                  className="profile-action-btn"
+                >
+                  <FaUser /> View Profile
+                </button> */}
+                <button 
+                  onClick={() => navigate('/set-pin')} 
+                  className="profile-action-btn"
+                >
+                  <FaLock /> Set/Change PIN
+                </button>
+                <button onClick={handleLogout} className="logout-button">
+                  <FaSignOutAlt /> Logout
+                </button>
+
+
+                  <button 
+                  onClick={() => navigate('/order')}
+                  className="profile-action-btn"
+                >
+                  <FaMoneyCheckAlt /> Add Money
+                </button>
+              </div>
             </div>
           )}
         </div>
       </header>
+
+      <main className="dashboard-content">
+        <section className="balance-section">
+          <h2>Account Balance</h2>
+          {/* <div className="balance-card">
+            <FaMoneyCheckAlt size={32} />
+            <span className="balance-amount">
+              {balance !== null ? `₹${balance.toLocaleString()}` : 'Loading...'}
+            </span>
+          </div> */}
+          <BalanceCard balance={balance} />
+        </section>
+
+        <section className="quick-actions">
+          <h2>Quick Actions</h2>
+          <div className="action-buttons">
+            <button className="action-btn" onClick={() => navigate('/beneficiaries')}>
+              <FaUserFriends /> Beneficiaries
+            </button>
+            <button className="action-btn" onClick={() => navigate('/transfer')}>
+              <FaMoneyCheckAlt /> Transfer Money
+            </button>
+            <button className="action-btn" onClick={() => navigate('/history')}>
+              <FaHistory /> Transaction History
+            </button>
+          </div>
+        </section>
+
+        <section className="transactions-section">
+          <h2>Recent Transactions</h2>
+          {bankLoading ? (
+            <div className="loading-spinner">Loading transactions...</div>
+          ) : (
+            <ul className="transactions-list">
+              {transactions.slice(0, 5).map((txn, idx) => (
+                <li key={idx} className={`txn-item ${txn.type === 'debit' ? 'txn-debit' : 'txn-credit'}`}>
+                  <div className="txn-amount">
+                    {txn.type === 'debit' ? '-' : '+'}₹{txn.amount}
+                  </div>
+                  <div className="txn-details">
+                    <span className="txn-account">{txn.to_account || txn.from_account}</span>
+                    <span className="txn-date">{new Date(txn.timestamp).toLocaleString()}</span>
+                  </div>
+                  <div className="txn-status">
+                    {txn.status === 'completed' ? '✓' : '...'}
+                  </div>
+                </li>
+              ))}
+            </ul>
+          )}
+        </section>
+      </main>
     </div>
   );
 }
 
-
-  
 export default Dashboard;
