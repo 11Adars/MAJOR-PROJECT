@@ -1,0 +1,61 @@
+-- Users table
+CREATE TABLE users (
+    id SERIAL PRIMARY KEY,
+    name VARCHAR(255) NOT NULL,
+    email VARCHAR(255) UNIQUE NOT NULL,
+    password_hash VARCHAR(255),
+    face_registered BOOLEAN DEFAULT FALSE,
+    voice_registered BOOLEAN DEFAULT FALSE,
+    face_embedding TEXT,
+    voice_data TEXT,
+    created_at TIMESTAMP DEFAULT NOW()
+);
+
+-- Accounts table
+CREATE TABLE accounts (
+    id SERIAL PRIMARY KEY,
+    user_id INTEGER UNIQUE NOT NULL REFERENCES users(id),
+    account_number VARCHAR(20) UNIQUE,
+    balance NUMERIC DEFAULT 0,
+    created_at TIMESTAMP DEFAULT NOW()
+);
+
+-- User PINs table
+CREATE TABLE user_pins (
+    id SERIAL PRIMARY KEY,
+    user_id INTEGER UNIQUE NOT NULL REFERENCES users(id),
+    pin_hash VARCHAR(255) NOT NULL,
+    created_at TIMESTAMP DEFAULT NOW()
+);
+
+-- Beneficiaries table
+CREATE TABLE beneficiaries (
+    id SERIAL PRIMARY KEY,
+    user_id INTEGER NOT NULL REFERENCES users(id),
+    name VARCHAR(255) NOT NULL,
+    account_number VARCHAR(20) NOT NULL,
+    ifsc VARCHAR(11) NOT NULL,
+    created_at TIMESTAMP DEFAULT NOW()
+);
+
+-- Transactions table
+CREATE TABLE transactions (
+    id SERIAL PRIMARY KEY,
+    user_id INTEGER NOT NULL REFERENCES users(id),
+    type VARCHAR(10) NOT NULL,
+    amount NUMERIC NOT NULL,
+    to_account VARCHAR(20),
+    status VARCHAR(20),
+    reference_id VARCHAR(50),
+    timestamp TIMESTAMP DEFAULT NOW()
+);
+
+-- Login History table
+CREATE TABLE login_history (
+    id SERIAL PRIMARY KEY,
+    user_id INTEGER NOT NULL REFERENCES users(id),
+    login_method VARCHAR(20),
+    ip_address VARCHAR(45),
+    user_agent TEXT,
+    timestamp TIMESTAMP DEFAULT NOW()
+);
