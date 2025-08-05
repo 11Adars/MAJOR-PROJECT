@@ -59,3 +59,84 @@ CREATE TABLE login_history (
     user_agent TEXT,
     timestamp TIMESTAMP DEFAULT NOW()
 );
+
+
+
+
+
+1.users
+
+| column_name      | data_type                   | is_nullable | column_default                    |
+| ---------------- | --------------------------- | ----------- | --------------------------------- |
+| id               | integer                     | NO          | nextval('users_id_seq'::regclass) |
+| username         | character varying           | NO          | null                              |
+| email            | character varying           | NO          | null                              |
+| face_embedding   | ARRAY                       | YES         | null                              |
+| created_at       | timestamp without time zone | YES         | CURRENT_TIMESTAMP                 |
+| voice_registered | boolean                     | YES         | false                             |
+| voice_data       | jsonb                       | YES         | null                              |
+| face_registered  | boolean                     | YES         | false                             |
+| otp              | character varying           | YES         | null                              |
+| otp_expires      | timestamp without time zone | YES         | null                              |
+
+
+
+2.acccounts
+
+| column_name    | data_type         | is_nullable | column_default                       |
+| -------------- | ----------------- | ----------- | ------------------------------------ |
+| id             | integer           | NO          | nextval('accounts_id_seq'::regclass) |
+| user_id        | integer           | YES         | null                                 |
+| account_number | character varying | NO          | null                                 |
+| balance        | numeric           | YES         | 0                                    |
+| ifsc           | character varying | YES         | null                                 |
+
+3.beneficiaries
+
+| column_name    | data_type         | is_nullable | column_default                            |
+| -------------- | ----------------- | ----------- | ----------------------------------------- |
+| id             | integer           | NO          | nextval('beneficiaries_id_seq'::regclass) |
+| user_id        | integer           | YES         | null                                      |
+| name           | character varying | NO          | null                                      |
+| account_number | character varying | NO          | null                                      |
+| ifsc           | character varying | NO          | null                                      |
+
+
+4.login_history:
+
+
+| column_name        | data_type                   | is_nullable | column_default                            |
+| ------------------ | --------------------------- | ----------- | ----------------------------------------- |
+| id                 | integer                     | NO          | nextval('login_history_id_seq'::regclass) |
+| user_id            | integer                     | YES         | null                                      |
+| timestamp          | timestamp without time zone | YES         | CURRENT_TIMESTAMP                         |
+| auth_method        | character varying           | YES         | null                                      |
+| success            | boolean                     | YES         | null                                      |
+| ip_address         | character varying           | YES         | null                                      |
+| verification_score | double precision            | YES         | null                                      |
+| similarity_score   | double precision            | YES         | null                                      |
+| biometric_score    | double precision            | YES         | null                                      |
+
+
+
+5.transactions:
+
+| column_name  | data_type                   | is_nullable | column_default                           |
+| ------------ | --------------------------- | ----------- | ---------------------------------------- |
+| id           | integer                     | NO          | nextval('transactions_id_seq'::regclass) |
+| user_id      | integer                     | YES         | null                                     |
+| type         | character varying           | YES         | null                                     |
+| amount       | numeric                     | YES         | null                                     |
+| to_account   | character varying           | YES         | null                                     |
+| status       | character varying           | YES         | null                                     |
+| reference_id | character varying           | YES         | null                                     |
+| timestamp    | timestamp without time zone | YES         | CURRENT_TIMESTAMP                        |
+
+
+6.user_pins
+
+
+| column_name | data_type         | is_nullable | column_default |
+| ----------- | ----------------- | ----------- | -------------- |
+| user_id     | integer           | NO          | null           |
+| pin_hash    | character varying | NO          | null           |
