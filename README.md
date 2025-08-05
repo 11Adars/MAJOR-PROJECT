@@ -70,3 +70,32 @@ npm install bcrypt
 
 npm install react-router-dom axios react-icons
 ---------------------
+
+
+
+
+.env::
+
+
+# PostgreSQL Connection (adjust the username, password, db name as per your local setup)
+DATABASE_URL=postgresql://postgres:Adarsh@123@db.lmaihyvwjbthawalhovn.supabase.co:5432/postgres
+
+# Secret used for generating JWT tokens (change this to a strong random value)
+JWT_SECRET=KqcJPyJChK5P/pviM65v8rAIOYdQ02tfOin0NQ6IWpmf4dKBCCL+drpJQzQvfeQfTjDsei8WfGitz85D72zILg==
+
+# Python face embedding microservice URL (should match your Python server URL/port)
+PYTHON_SERVICE_URL=http://127.0.0.1:5001/embed
+
+PORT=5000
+
+
+# ...existing env variables...
+EMAIL_USER=adarsh.ds22@sahyadri.edu.in
+EMAIL_APP_PASSWORD=gujtzvpdgaqiboaq
+
+
+#razorpay
+RAZORPAY_KEY_ID=rzp_test_vpCwG1s5IJZOwG
+RAZORPAY_KEY_SECRET=7iVbBYTvG7prvvTerDG2AGuK
+
+RAZORPAY_WEBHOOK_SECRET=adarshapoojary123****
