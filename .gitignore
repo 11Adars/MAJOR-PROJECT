@@ -50,7 +50,7 @@ temp_models/
 your_videos_processed/
 your_videos_gesture_data/
 your_vedeos/
-
+gesture_data/
 # Database files
 *.db
 *.sqlite
