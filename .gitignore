@@ -51,6 +51,10 @@ your_videos_processed/
 your_videos_gesture_data/
 your_vedeos/
 gesture_data/
+# Large CSV landmark files
+**/gesture_data/*.csv
+**/gesture_data/*_landmarks.csv
+
 # Database files
 *.db
 *.sqlite
