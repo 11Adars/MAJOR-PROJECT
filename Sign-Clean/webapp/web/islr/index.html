@@ -1,0 +1,354 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sign Language Recognition</title>
+    
+    <!-- External CSS -->
+    <link rel="stylesheet" href="web/islr/style.css">
+    
+    <!-- Boxicons for icons -->
+    <link href="https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css" rel="stylesheet">
+    <link rel="icon" href="../image/icon.png">
+    
+    <!-- MediaPipe Libraries -->
+    <script src="https://cdn.jsdelivr.net/npm/@mediapipe/camera_utils/camera_utils.js" crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@mediapipe/control_utils/control_utils.js" crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@mediapipe/drawing_utils/drawing_utils.js" crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@mediapipe/holistic/holistic.js" crossorigin="anonymous"></script>
+    <script type="text/javascript" src="web/islr/particles.js"></script>
+</head>
+
+<body>
+    <div id="particles-js"></div>
+    <div class="content">
+        <!-- Header Section -->
+        <header class="header">
+            <a class="home" href="https://sqnsportfolio.com">
+                <i class='bx bx-file'></i>
+            </a>
+            <div class="logo">
+                Sign Language <span>Recognition</span>
+            </div>
+            <nav class="navbar">
+                <a class='bx bx-menu' style="font-size: 5rem;"></a>
+            </nav>
+        </header>
+        
+        <!-- Modal for Settings -->
+        <div class="modal-container" id="modal_container">
+            <div class="modal">
+                <div class="modal-header">
+                    <h1>ASL Dictionary</h1>
+                </div>
+                <div class="modal-content">
+                    <input list="aslOptions" id="aslSelection" name="aslSelection" placeholder="Find the sign">
+                    <datalist id="aslOptions">
+                        <option value="After">
+                        <option value="Airplane">
+                        <option value="All">
+                        <option value="Alligator">
+                        <option value="Animal">
+                        <option value="Another">
+                        <option value="Any">
+                        <option value="Apple">
+                        <option value="Arm">
+                        <option value="Aunt">
+                        <option value="Awake">
+                        <option value="Backyard">
+                        <option value="Bad">
+                        <option value="Balloon">
+                        <option value="Bath">
+                        <option value="Because">
+                        <option value="Bed">
+                        <option value="Bedroom">
+                        <option value="Bee">
+                        <option value="Before">
+                        <option value="Beside">
+                        <option value="Better">
+                        <option value="Bird">
+                        <option value="Black">
+                        <option value="Blow">
+                        <option value="Blue">
+                        <option value="Boat">
+                        <option value="Book">
+                        <option value="Boy">
+                        <option value="Brother">
+                        <option value="Brown">
+                        <option value="Bug">
+                        <option value="Bye">
+                        <option value="Callonphone">
+                        <option value="Can">
+                        <option value="Car">
+                        <option value="Carrot">
+                        <option value="Cat">
+                        <option value="Cereal">
+                        <option value="Chair">
+                        <option value="Cheek">
+                        <option value="Child">
+                        <option value="Chin">
+                        <option value="Chocolate">
+                        <option value="Clean">
+                        <option value="Close">
+                        <option value="Closet">
+                        <option value="Cloud">
+                        <option value="Clown">
+                        <option value="Cow">
+                        <option value="Cowboy">
+                        <option value="Cry">
+                        <option value="Cut">
+                        <option value="Cute">
+                        <option value="Dad">
+                        <option value="Dance">
+                        <option value="Dirty">
+                        <option value="Dog">
+                        <option value="Doll">
+                        <option value="Donkey">
+                        <option value="Down">
+                        <option value="Drawer">
+                        <option value="Drink">
+                        <option value="Drop">
+                        <option value="Dry">
+                        <option value="Dryer">
+                        <option value="Duck">
+                        <option value="Ear">
+                        <option value="Elephant">
+                        <option value="Empty">
+                        <option value="Every">
+                        <option value="Eye">
+                        <option value="Face">
+                        <option value="Fall">
+                        <option value="Farm">
+                        <option value="Fast">
+                        <option value="Feet">
+                        <option value="Find">
+                        <option value="Fine">
+                        <option value="Finger">
+                        <option value="Finish">
+                        <option value="Fireman">
+                        <option value="First">
+                        <option value="Fish">
+                        <option value="Flag">
+                        <option value="Flower">
+                        <option value="Food">
+                        <option value="For">
+                        <option value="Frenchfries">
+                        <option value="Frog">
+                        <option value="Garbage">
+                        <option value="Gift">
+                        <option value="Giraffe">
+                        <option value="Girl">
+                        <option value="Give">
+                        <option value="Glasswindow">
+                        <option value="Go">
+                        <option value="Goose">
+                        <option value="Grandma">
+                        <option value="Grandpa">
+                        <option value="Grass">
+                        <option value="Green">
+                        <option value="Gum">
+                        <option value="Hair">
+                        <option value="Happy">
+                        <option value="Hat">
+                        <option value="Hate">
+                        <option value="Have">
+                        <option value="Haveto">
+                        <option value="Head">
+                        <option value="Hear">
+                        <option value="Helicopter">
+                        <option value="Hello">
+                        <option value="Hen">
+                        <option value="Hesheit">
+                        <option value="Hide">
+                        <option value="High">
+                        <option value="Home">
+                        <option value="Horse">
+                        <option value="Hot">
+                        <option value="Hungry">
+                        <option value="Icecream">
+                        <option value="If">
+                        <option value="Into">
+                        <option value="Jacket">
+                        <option value="Jeans">
+                        <option value="Jump">
+                        <option value="Kiss">
+                        <option value="Kitty">
+                        <option value="Lamp">
+                        <option value="Later">
+                        <option value="Like">
+                        <option value="Lion">
+                        <option value="Lips">
+                        <option value="Listen">
+                        <option value="Look">
+                        <option value="Loud">
+                        <option value="Mad">
+                        <option value="Make">
+                        <option value="Man">
+                        <option value="Many">
+                        <option value="Milk">
+                        <option value="Minemy">
+                        <option value="Mitten">
+                        <option value="Mom">
+                        <option value="Moon">
+                        <option value="Morning">
+                        <option value="Mouse">
+                        <option value="Mouth">
+                        <option value="Nap">
+                        <option value="Napkin">
+                        <option value="Night">
+                        <option value="No">
+                        <option value="Noisy">
+                        <option value="Nose">
+                        <option value="Not">
+                        <option value="Now">
+                        <option value="Nuts">
+                        <option value="Old">
+                        <option value="On">
+                        <option value="Open">
+                        <option value="Orange">
+                        <option value="Outside">
+                        <option value="Owie">
+                        <option value="Owl">
+                        <option value="Pajamas">
+                        <option value="Pen">
+                        <option value="Pencil">
+                        <option value="Penny">
+                        <option value="Person">
+                        <option value="Pig">
+                        <option value="Pizza">
+                        <option value="Please">
+                        <option value="Police">
+                        <option value="Pool">
+                        <option value="Potty">
+                        <option value="Pretend">
+                        <option value="Pretty">
+                        <option value="Puppy">
+                        <option value="Puzzle">
+                        <option value="Quiet">
+                        <option value="Radio">
+                        <option value="Rain">
+                        <option value="Read">
+                        <option value="Red">
+                        <option value="Refrigerator">
+                        <option value="Ride">
+                        <option value="Room">
+                        <option value="Sad">
+                        <option value="Same">
+                        <option value="Say">
+                        <option value="Scissors">
+                        <option value="See">
+                        <option value="Shhh">
+                        <option value="Shirt">
+                        <option value="Shoe">
+                        <option value="Shower">
+                        <option value="Sick">
+                        <option value="Sleep">
+                        <option value="Sleepy">
+                        <option value="Smile">
+                        <option value="Snack">
+                        <option value="Snow">
+                        <option value="Stairs">
+                        <option value="Stay">
+                        <option value="Sticky">
+                        <option value="Store">
+                        <option value="Story">
+                        <option value="Stuck">
+                        <option value="Sun">
+                        <option value="Table">
+                        <option value="Talk">
+                        <option value="Taste">
+                        <option value="Thankyou">
+                        <option value="That">
+                        <option value="There">
+                        <option value="Think">
+                        <option value="Thirsty">
+                        <option value="Tiger">
+                        <option value="Time">
+                        <option value="Tomorrow">
+                        <option value="Tongue">
+                        <option value="Tooth">
+                        <option value="Toothbrush">
+                        <option value="Touch">
+                        <option value="Toy">
+                        <option value="Tree">
+                        <option value="Tv">
+                        <option value="Uncle">
+                        <option value="Underwear">
+                        <option value="Up">
+                        <option value="Vacuum">
+                        <option value="Wait">
+                        <option value="Wake">
+                        <option value="Water">
+                        <option value="Wet">
+                        <option value="Weus">
+                        <option value="Where">
+                        <option value="White">
+                        <option value="Who">
+                        <option value="Why">
+                        <option value="Will">
+                        <option value="Wolf">
+                        <option value="Yellow">
+                        <option value="Yes">
+                        <option value="Yesterday">
+                        <option value="Yourself">
+                        <option value="Yucky">
+                        <option value="Zebra">
+                        <option value="Zipper">
+                    </datalist>
+                    <div class="note-container">
+                        <p id="note">
+                            Please note that only the words included in this ASL dictionary are supported and trained within the app. For the best experience, focus on the vocabulary provided here. Updates may introduce additional words, so stay tuned!
+                        </p>
+                    </div>
+                    <button id="playVideo" class="btn">Play Video</button>
+                </div>
+                <div class="modal-header">
+                    <h1>Settings</h1>
+                </div>
+                <div class="modal-content">
+                    <h2>API Configuration:</h2>
+                    <select id="listenMode">
+                        <option value="online">Online (Render)</option>
+                        <option value="offline">Offline</option>
+                    </select>
+                    <div id="inputContainer" class="note-container">
+                        <p id="note">
+                            Online mode may experience high latency due to the use of free web services. Occasionally, it may take up to 30 seconds to wake up the server. If you've waited longer than this, try reloading the webpage.
+                        </p>
+                    </div>
+                </div>
+                <div class="slider-container">
+                    <label for="predictionSpeed" class="slider-label">Prediction Speed</label>
+                    <input type="range" id="predictionSpeed" min="10" max="100" value="25" class="slider">
+                    <span id="sliderValue">25</span>
+                </div>
+                <div class="toggle-container">
+                    <label for="toggleSkeleton" class="slider-label">Draw Mediapipe Skeleton</label>
+                    <button id="toggleSkeleton" class="btn">On</button>
+                </div>
+                <div class="modal-footer">
+                    <button id="close" class="btn">Close</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Main Content -->
+        <main>
+            
+            <button id="camButton" class="btn">Loading Model...</button>
+            <div class="camView">
+                <video class="input_video" autoplay playsinline></video>
+                <canvas class="output_canvas"></canvas>
+            </div>
+            <div id="pred"></div>
+            <div id="pred_sentence"></div>
+        </main>
+    </div>
+    
+    <!-- External JavaScript -->
+    <script type="module" src="web/islr/script.js"></script>
+</body>
+
+</html>

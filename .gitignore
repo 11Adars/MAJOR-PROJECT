@@ -15,10 +15,14 @@ __pycache__/
 *$py.class
 dist/
 build/
+*.egg-info/
 
 # Node dependencies
 node_modules/
 package-lock.json
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
 
 # Project specific
 uploads/
@@ -26,6 +30,54 @@ python_service/__pycache__/
 frontend/build/
 backend/uploads/
 
-# IDE
+# Sign Language Project specific
+# Trained models (keep the final ones but ignore temporary/test models)
+*.pkl
+*.joblib
+test_models/
+temp_models/
+
+# Large data files
+*.mp4
+*.avi
+*.mov
+*.wmv
+*.mkv
+*.h5
+*.weights
+
+# Processed video data (comment out if you want to keep)
+your_videos_processed/
+your_videos_gesture_data/
+your_vedeos/
+
+# Database files
+*.db
+*.sqlite
+*.sqlite3
+
+# IDE and editors
 .vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# OS generated files
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+
+# Logs
+*.log
+logs/
+
+# Temporary files
+tmp/
+temp/
+*.tmp
 .idea/

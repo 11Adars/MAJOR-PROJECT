@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Simple Sign Language Recognition</title>
+    <link rel="stylesheet" href="/web/islr/style_simple.css">
+    
+    <!-- MediaPipe Libraries -->
+    <script src="https://cdn.jsdelivr.net/npm/@mediapipe/camera_utils/camera_utils.js" crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@mediapipe/control_utils/control_utils.js" crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@mediapipe/drawing_utils/drawing_utils.js" crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@mediapipe/holistic/holistic.js" crossorigin="anonymous"></script>
+</head>
+
+<body>
+    <div class="container">
+        <!-- Header -->
+        <header class="header">
+            <h1>Sign Language Recognition</h1>
+        </header>
+        
+        <!-- Main Content -->
+        <main class="main-content">
+            <div class="camera-section">
+                <button id="camButton" class="btn">Enable Camera</button>
+                <div class="camera-container">
+                    <video class="input_video" autoplay playsinline></video>
+                    <canvas class="output_canvas"></canvas>
+                </div>
+            </div>
+            
+            <div class="prediction-section">
+                <div class="prediction-display">
+                    <h2>Current Sign:</h2>
+                    <div id="pred" class="current-prediction">Ready to detect...</div>
+                </div>
+                
+                <div class="sentence-display">
+                    <h2>Generated Sentence:</h2>
+                    <div id="pred_sentence" class="sentence-output">Sentences will appear here...</div>
+                </div>
+            </div>
+        </main>
+    </div>
+    
+    <script src="/web/islr/script_simple.js"></script>
+</body>
+</html>

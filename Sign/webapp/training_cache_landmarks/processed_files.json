@@ -1,0 +1,1227 @@
+{
+  "hello_hello_10_1757054138.mp4": {
+    "hash": "8d4d9a2ed56364a0297534e2cc5d35e5",
+    "features_path": "training_cache_landmarks\\features\\hello_hello_10_1757054138.pkl",
+    "processed_at": "2025-09-05T16:50:12.567864"
+  },
+  "hello_hello_10_1757055230.mp4": {
+    "hash": "d45a39b77f8c134275bbecb9f85665cf",
+    "features_path": "training_cache_landmarks\\features\\hello_hello_10_1757055230.pkl",
+    "processed_at": "2025-09-05T16:50:42.354475"
+  },
+  "hello_hello_11_1757055236.mp4": {
+    "hash": "f7318568574b706f8c57564a64668476",
+    "features_path": "training_cache_landmarks\\features\\hello_hello_11_1757055236.pkl",
+    "processed_at": "2025-09-05T16:51:12.541419"
+  },
+  "hello_hello_12_1757055242.mp4": {
+    "hash": "9765e46ef246071a2c7e24f0558ee546",
+    "features_path": "training_cache_landmarks\\features\\hello_hello_12_1757055242.pkl",
+    "processed_at": "2025-09-05T16:51:42.058612"
+  },
+  "hello_hello_13_1757055247.mp4": {
+    "hash": "8d2de6b0e9138e550c6f8758a6fb9bf7",
+    "features_path": "training_cache_landmarks\\features\\hello_hello_13_1757055247.pkl",
+    "processed_at": "2025-09-05T16:52:12.341670"
+  },
+  "hello_hello_14_1757055253.mp4": {
+    "hash": "34598ef2dea3150f63ab2836b589e0d3",
+    "features_path": "training_cache_landmarks\\features\\hello_hello_14_1757055253.pkl",
+    "processed_at": "2025-09-05T16:52:44.785703"
+  },
+  "hello_hello_15_1757055258.mp4": {
+    "hash": "e082e22d5d21afac072d6fac33723601",
+    "features_path": "training_cache_landmarks\\features\\hello_hello_15_1757055258.pkl",
+    "processed_at": "2025-09-05T16:53:14.992735"
+  },
+  "hello_hello_16_1757055264.mp4": {
+    "hash": "9fc4e48e872c1152323c6ef99f2bef69",
+    "features_path": "training_cache_landmarks\\features\\hello_hello_16_1757055264.pkl",
+    "processed_at": "2025-09-05T16:54:00.118179"
+  },
+  "hello_hello_17_1757055270.mp4": {
+    "hash": "b11966a6e402283331bbc58827348710",
+    "features_path": "training_cache_landmarks\\features\\hello_hello_17_1757055270.pkl",
+    "processed_at": "2025-09-05T16:54:43.141411"
+  },
+  "hello_hello_18_1757055275.mp4": {
+    "hash": "ec4ef41f2900b25a9074b97835fed868",
+    "features_path": "training_cache_landmarks\\features\\hello_hello_18_1757055275.pkl",
+    "processed_at": "2025-09-05T16:55:14.568384"
+  },
+  "hello_hello_19_1757055281.mp4": {
+    "hash": "37058d97f8de8d89fe855d4bcd569b6d",
+    "features_path": "training_cache_landmarks\\features\\hello_hello_19_1757055281.pkl",
+    "processed_at": "2025-09-05T16:55:45.646002"
+  },
+  "hello_hello_1_1757054082.mp4": {
+    "hash": "2c70e4d02abe0e8a6b3a65227e888f04",
+    "features_path": "training_cache_landmarks\\features\\hello_hello_1_1757054082.pkl",
+    "processed_at": "2025-09-05T16:56:16.881158"
+  },
+  "hello_hello_1_1757055179.mp4": {
+    "hash": "098ad4695ae2a7ecbb197e8a13781aa3",
+    "features_path": "training_cache_landmarks\\features\\hello_hello_1_1757055179.pkl",
+    "processed_at": "2025-09-05T16:56:47.663958"
+  },
+  "hello_hello_20_1757055286.mp4": {
+    "hash": "126a689e6a18caccfea7501c651affec",
+    "features_path": "training_cache_landmarks\\features\\hello_hello_20_1757055286.pkl",
+    "processed_at": "2025-09-05T16:57:20.600409"
+  },
+  "hello_hello_21_1757055292.mp4": {
+    "hash": "abe74f8cb079b5db77ed27095fefac69",
+    "features_path": "training_cache_landmarks\\features\\hello_hello_21_1757055292.pkl",
+    "processed_at": "2025-09-05T16:57:51.971872"
+  },
+  "hello_hello_22_1757055299.mp4": {
+    "hash": "c565684e2d1d4566b4d6a4ad5dc1e30c",
+    "features_path": "training_cache_landmarks\\features\\hello_hello_22_1757055299.pkl",
+    "processed_at": "2025-09-05T16:58:23.304234"
+  },
+  "hello_hello_23_1757055305.mp4": {
+    "hash": "f17d0396496baecd085984da64161169",
+    "features_path": "training_cache_landmarks\\features\\hello_hello_23_1757055305.pkl",
+    "processed_at": "2025-09-05T16:58:55.380200"
+  },
+  "hello_hello_24_1757055311.mp4": {
+    "hash": "946beaf542fb36bba655e1ab2f4d2c29",
+    "features_path": "training_cache_landmarks\\features\\hello_hello_24_1757055311.pkl",
+    "processed_at": "2025-09-05T16:59:27.657925"
+  },
+  "hello_hello_25_1757055316.mp4": {
+    "hash": "42e90729feb3f024fbd297ea4934b0bc",
+    "features_path": "training_cache_landmarks\\features\\hello_hello_25_1757055316.pkl",
+    "processed_at": "2025-09-05T16:59:59.275881"
+  },
+  "hello_hello_26_1757055332.mp4": {
+    "hash": "59553c8b164c4f6088473ae5fd9dc807",
+    "features_path": "training_cache_landmarks\\features\\hello_hello_26_1757055332.pkl",
+    "processed_at": "2025-09-05T17:00:31.270663"
+  },
+  "hello_hello_27_1757055337.mp4": {
+    "hash": "4eb2069faeb25ae2cbecaaf80bc799a1",
+    "features_path": "training_cache_landmarks\\features\\hello_hello_27_1757055337.pkl",
+    "processed_at": "2025-09-05T17:01:03.236108"
+  },
+  "hello_hello_28_1757055343.mp4": {
+    "hash": "537070f612a3882e4637bc9306cfd500",
+    "features_path": "training_cache_landmarks\\features\\hello_hello_28_1757055343.pkl",
+    "processed_at": "2025-09-05T17:01:44.618324"
+  },
+  "hello_hello_29_1757055363.mp4": {
+    "hash": "d09771e32eb9763506964e4ade63ea8e",
+    "features_path": "training_cache_landmarks\\features\\hello_hello_29_1757055363.pkl",
+    "processed_at": "2025-09-05T17:02:28.718072"
+  },
+  "hello_hello_2_1757054088.mp4": {
+    "hash": "c577f61189c9b3eb333d7e80635a6152",
+    "features_path": "training_cache_landmarks\\features\\hello_hello_2_1757054088.pkl",
+    "processed_at": "2025-09-05T17:03:00.643515"
+  },
+  "hello_hello_2_1757055185.mp4": {
+    "hash": "925d3397ed030fe22ad249452421d289",
+    "features_path": "training_cache_landmarks\\features\\hello_hello_2_1757055185.pkl",
+    "processed_at": "2025-09-05T17:03:33.039708"
+  },
+  "hello_hello_30_1757055369.mp4": {
+    "hash": "34c82eec916ebd4c439391a062d59530",
+    "features_path": "training_cache_landmarks\\features\\hello_hello_30_1757055369.pkl",
+    "processed_at": "2025-09-05T17:04:05.744299"
+  },
+  "hello_hello_3_1757054095.mp4": {
+    "hash": "a4ef4eb32bfd139bffe1589b2e4c8f54",
+    "features_path": "training_cache_landmarks\\features\\hello_hello_3_1757054095.pkl",
+    "processed_at": "2025-09-05T17:04:38.414673"
+  },
+  "hello_hello_3_1757055191.mp4": {
+    "hash": "9a34bdac016765336fce342ab2d00ee3",
+    "features_path": "training_cache_landmarks\\features\\hello_hello_3_1757055191.pkl",
+    "processed_at": "2025-09-05T17:05:10.777225"
+  },
+  "hello_hello_4_1757054101.mp4": {
+    "hash": "464b7efbe0189656e30a673203d6477a",
+    "features_path": "training_cache_landmarks\\features\\hello_hello_4_1757054101.pkl",
+    "processed_at": "2025-09-05T17:05:43.705629"
+  },
+  "hello_hello_4_1757055197.mp4": {
+    "hash": "b289bf8147b04d21c3f3994c680da540",
+    "features_path": "training_cache_landmarks\\features\\hello_hello_4_1757055197.pkl",
+    "processed_at": "2025-09-05T17:06:21.026201"
+  },
+  "hello_hello_5_1757054107.mp4": {
+    "hash": "29f51fd5ef716e4a34b28bb52e835a0a",
+    "features_path": "training_cache_landmarks\\features\\hello_hello_5_1757054107.pkl",
+    "processed_at": "2025-09-05T17:07:10.638943"
+  },
+  "hello_hello_5_1757055203.mp4": {
+    "hash": "0ec67f90f9b45214a7a0408f8ef97c93",
+    "features_path": "training_cache_landmarks\\features\\hello_hello_5_1757055203.pkl",
+    "processed_at": "2025-09-05T17:07:43.370491"
+  },
+  "hello_hello_6_1757054113.mp4": {
+    "hash": "89f49dfa8619c77434f010ee4136f9da",
+    "features_path": "training_cache_landmarks\\features\\hello_hello_6_1757054113.pkl",
+    "processed_at": "2025-09-05T17:08:16.426855"
+  },
+  "hello_hello_6_1757055209.mp4": {
+    "hash": "701e5d883c46b5ba61f302dae6265335",
+    "features_path": "training_cache_landmarks\\features\\hello_hello_6_1757055209.pkl",
+    "processed_at": "2025-09-05T17:08:49.051657"
+  },
+  "hello_hello_7_1757054119.mp4": {
+    "hash": "ad6bef7cbe602447d102b49d9c975b1a",
+    "features_path": "training_cache_landmarks\\features\\hello_hello_7_1757054119.pkl",
+    "processed_at": "2025-09-05T17:09:22.545748"
+  },
+  "hello_hello_7_1757055214.mp4": {
+    "hash": "738e86b0b1ec7f02168569160173986b",
+    "features_path": "training_cache_landmarks\\features\\hello_hello_7_1757055214.pkl",
+    "processed_at": "2025-09-05T17:09:55.194887"
+  },
+  "hello_hello_8_1757054125.mp4": {
+    "hash": "afbf3ca7133244d994b7776814c9310d",
+    "features_path": "training_cache_landmarks\\features\\hello_hello_8_1757054125.pkl",
+    "processed_at": "2025-09-05T17:10:28.426840"
+  },
+  "hello_hello_8_1757055219.mp4": {
+    "hash": "85424f8117b70417b71e37536a9e2235",
+    "features_path": "training_cache_landmarks\\features\\hello_hello_8_1757055219.pkl",
+    "processed_at": "2025-09-05T17:11:02.162150"
+  },
+  "hello_hello_9_1757054131.mp4": {
+    "hash": "45e85217000e872de64286436aa39340",
+    "features_path": "training_cache_landmarks\\features\\hello_hello_9_1757054131.pkl",
+    "processed_at": "2025-09-05T17:12:00.648530"
+  },
+  "hello_hello_9_1757055225.mp4": {
+    "hash": "c5f0f08ac0824e057d9b7f92b88c5d5f",
+    "features_path": "training_cache_landmarks\\features\\hello_hello_9_1757055225.pkl",
+    "processed_at": "2025-09-05T17:12:49.625965"
+  },
+  "thank_you_thank_you_10_1757069585.mp4": {
+    "hash": "79c6b4e0efeb265e0b2896306503d2ce",
+    "features_path": "training_cache_landmarks\\features\\thank_you_thank_you_10_1757069585.pkl",
+    "processed_at": "2025-09-05T17:13:26.407299"
+  },
+  "thank_you_thank_you_11_1757069599.mp4": {
+    "hash": "c7d590f56a25e8898fe6c8720339ddf0",
+    "features_path": "training_cache_landmarks\\features\\thank_you_thank_you_11_1757069599.pkl",
+    "processed_at": "2025-09-05T17:14:02.848693"
+  },
+  "thank_you_thank_you_12_1757069604.mp4": {
+    "hash": "20c44251163da60702e1059ae5de6a34",
+    "features_path": "training_cache_landmarks\\features\\thank_you_thank_you_12_1757069604.pkl",
+    "processed_at": "2025-09-05T17:14:41.418083"
+  },
+  "thank_you_thank_you_13_1757069610.mp4": {
+    "hash": "72957d13e877d24a7dce4d94edc35062",
+    "features_path": "training_cache_landmarks\\features\\thank_you_thank_you_13_1757069610.pkl",
+    "processed_at": "2025-09-05T17:15:16.035161"
+  },
+  "thank_you_thank_you_14_1757069617.mp4": {
+    "hash": "e10fd2ecf7f36cbf6def333bc99b6929",
+    "features_path": "training_cache_landmarks\\features\\thank_you_thank_you_14_1757069617.pkl",
+    "processed_at": "2025-09-05T17:15:50.478167"
+  },
+  "thank_you_thank_you_15_1757069625.mp4": {
+    "hash": "64a5d61310a6144e5ce206786b9c8354",
+    "features_path": "training_cache_landmarks\\features\\thank_you_thank_you_15_1757069625.pkl",
+    "processed_at": "2025-09-05T17:16:25.235342"
+  },
+  "thank_you_thank_you_16_1757069631.mp4": {
+    "hash": "19f2a371f6f69941a98416399fb009e5",
+    "features_path": "training_cache_landmarks\\features\\thank_you_thank_you_16_1757069631.pkl",
+    "processed_at": "2025-09-05T17:16:58.738952"
+  },
+  "thank_you_thank_you_17_1757069637.mp4": {
+    "hash": "49a69e96e38404989b229287d034ca6f",
+    "features_path": "training_cache_landmarks\\features\\thank_you_thank_you_17_1757069637.pkl",
+    "processed_at": "2025-09-05T17:17:33.780006"
+  },
+  "thank_you_thank_you_18_1757069642.mp4": {
+    "hash": "236c33198d0776049e5eb45690e53f3c",
+    "features_path": "training_cache_landmarks\\features\\thank_you_thank_you_18_1757069642.pkl",
+    "processed_at": "2025-09-05T17:18:18.536679"
+  },
+  "thank_you_thank_you_19_1757069648.mp4": {
+    "hash": "cc67333f54d8d0eae6184e79c32d2ed7",
+    "features_path": "training_cache_landmarks\\features\\thank_you_thank_you_19_1757069648.pkl",
+    "processed_at": "2025-09-05T17:19:19.056259"
+  },
+  "thank_you_thank_you_1_1757069533.mp4": {
+    "hash": "eff525fc33ed147a71dec75bfbd56ee3",
+    "features_path": "training_cache_landmarks\\features\\thank_you_thank_you_1_1757069533.pkl",
+    "processed_at": "2025-09-05T17:20:23.998573"
+  },
+  "thank_you_thank_you_20_1757069653.mp4": {
+    "hash": "078c888e92bfac016cb87903b72a5552",
+    "features_path": "training_cache_landmarks\\features\\thank_you_thank_you_20_1757069653.pkl",
+    "processed_at": "2025-09-05T17:21:02.308150"
+  },
+  "thank_you_thank_you_21_1757069659.mp4": {
+    "hash": "0537321de0587311b09576cc7d05f5f7",
+    "features_path": "training_cache_landmarks\\features\\thank_you_thank_you_21_1757069659.pkl",
+    "processed_at": "2025-09-05T17:21:32.966667"
+  },
+  "thank_you_thank_you_22_1757069664.mp4": {
+    "hash": "3d3307cd2d3361c2b4ac632c3e9ecfa5",
+    "features_path": "training_cache_landmarks\\features\\thank_you_thank_you_22_1757069664.pkl",
+    "processed_at": "2025-09-05T17:22:03.298348"
+  },
+  "thank_you_thank_you_23_1757069673.mp4": {
+    "hash": "4b8110b34b287ee709d091dd87e131c8",
+    "features_path": "training_cache_landmarks\\features\\thank_you_thank_you_23_1757069673.pkl",
+    "processed_at": "2025-09-05T17:22:34.808513"
+  },
+  "thank_you_thank_you_24_1757069678.mp4": {
+    "hash": "2253447e9c101081123fd6ab300d46dd",
+    "features_path": "training_cache_landmarks\\features\\thank_you_thank_you_24_1757069678.pkl",
+    "processed_at": "2025-09-05T17:23:06.192014"
+  },
+  "thank_you_thank_you_25_1757069684.mp4": {
+    "hash": "308a4cf9772a377da28ddc377cee8654",
+    "features_path": "training_cache_landmarks\\features\\thank_you_thank_you_25_1757069684.pkl",
+    "processed_at": "2025-09-05T17:23:37.825667"
+  },
+  "thank_you_thank_you_26_1757069689.mp4": {
+    "hash": "9812d7804193403f9a0692e87c2a3f70",
+    "features_path": "training_cache_landmarks\\features\\thank_you_thank_you_26_1757069689.pkl",
+    "processed_at": "2025-09-05T17:24:08.451848"
+  },
+  "thank_you_thank_you_27_1757069694.mp4": {
+    "hash": "2f18350cb0a3d46020caf6ab61ef5816",
+    "features_path": "training_cache_landmarks\\features\\thank_you_thank_you_27_1757069694.pkl",
+    "processed_at": "2025-09-05T17:24:39.041257"
+  },
+  "thank_you_thank_you_28_1757069700.mp4": {
+    "hash": "49bcfebe0e5ef3bb7b91cf77f6a0c3c9",
+    "features_path": "training_cache_landmarks\\features\\thank_you_thank_you_28_1757069700.pkl",
+    "processed_at": "2025-09-05T17:25:10.524855"
+  },
+  "thank_you_thank_you_29_1757069847.mp4": {
+    "hash": "06f3d2340d41d200a08983a72d9ef10a",
+    "features_path": "training_cache_landmarks\\features\\thank_you_thank_you_29_1757069847.pkl",
+    "processed_at": "2025-09-05T17:25:42.756818"
+  },
+  "thank_you_thank_you_2_1757069540.mp4": {
+    "hash": "44b0d3c8ae9f4c554b403f426d9dd817",
+    "features_path": "training_cache_landmarks\\features\\thank_you_thank_you_2_1757069540.pkl",
+    "processed_at": "2025-09-05T17:26:13.316719"
+  },
+  "thank_you_thank_you_30_1757069853.mp4": {
+    "hash": "96ac8d91debb1a4724462df945aa8d9d",
+    "features_path": "training_cache_landmarks\\features\\thank_you_thank_you_30_1757069853.pkl",
+    "processed_at": "2025-09-05T17:26:43.924500"
+  },
+  "thank_you_thank_you_31_1757069861.mp4": {
+    "hash": "92347064e8ee9e7fd2f5933f2ad7532f",
+    "features_path": "training_cache_landmarks\\features\\thank_you_thank_you_31_1757069861.pkl",
+    "processed_at": "2025-09-05T17:27:13.406635"
+  },
+  "thank_you_thank_you_32_1757069867.mp4": {
+    "hash": "0c873645194519424c2098808a27432b",
+    "features_path": "training_cache_landmarks\\features\\thank_you_thank_you_32_1757069867.pkl",
+    "processed_at": "2025-09-05T17:27:43.454917"
+  },
+  "thank_you_thank_you_33_1757069873.mp4": {
+    "hash": "4bf1241e62ddb082b76ddaa8d4412926",
+    "features_path": "training_cache_landmarks\\features\\thank_you_thank_you_33_1757069873.pkl",
+    "processed_at": "2025-09-05T17:28:13.255671"
+  },
+  "thank_you_thank_you_34_1757069882.mp4": {
+    "hash": "ab3c297d444765a27c06ec2e806fab3b",
+    "features_path": "training_cache_landmarks\\features\\thank_you_thank_you_34_1757069882.pkl",
+    "processed_at": "2025-09-05T17:28:43.403689"
+  },
+  "thank_you_thank_you_35_1757069888.mp4": {
+    "hash": "e70de7911b2d865eae7af1e2a3339a0f",
+    "features_path": "training_cache_landmarks\\features\\thank_you_thank_you_35_1757069888.pkl",
+    "processed_at": "2025-09-05T17:29:14.388050"
+  },
+  "thank_you_thank_you_36_1757069893.mp4": {
+    "hash": "04ca2fd948caef796a1107bc7fcef6d9",
+    "features_path": "training_cache_landmarks\\features\\thank_you_thank_you_36_1757069893.pkl",
+    "processed_at": "2025-09-05T17:29:45.828471"
+  },
+  "thank_you_thank_you_37_1757069899.mp4": {
+    "hash": "1870f57cb2242d1c4b07a10af6124619",
+    "features_path": "training_cache_landmarks\\features\\thank_you_thank_you_37_1757069899.pkl",
+    "processed_at": "2025-09-05T17:30:16.862999"
+  },
+  "thank_you_thank_you_38_1757069904.mp4": {
+    "hash": "8e21dc51250057244197ed173e5899d1",
+    "features_path": "training_cache_landmarks\\features\\thank_you_thank_you_38_1757069904.pkl",
+    "processed_at": "2025-09-05T17:30:48.130289"
+  },
+  "thank_you_thank_you_39_1757069910.mp4": {
+    "hash": "a73d883ce8c04631b69f8ec61351b115",
+    "features_path": "training_cache_landmarks\\features\\thank_you_thank_you_39_1757069910.pkl",
+    "processed_at": "2025-09-05T17:31:19.229127"
+  },
+  "thank_you_thank_you_3_1757069546.mp4": {
+    "hash": "0cbef89e4f6678374ad3e38873c16374",
+    "features_path": "training_cache_landmarks\\features\\thank_you_thank_you_3_1757069546.pkl",
+    "processed_at": "2025-09-05T17:31:50.361719"
+  },
+  "thank_you_thank_you_40_1757069915.mp4": {
+    "hash": "618e4ce4b0fed91a6621e3436ce77e07",
+    "features_path": "training_cache_landmarks\\features\\thank_you_thank_you_40_1757069915.pkl",
+    "processed_at": "2025-09-05T17:32:20.942176"
+  },
+  "thank_you_thank_you_4_1757069552.mp4": {
+    "hash": "33762b508d0696491fbebbc640231f7f",
+    "features_path": "training_cache_landmarks\\features\\thank_you_thank_you_4_1757069552.pkl",
+    "processed_at": "2025-09-05T17:32:52.356020"
+  },
+  "thank_you_thank_you_5_1757069557.mp4": {
+    "hash": "c6624b9fa0f7be0f3b364457d7a2b402",
+    "features_path": "training_cache_landmarks\\features\\thank_you_thank_you_5_1757069557.pkl",
+    "processed_at": "2025-09-05T17:33:24.608114"
+  },
+  "thank_you_thank_you_6_1757069562.mp4": {
+    "hash": "327a5af907bdea222095466ab9e1ebbe",
+    "features_path": "training_cache_landmarks\\features\\thank_you_thank_you_6_1757069562.pkl",
+    "processed_at": "2025-09-05T17:33:58.643589"
+  },
+  "thank_you_thank_you_7_1757069568.mp4": {
+    "hash": "4ec2d9c8a27add83e6875458eca23f66",
+    "features_path": "training_cache_landmarks\\features\\thank_you_thank_you_7_1757069568.pkl",
+    "processed_at": "2025-09-05T17:34:33.788050"
+  },
+  "thank_you_thank_you_8_1757069573.mp4": {
+    "hash": "7945708d42e90878e572db45feab95ea",
+    "features_path": "training_cache_landmarks\\features\\thank_you_thank_you_8_1757069573.pkl",
+    "processed_at": "2025-09-05T17:35:09.286932"
+  },
+  "thank_you_thank_you_9_1757069579.mp4": {
+    "hash": "a1ba5780a782e20a3924032849474b30",
+    "features_path": "training_cache_landmarks\\features\\thank_you_thank_you_9_1757069579.pkl",
+    "processed_at": "2025-09-05T17:35:45.716175"
+  },
+  "block_mad_block_mad_10_1757085376.mp4": {
+    "hash": "8eee7ae25c83f7122eab391a0cf042e9",
+    "features_path": "training_cache_landmarks\\features\\block_mad_block_mad_10_1757085376.pkl",
+    "processed_at": "2025-09-05T21:02:18.187839"
+  },
+  "block_mad_block_mad_11_1757085382.mp4": {
+    "hash": "57ce6122c5aa15893555a5a1a1ad096c",
+    "features_path": "training_cache_landmarks\\features\\block_mad_block_mad_11_1757085382.pkl",
+    "processed_at": "2025-09-05T21:02:45.191387"
+  },
+  "block_mad_block_mad_12_1757085387.mp4": {
+    "hash": "686cadd433f657c4150f93c32f0830c3",
+    "features_path": "training_cache_landmarks\\features\\block_mad_block_mad_12_1757085387.pkl",
+    "processed_at": "2025-09-05T21:03:12.566933"
+  },
+  "block_mad_block_mad_13_1757085392.mp4": {
+    "hash": "b98cf48c65d6996aa3ad6aaf6f6e0235",
+    "features_path": "training_cache_landmarks\\features\\block_mad_block_mad_13_1757085392.pkl",
+    "processed_at": "2025-09-05T21:03:39.562440"
+  },
+  "block_mad_block_mad_14_1757085398.mp4": {
+    "hash": "c807bd587f4a339917b4dbce2c3f85f4",
+    "features_path": "training_cache_landmarks\\features\\block_mad_block_mad_14_1757085398.pkl",
+    "processed_at": "2025-09-05T21:04:06.090519"
+  },
+  "block_mad_block_mad_15_1757085403.mp4": {
+    "hash": "20562282ff736786067abbeddb3f332c",
+    "features_path": "training_cache_landmarks\\features\\block_mad_block_mad_15_1757085403.pkl",
+    "processed_at": "2025-09-05T21:04:32.302966"
+  },
+  "block_mad_block_mad_16_1757085408.mp4": {
+    "hash": "7bc993bb28dc5623e54037ff7eb521eb",
+    "features_path": "training_cache_landmarks\\features\\block_mad_block_mad_16_1757085408.pkl",
+    "processed_at": "2025-09-05T21:04:59.662344"
+  },
+  "block_mad_block_mad_17_1757085414.mp4": {
+    "hash": "2d2ea04c2ab0fe622e7c9596bcd1c056",
+    "features_path": "training_cache_landmarks\\features\\block_mad_block_mad_17_1757085414.pkl",
+    "processed_at": "2025-09-05T21:05:27.140401"
+  },
+  "block_mad_block_mad_18_1757085420.mp4": {
+    "hash": "635eb9fd9fbed57de1ab638948812288",
+    "features_path": "training_cache_landmarks\\features\\block_mad_block_mad_18_1757085420.pkl",
+    "processed_at": "2025-09-05T21:06:06.627127"
+  },
+  "block_mad_block_mad_19_1757085426.mp4": {
+    "hash": "1e1343f95ad655a2930a09602311e5ca",
+    "features_path": "training_cache_landmarks\\features\\block_mad_block_mad_19_1757085426.pkl",
+    "processed_at": "2025-09-05T21:06:48.499981"
+  },
+  "block_mad_block_mad_1_1757085259.mp4": {
+    "hash": "95ab3ff02a3f0cb604ce1628c4bc2650",
+    "features_path": "training_cache_landmarks\\features\\block_mad_block_mad_1_1757085259.pkl",
+    "processed_at": "2025-09-05T21:07:15.466222"
+  },
+  "block_mad_block_mad_20_1757085432.mp4": {
+    "hash": "2c426cd18845f3281b62a0d19c6b3829",
+    "features_path": "training_cache_landmarks\\features\\block_mad_block_mad_20_1757085432.pkl",
+    "processed_at": "2025-09-05T21:07:42.541058"
+  },
+  "block_mad_block_mad_21_1757085437.mp4": {
+    "hash": "7e691e55fe022022cb9f16d96c239ebc",
+    "features_path": "training_cache_landmarks\\features\\block_mad_block_mad_21_1757085437.pkl",
+    "processed_at": "2025-09-05T21:08:10.104135"
+  },
+  "block_mad_block_mad_22_1757085443.mp4": {
+    "hash": "28a2a3c58ef798d7a9fe6dc860cf6492",
+    "features_path": "training_cache_landmarks\\features\\block_mad_block_mad_22_1757085443.pkl",
+    "processed_at": "2025-09-05T21:08:40.167481"
+  },
+  "block_mad_block_mad_23_1757085448.mp4": {
+    "hash": "287ccb886702c7a73a7eca6aaf08c97c",
+    "features_path": "training_cache_landmarks\\features\\block_mad_block_mad_23_1757085448.pkl",
+    "processed_at": "2025-09-05T21:09:08.469279"
+  },
+  "block_mad_block_mad_24_1757085454.mp4": {
+    "hash": "4785ead5299d0dc29828ae9428ce767e",
+    "features_path": "training_cache_landmarks\\features\\block_mad_block_mad_24_1757085454.pkl",
+    "processed_at": "2025-09-05T21:09:36.275183"
+  },
+  "block_mad_block_mad_25_1757085459.mp4": {
+    "hash": "770ccd394c576c5acab2d57ef68761be",
+    "features_path": "training_cache_landmarks\\features\\block_mad_block_mad_25_1757085459.pkl",
+    "processed_at": "2025-09-05T21:10:02.957310"
+  },
+  "block_mad_block_mad_26_1757085464.mp4": {
+    "hash": "013ddeabe46772d5655e000d8ba9da51",
+    "features_path": "training_cache_landmarks\\features\\block_mad_block_mad_26_1757085464.pkl",
+    "processed_at": "2025-09-05T21:10:29.820046"
+  },
+  "block_mad_block_mad_27_1757085469.mp4": {
+    "hash": "067a3fb5c147aff8455d5f51c011dc61",
+    "features_path": "training_cache_landmarks\\features\\block_mad_block_mad_27_1757085469.pkl",
+    "processed_at": "2025-09-05T21:10:56.921524"
+  },
+  "block_mad_block_mad_28_1757085475.mp4": {
+    "hash": "f86e0ad2cdd14fb486ba4316fe5fbabe",
+    "features_path": "training_cache_landmarks\\features\\block_mad_block_mad_28_1757085475.pkl",
+    "processed_at": "2025-09-05T21:11:25.270809"
+  },
+  "block_mad_block_mad_29_1757085481.mp4": {
+    "hash": "7a398dc3886fabd64f3fb03c961535cb",
+    "features_path": "training_cache_landmarks\\features\\block_mad_block_mad_29_1757085481.pkl",
+    "processed_at": "2025-09-05T21:11:51.440779"
+  },
+  "block_mad_block_mad_2_1757085266.mp4": {
+    "hash": "417dc6d77ee67adc51417feb61e6e612",
+    "features_path": "training_cache_landmarks\\features\\block_mad_block_mad_2_1757085266.pkl",
+    "processed_at": "2025-09-05T21:12:18.427051"
+  },
+  "block_mad_block_mad_30_1757085486.mp4": {
+    "hash": "f88422f01fcff6839648b0ce8d98faf8",
+    "features_path": "training_cache_landmarks\\features\\block_mad_block_mad_30_1757085486.pkl",
+    "processed_at": "2025-09-05T21:12:45.804555"
+  },
+  "block_mad_block_mad_31_1757085492.mp4": {
+    "hash": "c0fde22342221412aa82031f11afbb39",
+    "features_path": "training_cache_landmarks\\features\\block_mad_block_mad_31_1757085492.pkl",
+    "processed_at": "2025-09-05T21:13:13.861649"
+  },
+  "block_mad_block_mad_32_1757085497.mp4": {
+    "hash": "dadea3286d72cb416f2e91d39aff3698",
+    "features_path": "training_cache_landmarks\\features\\block_mad_block_mad_32_1757085497.pkl",
+    "processed_at": "2025-09-05T21:13:40.835832"
+  },
+  "block_mad_block_mad_33_1757085504.mp4": {
+    "hash": "77473ff5d7d9e05423a5e032cab94db1",
+    "features_path": "training_cache_landmarks\\features\\block_mad_block_mad_33_1757085504.pkl",
+    "processed_at": "2025-09-05T21:14:08.402935"
+  },
+  "block_mad_block_mad_34_1757085517.mp4": {
+    "hash": "e7849a59e77e4d22ef7c8d15d0ea7abf",
+    "features_path": "training_cache_landmarks\\features\\block_mad_block_mad_34_1757085517.pkl",
+    "processed_at": "2025-09-05T21:14:35.964695"
+  },
+  "block_mad_block_mad_35_1757085522.mp4": {
+    "hash": "0ca176fff6a9cb26df25dc5e9d01e383",
+    "features_path": "training_cache_landmarks\\features\\block_mad_block_mad_35_1757085522.pkl",
+    "processed_at": "2025-09-05T21:15:02.860307"
+  },
+  "block_mad_block_mad_36_1757085528.mp4": {
+    "hash": "4cca5da62bd36f2045b3a96dd16d9d04",
+    "features_path": "training_cache_landmarks\\features\\block_mad_block_mad_36_1757085528.pkl",
+    "processed_at": "2025-09-05T21:15:51.243560"
+  },
+  "block_mad_block_mad_37_1757085533.mp4": {
+    "hash": "d228ce99fed9cc7a2761f3e6d3be7ad1",
+    "features_path": "training_cache_landmarks\\features\\block_mad_block_mad_37_1757085533.pkl",
+    "processed_at": "2025-09-05T21:16:22.967827"
+  },
+  "block_mad_block_mad_38_1757085538.mp4": {
+    "hash": "a553ee31a33564d397787d29bc4d4691",
+    "features_path": "training_cache_landmarks\\features\\block_mad_block_mad_38_1757085538.pkl",
+    "processed_at": "2025-09-05T21:16:51.029640"
+  },
+  "block_mad_block_mad_39_1757085544.mp4": {
+    "hash": "b307909cdf3e6eb5773f4a7774cdb482",
+    "features_path": "training_cache_landmarks\\features\\block_mad_block_mad_39_1757085544.pkl",
+    "processed_at": "2025-09-05T21:17:18.882957"
+  },
+  "block_mad_block_mad_3_1757085272.mp4": {
+    "hash": "a58ef73562eb09966d0c643798fa008d",
+    "features_path": "training_cache_landmarks\\features\\block_mad_block_mad_3_1757085272.pkl",
+    "processed_at": "2025-09-05T21:17:46.114040"
+  },
+  "block_mad_block_mad_40_1757085549.mp4": {
+    "hash": "62e8488a78ee2517d9c3584c566b0927",
+    "features_path": "training_cache_landmarks\\features\\block_mad_block_mad_40_1757085549.pkl",
+    "processed_at": "2025-09-05T21:18:14.118843"
+  },
+  "block_mad_block_mad_4_1757085343.mp4": {
+    "hash": "7842c118b61a6974388fee779b08e6d7",
+    "features_path": "training_cache_landmarks\\features\\block_mad_block_mad_4_1757085343.pkl",
+    "processed_at": "2025-09-05T21:18:41.956980"
+  },
+  "block_mad_block_mad_5_1757085349.mp4": {
+    "hash": "d5ae0f3d100afe857e692a83fc2899dc",
+    "features_path": "training_cache_landmarks\\features\\block_mad_block_mad_5_1757085349.pkl",
+    "processed_at": "2025-09-05T21:19:09.267193"
+  },
+  "block_mad_block_mad_6_1757085355.mp4": {
+    "hash": "319ad157db165231e6332c27244203e4",
+    "features_path": "training_cache_landmarks\\features\\block_mad_block_mad_6_1757085355.pkl",
+    "processed_at": "2025-09-05T21:19:35.942609"
+  },
+  "block_mad_block_mad_7_1757085360.mp4": {
+    "hash": "348938e5a02465b91658558f94a05e18",
+    "features_path": "training_cache_landmarks\\features\\block_mad_block_mad_7_1757085360.pkl",
+    "processed_at": "2025-09-05T21:20:10.930530"
+  },
+  "block_mad_block_mad_8_1757085366.mp4": {
+    "hash": "3f4a37908d67f279823f7a38b4b1ed1e",
+    "features_path": "training_cache_landmarks\\features\\block_mad_block_mad_8_1757085366.pkl",
+    "processed_at": "2025-09-05T21:21:05.770572"
+  },
+  "block_mad_block_mad_9_1757085371.mp4": {
+    "hash": "d50c9f960e3923c8d3f14c01ecac370a",
+    "features_path": "training_cache_landmarks\\features\\block_mad_block_mad_9_1757085371.pkl",
+    "processed_at": "2025-09-05T21:21:59.030685"
+  },
+  "swipe_swipe_10_1757223506.mp4": {
+    "hash": "f90aa6fc85b71c7353baeaac8c5fb2f9",
+    "features_path": "training_cache_landmarks\\features\\swipe_swipe_10_1757223506.pkl",
+    "processed_at": "2025-09-07T11:23:10.581869"
+  },
+  "swipe_swipe_11_1757223511.mp4": {
+    "hash": "f8c6c0603f1f8645260ac3b6f4fd01cb",
+    "features_path": "training_cache_landmarks\\features\\swipe_swipe_11_1757223511.pkl",
+    "processed_at": "2025-09-07T11:23:41.072667"
+  },
+  "swipe_swipe_12_1757223517.mp4": {
+    "hash": "6794a4e779e563e0219d53fde588183f",
+    "features_path": "training_cache_landmarks\\features\\swipe_swipe_12_1757223517.pkl",
+    "processed_at": "2025-09-07T11:24:08.102113"
+  },
+  "swipe_swipe_13_1757223522.mp4": {
+    "hash": "8402009d6c44a1c3cc3411f4fd7cf471",
+    "features_path": "training_cache_landmarks\\features\\swipe_swipe_13_1757223522.pkl",
+    "processed_at": "2025-09-07T11:24:35.732869"
+  },
+  "swipe_swipe_14_1757223528.mp4": {
+    "hash": "056df76298ff39f5bd419547f7526155",
+    "features_path": "training_cache_landmarks\\features\\swipe_swipe_14_1757223528.pkl",
+    "processed_at": "2025-09-07T11:25:02.538475"
+  },
+  "swipe_swipe_15_1757223534.mp4": {
+    "hash": "ac3c7ebd35b69b1af2b9554109eacfd4",
+    "features_path": "training_cache_landmarks\\features\\swipe_swipe_15_1757223534.pkl",
+    "processed_at": "2025-09-07T11:25:29.966480"
+  },
+  "swipe_swipe_16_1757223541.mp4": {
+    "hash": "715f3515707fc0a7bd1d4f6b2dc35352",
+    "features_path": "training_cache_landmarks\\features\\swipe_swipe_16_1757223541.pkl",
+    "processed_at": "2025-09-07T11:25:56.981901"
+  },
+  "swipe_swipe_17_1757223666.mp4": {
+    "hash": "6fa99979f27fe18efaa7bc05081327f1",
+    "features_path": "training_cache_landmarks\\features\\swipe_swipe_17_1757223666.pkl",
+    "processed_at": "2025-09-07T11:26:24.923411"
+  },
+  "swipe_swipe_18_1757223675.mp4": {
+    "hash": "749bd19360b305048e7a9cf45391fe86",
+    "features_path": "training_cache_landmarks\\features\\swipe_swipe_18_1757223675.pkl",
+    "processed_at": "2025-09-07T11:27:11.329442"
+  },
+  "swipe_swipe_19_1757223680.mp4": {
+    "hash": "583ba77bb30930411dda97c0ce542881",
+    "features_path": "training_cache_landmarks\\features\\swipe_swipe_19_1757223680.pkl",
+    "processed_at": "2025-09-07T11:27:46.587086"
+  },
+  "swipe_swipe_1_1757223456.mp4": {
+    "hash": "2ccf4f7620c4363007cdfce22107f696",
+    "features_path": "training_cache_landmarks\\features\\swipe_swipe_1_1757223456.pkl",
+    "processed_at": "2025-09-07T11:28:12.852310"
+  },
+  "swipe_swipe_20_1757223688.mp4": {
+    "hash": "698ee4e8014bb456d719fd2715ff24e1",
+    "features_path": "training_cache_landmarks\\features\\swipe_swipe_20_1757223688.pkl",
+    "processed_at": "2025-09-07T11:28:40.564388"
+  },
+  "swipe_swipe_21_1757223694.mp4": {
+    "hash": "cdf7782ad3aca5d7c7dcff27ede23709",
+    "features_path": "training_cache_landmarks\\features\\swipe_swipe_21_1757223694.pkl",
+    "processed_at": "2025-09-07T11:29:07.954849"
+  },
+  "swipe_swipe_22_1757223703.mp4": {
+    "hash": "93f4cd9218cec2580717ded1c9745b22",
+    "features_path": "training_cache_landmarks\\features\\swipe_swipe_22_1757223703.pkl",
+    "processed_at": "2025-09-07T11:29:35.950362"
+  },
+  "swipe_swipe_23_1757223762.mp4": {
+    "hash": "619903b9aaa2e03cbe0e589e25f61112",
+    "features_path": "training_cache_landmarks\\features\\swipe_swipe_23_1757223762.pkl",
+    "processed_at": "2025-09-07T11:30:03.355974"
+  },
+  "swipe_swipe_24_1757223768.mp4": {
+    "hash": "d856e5e93f4b6807cc44bfd6c184ea0a",
+    "features_path": "training_cache_landmarks\\features\\swipe_swipe_24_1757223768.pkl",
+    "processed_at": "2025-09-07T11:30:31.089922"
+  },
+  "swipe_swipe_25_1757223774.mp4": {
+    "hash": "a0fbfad77240fed64d540d650866a0bb",
+    "features_path": "training_cache_landmarks\\features\\swipe_swipe_25_1757223774.pkl",
+    "processed_at": "2025-09-07T11:31:02.916277"
+  },
+  "swipe_swipe_26_1757223780.mp4": {
+    "hash": "8aa344c921c919143bd517b9083334f8",
+    "features_path": "training_cache_landmarks\\features\\swipe_swipe_26_1757223780.pkl",
+    "processed_at": "2025-09-07T11:31:38.708276"
+  },
+  "swipe_swipe_27_1757223788.mp4": {
+    "hash": "92f7655360d51ed82b8a6825e272824e",
+    "features_path": "training_cache_landmarks\\features\\swipe_swipe_27_1757223788.pkl",
+    "processed_at": "2025-09-07T11:32:29.155446"
+  },
+  "swipe_swipe_28_1757223795.mp4": {
+    "hash": "7a7add6f39546c2fe0f6bac685c7bd31",
+    "features_path": "training_cache_landmarks\\features\\swipe_swipe_28_1757223795.pkl",
+    "processed_at": "2025-09-07T11:32:55.099136"
+  },
+  "swipe_swipe_29_1757223803.mp4": {
+    "hash": "2c2effbb840a083507eeb81c4505594b",
+    "features_path": "training_cache_landmarks\\features\\swipe_swipe_29_1757223803.pkl",
+    "processed_at": "2025-09-07T11:33:21.445498"
+  },
+  "swipe_swipe_2_1757223463.mp4": {
+    "hash": "5316ce4771ed6a75d2844643055ee4b7",
+    "features_path": "training_cache_landmarks\\features\\swipe_swipe_2_1757223463.pkl",
+    "processed_at": "2025-09-07T11:33:47.884335"
+  },
+  "swipe_swipe_30_1757223810.mp4": {
+    "hash": "48b931e0a4e9019a909680de6f0fc7de",
+    "features_path": "training_cache_landmarks\\features\\swipe_swipe_30_1757223810.pkl",
+    "processed_at": "2025-09-07T11:34:13.831687"
+  },
+  "swipe_swipe_31_1757223816.mp4": {
+    "hash": "13329ecbc841fea8382d2a6c41c8e8fe",
+    "features_path": "training_cache_landmarks\\features\\swipe_swipe_31_1757223816.pkl",
+    "processed_at": "2025-09-07T11:34:41.167241"
+  },
+  "swipe_swipe_32_1757223821.mp4": {
+    "hash": "0b6e0befd1d18713cef1572dca708ff3",
+    "features_path": "training_cache_landmarks\\features\\swipe_swipe_32_1757223821.pkl",
+    "processed_at": "2025-09-07T11:35:07.641968"
+  },
+  "swipe_swipe_33_1757223827.mp4": {
+    "hash": "a1c9cfff134c8f0b7f63094b59a7673e",
+    "features_path": "training_cache_landmarks\\features\\swipe_swipe_33_1757223827.pkl",
+    "processed_at": "2025-09-07T11:35:34.463127"
+  },
+  "swipe_swipe_34_1757223832.mp4": {
+    "hash": "2aae1a8eb2d55d6f8d7beee680341318",
+    "features_path": "training_cache_landmarks\\features\\swipe_swipe_34_1757223832.pkl",
+    "processed_at": "2025-09-07T11:36:01.579612"
+  },
+  "swipe_swipe_35_1757223839.mp4": {
+    "hash": "9103d892f118fa0da95feb4bab872405",
+    "features_path": "training_cache_landmarks\\features\\swipe_swipe_35_1757223839.pkl",
+    "processed_at": "2025-09-07T11:36:29.767004"
+  },
+  "swipe_swipe_36_1757223845.mp4": {
+    "hash": "f49169bce03fa81cccf5acd32d489997",
+    "features_path": "training_cache_landmarks\\features\\swipe_swipe_36_1757223845.pkl",
+    "processed_at": "2025-09-07T11:37:18.018927"
+  },
+  "swipe_swipe_37_1757223851.mp4": {
+    "hash": "13c3b4f9aba1d144c6814fc4e5890c1d",
+    "features_path": "training_cache_landmarks\\features\\swipe_swipe_37_1757223851.pkl",
+    "processed_at": "2025-09-07T11:37:44.428942"
+  },
+  "swipe_swipe_38_1757223856.mp4": {
+    "hash": "a5fa160e3b1e0a3c571548992837e211",
+    "features_path": "training_cache_landmarks\\features\\swipe_swipe_38_1757223856.pkl",
+    "processed_at": "2025-09-07T11:38:10.557665"
+  },
+  "swipe_swipe_39_1757223861.mp4": {
+    "hash": "e8622e6dc7475e7049a79ff2ecadbd63",
+    "features_path": "training_cache_landmarks\\features\\swipe_swipe_39_1757223861.pkl",
+    "processed_at": "2025-09-07T11:38:37.740969"
+  },
+  "swipe_swipe_3_1757223468.mp4": {
+    "hash": "0d3cb536f96b8ef2a2a4962c7741edd5",
+    "features_path": "training_cache_landmarks\\features\\swipe_swipe_3_1757223468.pkl",
+    "processed_at": "2025-09-07T11:39:04.992102"
+  },
+  "swipe_swipe_40_1757223867.mp4": {
+    "hash": "143d996bf4b3f7ae8f2da1c2c2ddd3b5",
+    "features_path": "training_cache_landmarks\\features\\swipe_swipe_40_1757223867.pkl",
+    "processed_at": "2025-09-07T11:39:32.136902"
+  },
+  "swipe_swipe_4_1757223473.mp4": {
+    "hash": "10938c69394730378cdd36cbb5dae7fc",
+    "features_path": "training_cache_landmarks\\features\\swipe_swipe_4_1757223473.pkl",
+    "processed_at": "2025-09-07T11:39:58.836949"
+  },
+  "swipe_swipe_5_1757223479.mp4": {
+    "hash": "633bc0e41c6ce968ffe867b916059d0c",
+    "features_path": "training_cache_landmarks\\features\\swipe_swipe_5_1757223479.pkl",
+    "processed_at": "2025-09-07T11:40:25.655179"
+  },
+  "swipe_swipe_6_1757223484.mp4": {
+    "hash": "d19920e388296e38c6b9b205dc280dee",
+    "features_path": "training_cache_landmarks\\features\\swipe_swipe_6_1757223484.pkl",
+    "processed_at": "2025-09-07T11:40:52.247500"
+  },
+  "swipe_swipe_7_1757223489.mp4": {
+    "hash": "3f4f427b04f8313bffb671ada419545e",
+    "features_path": "training_cache_landmarks\\features\\swipe_swipe_7_1757223489.pkl",
+    "processed_at": "2025-09-07T11:41:24.527350"
+  },
+  "swipe_swipe_8_1757223494.mp4": {
+    "hash": "3db58f9fabd817a017b347ed4e9f1b11",
+    "features_path": "training_cache_landmarks\\features\\swipe_swipe_8_1757223494.pkl",
+    "processed_at": "2025-09-07T11:42:10.554796"
+  },
+  "swipe_swipe_9_1757223500.mp4": {
+    "hash": "7415db0d6bfa5af7ac4b3d0b7c0ef16a",
+    "features_path": "training_cache_landmarks\\features\\swipe_swipe_9_1757223500.pkl",
+    "processed_at": "2025-09-07T11:42:37.185325"
+  },
+  "super_super_10_1757243525.mp4": {
+    "hash": "7f5191a4bcea6c649ec34aacf787dabd",
+    "features_path": "training_cache_landmarks\\features\\super_super_10_1757243525.pkl",
+    "processed_at": "2025-09-07T23:18:59.439092"
+  },
+  "super_super_11_1757243531.mp4": {
+    "hash": "e8b109e7210453ea9b803c9a1b043500",
+    "features_path": "training_cache_landmarks\\features\\super_super_11_1757243531.pkl",
+    "processed_at": "2025-09-07T23:19:26.732053"
+  },
+  "super_super_12_1757243536.mp4": {
+    "hash": "c9be897020c88996943fa963a4c059a7",
+    "features_path": "training_cache_landmarks\\features\\super_super_12_1757243536.pkl",
+    "processed_at": "2025-09-07T23:19:55.315993"
+  },
+  "super_super_13_1757243541.mp4": {
+    "hash": "841f0c1bc981b33cf2393bd70800f09a",
+    "features_path": "training_cache_landmarks\\features\\super_super_13_1757243541.pkl",
+    "processed_at": "2025-09-07T23:20:22.915673"
+  },
+  "super_super_14_1757243546.mp4": {
+    "hash": "d204f6b8470affed3a16afeaddd61faa",
+    "features_path": "training_cache_landmarks\\features\\super_super_14_1757243546.pkl",
+    "processed_at": "2025-09-07T23:20:51.219512"
+  },
+  "super_super_15_1757243551.mp4": {
+    "hash": "f531ab93768816ef0d45b531c1083c43",
+    "features_path": "training_cache_landmarks\\features\\super_super_15_1757243551.pkl",
+    "processed_at": "2025-09-07T23:21:18.938784"
+  },
+  "super_super_16_1757243556.mp4": {
+    "hash": "4c18615e5386d8dcad18bad13386013f",
+    "features_path": "training_cache_landmarks\\features\\super_super_16_1757243556.pkl",
+    "processed_at": "2025-09-07T23:21:47.665575"
+  },
+  "super_super_17_1757243561.mp4": {
+    "hash": "e607f060cc05a5dcc0b56230f4187117",
+    "features_path": "training_cache_landmarks\\features\\super_super_17_1757243561.pkl",
+    "processed_at": "2025-09-07T23:22:15.401070"
+  },
+  "super_super_18_1757243566.mp4": {
+    "hash": "5b3e43208c6f9eb40b4472127a1acfe4",
+    "features_path": "training_cache_landmarks\\features\\super_super_18_1757243566.pkl",
+    "processed_at": "2025-09-07T23:22:43.771044"
+  },
+  "super_super_19_1757243571.mp4": {
+    "hash": "aff469691ecdf0a4df9fbb107d599539",
+    "features_path": "training_cache_landmarks\\features\\super_super_19_1757243571.pkl",
+    "processed_at": "2025-09-07T23:23:12.430220"
+  },
+  "super_super_1_1757243478.mp4": {
+    "hash": "5e0a2d61dbbc3418f3bc7625c9ee2b18",
+    "features_path": "training_cache_landmarks\\features\\super_super_1_1757243478.pkl",
+    "processed_at": "2025-09-07T23:23:41.667402"
+  },
+  "super_super_20_1757243576.mp4": {
+    "hash": "172eaaa53b293c158cf7c59a163f7fd0",
+    "features_path": "training_cache_landmarks\\features\\super_super_20_1757243576.pkl",
+    "processed_at": "2025-09-07T23:24:10.662151"
+  },
+  "super_super_21_1757243583.mp4": {
+    "hash": "b3e9ba9f860af7ab88c2aa9cecfc01cd",
+    "features_path": "training_cache_landmarks\\features\\super_super_21_1757243583.pkl",
+    "processed_at": "2025-09-07T23:24:39.714581"
+  },
+  "super_super_22_1757243588.mp4": {
+    "hash": "ed0f6fcfbfb8990a5acc016330ae931e",
+    "features_path": "training_cache_landmarks\\features\\super_super_22_1757243588.pkl",
+    "processed_at": "2025-09-07T23:25:08.378194"
+  },
+  "super_super_23_1757243594.mp4": {
+    "hash": "ac57ebd99b4b2abfd3821565455b2371",
+    "features_path": "training_cache_landmarks\\features\\super_super_23_1757243594.pkl",
+    "processed_at": "2025-09-07T23:25:36.898335"
+  },
+  "super_super_24_1757243599.mp4": {
+    "hash": "10b54daec7625f90ffd54da17a334a1b",
+    "features_path": "training_cache_landmarks\\features\\super_super_24_1757243599.pkl",
+    "processed_at": "2025-09-07T23:26:05.728056"
+  },
+  "super_super_25_1757243608.mp4": {
+    "hash": "3b20cbe50a90912dc29a21fe2694705f",
+    "features_path": "training_cache_landmarks\\features\\super_super_25_1757243608.pkl",
+    "processed_at": "2025-09-07T23:26:34.338379"
+  },
+  "super_super_26_1757243613.mp4": {
+    "hash": "cace630a40e1b483f7532c3ee2bf8545",
+    "features_path": "training_cache_landmarks\\features\\super_super_26_1757243613.pkl",
+    "processed_at": "2025-09-07T23:27:03.361828"
+  },
+  "super_super_27_1757243618.mp4": {
+    "hash": "e628d8e3c8b99dbe3ea6035700621c5a",
+    "features_path": "training_cache_landmarks\\features\\super_super_27_1757243618.pkl",
+    "processed_at": "2025-09-07T23:27:35.242079"
+  },
+  "super_super_28_1757243623.mp4": {
+    "hash": "e0aeda5db4f45d2a958dee4e381cb970",
+    "features_path": "training_cache_landmarks\\features\\super_super_28_1757243623.pkl",
+    "processed_at": "2025-09-07T23:28:28.156989"
+  },
+  "super_super_29_1757243628.mp4": {
+    "hash": "711c21e3cd3270480e4bbb2132b3696b",
+    "features_path": "training_cache_landmarks\\features\\super_super_29_1757243628.pkl",
+    "processed_at": "2025-09-07T23:28:56.873083"
+  },
+  "super_super_2_1757243483.mp4": {
+    "hash": "51755b2decf8cb064f3574d24e4eac33",
+    "features_path": "training_cache_landmarks\\features\\super_super_2_1757243483.pkl",
+    "processed_at": "2025-09-07T23:29:25.765503"
+  },
+  "super_super_30_1757243634.mp4": {
+    "hash": "4ee949021521753c87fabd0c3df39835",
+    "features_path": "training_cache_landmarks\\features\\super_super_30_1757243634.pkl",
+    "processed_at": "2025-09-07T23:29:54.632361"
+  },
+  "super_super_31_1757243639.mp4": {
+    "hash": "0de327834b60dcf6ea3719f4a2648c90",
+    "features_path": "training_cache_landmarks\\features\\super_super_31_1757243639.pkl",
+    "processed_at": "2025-09-07T23:30:22.532268"
+  },
+  "super_super_32_1757243644.mp4": {
+    "hash": "b75a38f0394318a45dbf53132ed7b137",
+    "features_path": "training_cache_landmarks\\features\\super_super_32_1757243644.pkl",
+    "processed_at": "2025-09-07T23:30:51.639493"
+  },
+  "super_super_33_1757243649.mp4": {
+    "hash": "15b3a64b1aa7df2741c93e17309dadd9",
+    "features_path": "training_cache_landmarks\\features\\super_super_33_1757243649.pkl",
+    "processed_at": "2025-09-07T23:31:20.340764"
+  },
+  "super_super_34_1757243654.mp4": {
+    "hash": "9f488c9b8e823f952da6d0b6d09bccb7",
+    "features_path": "training_cache_landmarks\\features\\super_super_34_1757243654.pkl",
+    "processed_at": "2025-09-07T23:31:49.352608"
+  },
+  "super_super_35_1757243659.mp4": {
+    "hash": "a55773add676819aa2ac4b43574a0768",
+    "features_path": "training_cache_landmarks\\features\\super_super_35_1757243659.pkl",
+    "processed_at": "2025-09-07T23:32:17.993965"
+  },
+  "super_super_36_1757243664.mp4": {
+    "hash": "756d14c60f3f113adcfbb0d73d46296b",
+    "features_path": "training_cache_landmarks\\features\\super_super_36_1757243664.pkl",
+    "processed_at": "2025-09-07T23:33:05.883821"
+  },
+  "super_super_37_1757243669.mp4": {
+    "hash": "57331eeddad6ab8fb714cd1994e9cced",
+    "features_path": "training_cache_landmarks\\features\\super_super_37_1757243669.pkl",
+    "processed_at": "2025-09-07T23:33:37.777693"
+  },
+  "super_super_38_1757243676.mp4": {
+    "hash": "5fc0e88560f0e1c6643c217909551a30",
+    "features_path": "training_cache_landmarks\\features\\super_super_38_1757243676.pkl",
+    "processed_at": "2025-09-07T23:34:06.216400"
+  },
+  "super_super_39_1757243682.mp4": {
+    "hash": "fa5c929127ceeb6b05deb2bf3cc40fbb",
+    "features_path": "training_cache_landmarks\\features\\super_super_39_1757243682.pkl",
+    "processed_at": "2025-09-07T23:34:34.096054"
+  },
+  "super_super_3_1757243488.mp4": {
+    "hash": "61caa89e0b9ff11b0215a7a5afb8b642",
+    "features_path": "training_cache_landmarks\\features\\super_super_3_1757243488.pkl",
+    "processed_at": "2025-09-07T23:35:02.659172"
+  },
+  "super_super_40_1757243688.mp4": {
+    "hash": "c95f743592b315c5809e85a0e915aa19",
+    "features_path": "training_cache_landmarks\\features\\super_super_40_1757243688.pkl",
+    "processed_at": "2025-09-07T23:35:30.934528"
+  },
+  "super_super_4_1757243494.mp4": {
+    "hash": "a23a9ce469095073445392f4fa3494b8",
+    "features_path": "training_cache_landmarks\\features\\super_super_4_1757243494.pkl",
+    "processed_at": "2025-09-07T23:35:59.719790"
+  },
+  "super_super_5_1757243499.mp4": {
+    "hash": "4b794418f007876b2335160cea223cd3",
+    "features_path": "training_cache_landmarks\\features\\super_super_5_1757243499.pkl",
+    "processed_at": "2025-09-07T23:36:27.690943"
+  },
+  "super_super_6_1757243505.mp4": {
+    "hash": "680f19c41046838aade637da02fb321d",
+    "features_path": "training_cache_landmarks\\features\\super_super_6_1757243505.pkl",
+    "processed_at": "2025-09-07T23:36:57.003241"
+  },
+  "super_super_7_1757243510.mp4": {
+    "hash": "843ae339270eb1fdce40b061e52ada75",
+    "features_path": "training_cache_landmarks\\features\\super_super_7_1757243510.pkl",
+    "processed_at": "2025-09-07T23:37:25.265175"
+  },
+  "super_super_8_1757243515.mp4": {
+    "hash": "1c4170429c8095a540c42d0895cb68c7",
+    "features_path": "training_cache_landmarks\\features\\super_super_8_1757243515.pkl",
+    "processed_at": "2025-09-07T23:38:01.490739"
+  },
+  "super_super_9_1757243520.mp4": {
+    "hash": "781f1ea1d1e55e137789ab889cf24e8b",
+    "features_path": "training_cache_landmarks\\features\\super_super_9_1757243520.pkl",
+    "processed_at": "2025-09-07T23:38:56.283312"
+  },
+  "victory_victory_1_1757243767.mp4": {
+    "hash": "25612efdcb6bf7236d990d8082ade0cf",
+    "features_path": "training_cache_landmarks\\features\\victory_victory_1_1757243767.pkl",
+    "processed_at": "2025-09-07T23:39:51.515206"
+  },
+  "victory_victory_2_1757243772.mp4": {
+    "hash": "6d9dabf58e2c96d286d689113567c61f",
+    "features_path": "training_cache_landmarks\\features\\victory_victory_2_1757243772.pkl",
+    "processed_at": "2025-09-07T23:40:45.033840"
+  },
+  "victory_victory_3_1757243817.mp4": {
+    "hash": "f29da926aa30d1849359c6acbe050593",
+    "features_path": "training_cache_landmarks\\features\\victory_victory_3_1757243817.pkl",
+    "processed_at": "2025-09-07T23:41:39.161276"
+  },
+  "victory_victory_4_1757243825.mp4": {
+    "hash": "911b1035b78f0f5f0759bcaa79e2cc58",
+    "features_path": "training_cache_landmarks\\features\\victory_victory_4_1757243825.pkl",
+    "processed_at": "2025-09-07T23:42:33.388006"
+  },
+  "victory_victory_5_1757243837.mp4": {
+    "hash": "a287c5a88a3f301a4f32f6060b4ae919",
+    "features_path": "training_cache_landmarks\\features\\victory_victory_5_1757243837.pkl",
+    "processed_at": "2025-09-07T23:43:27.597742"
+  },
+  "welcome_welcome_10_1757243282.mp4": {
+    "hash": "a403f0ec0d2da7dea49445f1ada4f488",
+    "features_path": "training_cache_landmarks\\features\\welcome_welcome_10_1757243282.pkl",
+    "processed_at": "2025-09-07T23:44:01.432365"
+  },
+  "welcome_welcome_11_1757243287.mp4": {
+    "hash": "5d131eef8e762950e3eb87d1a053e9fa",
+    "features_path": "training_cache_landmarks\\features\\welcome_welcome_11_1757243287.pkl",
+    "processed_at": "2025-09-07T23:44:28.384523"
+  },
+  "welcome_welcome_12_1757243292.mp4": {
+    "hash": "4a37e799d6c201ca4c70274541bbf189",
+    "features_path": "training_cache_landmarks\\features\\welcome_welcome_12_1757243292.pkl",
+    "processed_at": "2025-09-07T23:44:56.115308"
+  },
+  "welcome_welcome_13_1757243298.mp4": {
+    "hash": "f4f811cc23b5195da178f91da69da501",
+    "features_path": "training_cache_landmarks\\features\\welcome_welcome_13_1757243298.pkl",
+    "processed_at": "2025-09-07T23:45:23.724718"
+  },
+  "welcome_welcome_14_1757243303.mp4": {
+    "hash": "8ef4b74c7a4c51426e2a29419008e4c6",
+    "features_path": "training_cache_landmarks\\features\\welcome_welcome_14_1757243303.pkl",
+    "processed_at": "2025-09-07T23:45:52.100665"
+  },
+  "welcome_welcome_15_1757243308.mp4": {
+    "hash": "0859300f4a0fbfa8a98d9cad56bb7210",
+    "features_path": "training_cache_landmarks\\features\\welcome_welcome_15_1757243308.pkl",
+    "processed_at": "2025-09-07T23:46:19.961858"
+  },
+  "welcome_welcome_16_1757243313.mp4": {
+    "hash": "a52be7b7413a7cba235ff1a5bead5c12",
+    "features_path": "training_cache_landmarks\\features\\welcome_welcome_16_1757243313.pkl",
+    "processed_at": "2025-09-07T23:46:47.556512"
+  },
+  "welcome_welcome_17_1757243318.mp4": {
+    "hash": "47e5b5502ed9cfdf02114130efc48a73",
+    "features_path": "training_cache_landmarks\\features\\welcome_welcome_17_1757243318.pkl",
+    "processed_at": "2025-09-07T23:47:15.899614"
+  },
+  "welcome_welcome_18_1757243323.mp4": {
+    "hash": "24fc401e6332b63045949399cdd549fb",
+    "features_path": "training_cache_landmarks\\features\\welcome_welcome_18_1757243323.pkl",
+    "processed_at": "2025-09-07T23:47:43.455563"
+  },
+  "welcome_welcome_19_1757243328.mp4": {
+    "hash": "a99bc812745b03f5058b294a098b5be9",
+    "features_path": "training_cache_landmarks\\features\\welcome_welcome_19_1757243328.pkl",
+    "processed_at": "2025-09-07T23:48:14.972769"
+  },
+  "welcome_welcome_1_1757243220.mp4": {
+    "hash": "c3d09bcf696a7ec4fc5cbef24ee97006",
+    "features_path": "training_cache_landmarks\\features\\welcome_welcome_1_1757243220.pkl",
+    "processed_at": "2025-09-07T23:49:10.837552"
+  },
+  "welcome_welcome_20_1757243333.mp4": {
+    "hash": "829223cd5207a8a9d25e2da5b06811b8",
+    "features_path": "training_cache_landmarks\\features\\welcome_welcome_20_1757243333.pkl",
+    "processed_at": "2025-09-07T23:50:05.217983"
+  },
+  "welcome_welcome_21_1757243338.mp4": {
+    "hash": "b7e788eb373c4a58475a2d41a9fad0e9",
+    "features_path": "training_cache_landmarks\\features\\welcome_welcome_21_1757243338.pkl",
+    "processed_at": "2025-09-07T23:50:59.131073"
+  },
+  "welcome_welcome_22_1757243343.mp4": {
+    "hash": "365e7bffd6145e5d7ba98235c1c60a7d",
+    "features_path": "training_cache_landmarks\\features\\welcome_welcome_22_1757243343.pkl",
+    "processed_at": "2025-09-07T23:51:53.902198"
+  },
+  "welcome_welcome_23_1757243348.mp4": {
+    "hash": "5c1d3ac3f393bd2997c2fce955c16855",
+    "features_path": "training_cache_landmarks\\features\\welcome_welcome_23_1757243348.pkl",
+    "processed_at": "2025-09-07T23:52:47.477442"
+  },
+  "welcome_welcome_24_1757243353.mp4": {
+    "hash": "8bc46f3120df833f6c48f70d01c2c648",
+    "features_path": "training_cache_landmarks\\features\\welcome_welcome_24_1757243353.pkl",
+    "processed_at": "2025-09-07T23:53:42.051665"
+  },
+  "welcome_welcome_25_1757243358.mp4": {
+    "hash": "4da11385e15ce87cd2b9309cb4ec2208",
+    "features_path": "training_cache_landmarks\\features\\welcome_welcome_25_1757243358.pkl",
+    "processed_at": "2025-09-08T00:54:35.975986"
+  },
+  "welcome_welcome_26_1757243363.mp4": {
+    "hash": "14dd9e20dbbbf97dd134ff1133534e54",
+    "features_path": "training_cache_landmarks\\features\\welcome_welcome_26_1757243363.pkl",
+    "processed_at": "2025-09-08T07:46:20.464791"
+  },
+  "welcome_welcome_27_1757243368.mp4": {
+    "hash": "a57635800fd0382e7661a0d01c4bd079",
+    "features_path": "training_cache_landmarks\\features\\welcome_welcome_27_1757243368.pkl",
+    "processed_at": "2025-09-08T07:46:50.472907"
+  },
+  "welcome_welcome_28_1757243375.mp4": {
+    "hash": "0d516e9063ff550b8a5cfd69b4e0264f",
+    "features_path": "training_cache_landmarks\\features\\welcome_welcome_28_1757243375.pkl",
+    "processed_at": "2025-09-08T07:47:19.618171"
+  },
+  "welcome_welcome_29_1757243380.mp4": {
+    "hash": "2914e76d036d22199b8460b5476c1178",
+    "features_path": "training_cache_landmarks\\features\\welcome_welcome_29_1757243380.pkl",
+    "processed_at": "2025-09-08T07:47:48.628036"
+  },
+  "welcome_welcome_2_1757243237.mp4": {
+    "hash": "51a757bcff34feefb75cb61ff0bca873",
+    "features_path": "training_cache_landmarks\\features\\welcome_welcome_2_1757243237.pkl",
+    "processed_at": "2025-09-08T07:48:17.513382"
+  },
+  "welcome_welcome_30_1757243385.mp4": {
+    "hash": "b8a39a504c66395385a2b4b6fdab598e",
+    "features_path": "training_cache_landmarks\\features\\welcome_welcome_30_1757243385.pkl",
+    "processed_at": "2025-09-08T07:48:45.752760"
+  },
+  "welcome_welcome_31_1757243390.mp4": {
+    "hash": "b0aa965e7359ce44aae3ec140240e0dd",
+    "features_path": "training_cache_landmarks\\features\\welcome_welcome_31_1757243390.pkl",
+    "processed_at": "2025-09-08T07:49:33.060038"
+  },
+  "welcome_welcome_32_1757243395.mp4": {
+    "hash": "7ba5cc38114b1c033235f3d493041d4d",
+    "features_path": "training_cache_landmarks\\features\\welcome_welcome_32_1757243395.pkl",
+    "processed_at": "2025-09-08T07:50:18.515535"
+  },
+  "welcome_welcome_33_1757243400.mp4": {
+    "hash": "9ef9c8f49f592e074af1883b7277841c",
+    "features_path": "training_cache_landmarks\\features\\welcome_welcome_33_1757243400.pkl",
+    "processed_at": "2025-09-08T07:50:59.731930"
+  },
+  "welcome_welcome_34_1757243405.mp4": {
+    "hash": "be31ad77ad9f677c880ec1da6a5adbf2",
+    "features_path": "training_cache_landmarks\\features\\welcome_welcome_34_1757243405.pkl",
+    "processed_at": "2025-09-08T07:51:55.311441"
+  },
+  "welcome_welcome_35_1757243410.mp4": {
+    "hash": "9ac9d3a28741a5ba36df18bfe62d296d",
+    "features_path": "training_cache_landmarks\\features\\welcome_welcome_35_1757243410.pkl",
+    "processed_at": "2025-09-08T07:52:39.193381"
+  },
+  "welcome_welcome_36_1757243415.mp4": {
+    "hash": "dba90b2e709d662eafbf0f34ebb8f5d8",
+    "features_path": "training_cache_landmarks\\features\\welcome_welcome_36_1757243415.pkl",
+    "processed_at": "2025-09-08T07:53:22.934429"
+  },
+  "welcome_welcome_37_1757243420.mp4": {
+    "hash": "cc703031372cb72d681b67a5a1b6f647",
+    "features_path": "training_cache_landmarks\\features\\welcome_welcome_37_1757243420.pkl",
+    "processed_at": "2025-09-08T07:53:52.688467"
+  },
+  "welcome_welcome_38_1757243425.mp4": {
+    "hash": "d1ec49f71317b25eec3bf44685d2cc98",
+    "features_path": "training_cache_landmarks\\features\\welcome_welcome_38_1757243425.pkl",
+    "processed_at": "2025-09-08T07:54:22.723901"
+  },
+  "welcome_welcome_39_1757243430.mp4": {
+    "hash": "1707480d9336e852542854ed1ecc4f7d",
+    "features_path": "training_cache_landmarks\\features\\welcome_welcome_39_1757243430.pkl",
+    "processed_at": "2025-09-08T07:54:51.864033"
+  },
+  "welcome_welcome_3_1757243243.mp4": {
+    "hash": "7cc160e0a8770ef46170dbfc29d48fc7",
+    "features_path": "training_cache_landmarks\\features\\welcome_welcome_3_1757243243.pkl",
+    "processed_at": "2025-09-08T07:55:20.714525"
+  },
+  "welcome_welcome_40_1757243435.mp4": {
+    "hash": "dee954adb31c3de9e59a1d71a0807a63",
+    "features_path": "training_cache_landmarks\\features\\welcome_welcome_40_1757243435.pkl",
+    "processed_at": "2025-09-08T07:55:49.774093"
+  },
+  "welcome_welcome_4_1757243248.mp4": {
+    "hash": "221faaaaa861da431134d9288d58d2f3",
+    "features_path": "training_cache_landmarks\\features\\welcome_welcome_4_1757243248.pkl",
+    "processed_at": "2025-09-08T07:56:18.385832"
+  },
+  "welcome_welcome_5_1757243253.mp4": {
+    "hash": "15694e425261f7230740dfc892190739",
+    "features_path": "training_cache_landmarks\\features\\welcome_welcome_5_1757243253.pkl",
+    "processed_at": "2025-09-08T07:56:49.504749"
+  },
+  "welcome_welcome_6_1757243259.mp4": {
+    "hash": "35654ffc4178a58755bb7243eef744ac",
+    "features_path": "training_cache_landmarks\\features\\welcome_welcome_6_1757243259.pkl",
+    "processed_at": "2025-09-08T07:57:18.097082"
+  },
+  "welcome_welcome_7_1757243265.mp4": {
+    "hash": "36f2fbdb737f863b8bcb2927a23505a8",
+    "features_path": "training_cache_landmarks\\features\\welcome_welcome_7_1757243265.pkl",
+    "processed_at": "2025-09-08T07:57:46.587550"
+  },
+  "welcome_welcome_8_1757243270.mp4": {
+    "hash": "797b416fe7ba3c1009e32b1da57a6909",
+    "features_path": "training_cache_landmarks\\features\\welcome_welcome_8_1757243270.pkl",
+    "processed_at": "2025-09-08T07:58:18.539402"
+  },
+  "welcome_welcome_9_1757243277.mp4": {
+    "hash": "99698819fc31390a8da95acf2ca53568",
+    "features_path": "training_cache_landmarks\\features\\welcome_welcome_9_1757243277.pkl",
+    "processed_at": "2025-09-08T07:58:47.342615"
+  }
+}

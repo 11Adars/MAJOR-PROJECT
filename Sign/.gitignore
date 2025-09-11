@@ -1,0 +1,4 @@
+# Ignore env files in any directory
+**/*.env
+# Ignore mp4 files in webapp islr directory
+webapp/web/islr/videos/*.mp4
