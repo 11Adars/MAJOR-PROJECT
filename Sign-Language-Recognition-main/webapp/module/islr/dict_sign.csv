@@ -20,7 +20,7 @@ bed,17
 bedroom,18
 bee,19
 before,20
-beside,21
+
 better,22
 bird,23
 black,24
@@ -85,7 +85,7 @@ fireman,82
 first,83
 fish,84
 flag,85
-flower,86
+Missing,86
 food,87
 for,88
 frenchfries,89
@@ -103,7 +103,7 @@ grandpa,100
 grass,101
 green,102
 gum,103
-hair,104
+ATM,104
 happy,105
 hat,106
 hate,107
@@ -181,7 +181,7 @@ pretty,178
 puppy,179
 puzzle,180
 quiet,181
-radio,182
+Card,182
 rain,183
 read,184
 red,185

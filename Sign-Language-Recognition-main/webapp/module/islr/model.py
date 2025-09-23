@@ -90,7 +90,7 @@ class IsolatedASLRecognition:
         Uses TensorFlow Lite model for sign language recognition.
         """
         print(data)
-        if data[0].timeInSeconds <= 4:
+        if data[0].timeInSeconds <= 10:
             self.sign_name = "No Movement Detected"
             self.unique_signs.clear()
             self.pred_sentence = ""
@@ -113,7 +113,7 @@ class IsolatedASLRecognition:
         # Run the model prediction
         prediction = self.model(inputs=xyz_np)
         sign_index = prediction['outputs'].argmax()
-        self.sign_name = self.ORD2SIGN.get(sign_index, "Unknown Sign")
+        self.sign_name = self.ORD2SIGN.get(sign_index, ".")
 
         # Reset state or update unique signs and sentence
         if self.sign_name in {"", "jeans"}:
