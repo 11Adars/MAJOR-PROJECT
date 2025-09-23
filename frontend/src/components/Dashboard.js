@@ -4,6 +4,7 @@ import axios from 'axios';
 import { FaUserCircle, FaMoneyCheckAlt, FaHistory, FaUserFriends, FaSignOutAlt, FaUser, FaLock}from 'react-icons/fa';
 import './styles.css';
 import BalanceCard from './BalanceCard'; 
+import QuickActions from './QuickActions';
 
 function Dashboard() {
   // User data and authentication state
@@ -215,17 +216,7 @@ function Dashboard() {
 
         <section className="quick-actions">
           <h2>Quick Actions</h2>
-          <div className="action-buttons">
-            <button className="action-btn" onClick={() => navigate('/beneficiaries')}>
-              <FaUserFriends /> Beneficiaries
-            </button>
-            <button className="action-btn" onClick={() => navigate('/transfer')}>
-              <FaMoneyCheckAlt /> Transfer Money
-            </button>
-            <button className="action-btn" onClick={() => navigate('/history')}>
-              <FaHistory /> Transaction History
-            </button>
-          </div>
+          <QuickActions />
         </section>
 
         <section className="transactions-section">

@@ -167,6 +167,12 @@ app.use((err, req, res, next) => {
 app.post('/api/otp/send', sendOtp);
 app.post('/api/otp/verify', verifyOtp);
 
+// Support: return Sign Language Recognition webapp URL
+app.get('/api/support/sign-recognition-url', authMiddleware, (req, res) => {
+  const url = process.env.SIGN_RECOGNITION_URL || 'http://127.0.0.1:8000/';
+  return res.json({ url });
+});
+
 // Start server
 const PORT = process.env.PORT || 5000;
 app.listen(PORT, () => console.log(`Backend running on port ${PORT}`));

@@ -1,45 +1,30 @@
-.App {
-  text-align: center;
-}
+/* App structural helpers */
+.App { display:flex; flex-direction:column; min-height:100vh; }
+.App-main { flex:1; }
 
-.App-logo {
-  height: 40vmin;
-  pointer-events: none;
-}
+/* Page sections */
+.section { padding: var(--space-8) 0; }
+.section + .section { border-top:1px solid var(--color-border); }
 
-@media (prefers-reduced-motion: no-preference) {
-  .App-logo {
-    animation: App-logo-spin infinite 20s linear;
-  }
-}
+/* Hero / header area example */
+.hero { text-align:center; padding: var(--space-12) var(--space-6); }
+.hero h1 { font-size: clamp(2rem,4vw,3rem); font-weight:700; letter-spacing:-.5px; margin-bottom: var(--space-4); }
+.hero p { max-width: 680px; margin:0 auto; font-size: var(--text-md); color: var(--color-text-soft); }
 
-.App-header {
-  background-color: #282c34;
-  min-height: 100vh;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  font-size: calc(10px + 2vmin);
-  color: white;
-}
+/* Layout cards */
+.grid { display:grid; gap: var(--space-6); }
+.grid.cols-3 { grid-template-columns: repeat(auto-fit,minmax(240px,1fr)); }
 
-.App-link {
-  color: #61dafb;
-}
+/* Generic card override for React area */
+.card { background: var(--gradient-surface); border:1px solid var(--color-border); border-radius: var(--radius-lg); padding: var(--space-6); box-shadow: var(--shadow-sm); position:relative; }
+.card:hover { box-shadow: var(--shadow-md); }
 
-@keyframes App-logo-spin {
-  from {
-    transform: rotate(0deg);
-  }
-  to {
-    transform: rotate(360deg);
-  }
-}
-body {
-  background-color: #f2f2f2;
-  font-family: 'Segoe UI', sans-serif;
-}
-button {
-  padding: 10px 20px;
-}
+/* Muted text */
+.text-soft { color: var(--color-text-soft); }
+
+/* Buttons baseline (inherit from global .btn) */
+button { font-family: inherit; }
+
+/* Animation utilities */
+@keyframes float-up { 0% { opacity:0; transform: translateY(12px);} 100% { opacity:1; transform: translateY(0);} }
+.animate-in { animation: float-up .6s var(--transition) backwards; }

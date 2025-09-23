@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Sign Language Recognition</title>
+  <link rel="stylesheet" href="/web/islr/style.css" />
+  <link href="https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css" rel="stylesheet">
+  <script src="https://cdn.jsdelivr.net/npm/@mediapipe/camera_utils/camera_utils.js" crossorigin="anonymous"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@mediapipe/drawing_utils/drawing_utils.js" crossorigin="anonymous"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@mediapipe/holistic/holistic.js" crossorigin="anonymous"></script>
+</head>
+<body>
+  <div class="content">
+    <header class="header" style="position:static;display:flex;justify-content:space-between;align-items:center;padding:1rem 2rem;">
+      <div class="logo" style="font-size:3rem;">Sign Language <span>Recognition</span></div>
+      <nav>
+        <a href="http://127.0.0.1:3000/dashboard" class="back-dashboard-link" style="font-size:1.6rem;color:var(--main-color);text-decoration:none;">← Dashboard</a>
+      </nav>
+    </header>
+    <main style="margin-top:2rem;display:flex;flex-direction:column;align-items:center;gap:1.6rem;">
+      <button id="camButton" class="btn">Enable Webcam</button>
+      <div style="display:flex;flex-direction:column;align-items:center;gap:0.8rem;">
+  <label for="predictionSpeed" style="font-size:1.4rem;">Frames per prediction: <span id="sliderValue">20</span></label>
+  <input type="range" id="predictionSpeed" min="10" max="90" step="5" value="20" style="width:280px;" />
+      </div>
+      <div class="camView">
+        <video class="input_video" autoplay playsinline></video>
+        <canvas class="output_canvas"></canvas>
+      </div>
+      <div id="pred" style="font-size:2.4rem;color:var(--main-color);"></div>
+      <div id="pred_sentence" style="font-size:1.8rem;"></div>
+      <div class="sentence-actions" style="display:flex;gap:1rem;margin-top:0.5rem;">
+        <button id="cancelSentence" class="btn" style="background:#ff5757;color:#000;">Cancel</button>
+        <button id="sendSentence" class="btn" style="background:#4ade80;color:#000;">Send</button>
+      </div>
+      <div id="sendStatus" style="font-size:1.2rem;min-height:1.4rem;color:var(--main-color);"></div>
+      <p style="font-size:1.1rem;opacity:0.7;max-width:720px;text-align:center;">
+        Offline mode active. Landmark face mesh hidden for clarity. Adjust frame threshold for responsiveness vs accuracy.
+      </p>
+    </main>
+  </div>
+  <script type="module" src="/web/islr/script.js"></script>
+  <script>
+    const cancelBtn = document.getElementById('cancelSentence');
+    const sendBtn = document.getElementById('sendSentence');
+    const statusEl = document.getElementById('sendStatus');
+    cancelBtn.addEventListener('click', async () => {
+      try {
+        const r = await fetch('/islr/reset', { method: 'POST' });
+        const j = await r.json();
+        document.getElementById('pred').textContent = 'Reset';
+        document.getElementById('pred_sentence').textContent = '';
+        statusEl.textContent = j.message || 'State cleared';
+      } catch(e) { console.error(e); }
+    });
+    sendBtn.addEventListener('click', async () => {
+      sendBtn.disabled = true; sendBtn.textContent = 'Sending...';
+      try {
+        const r = await fetch('/islr/send', { method: 'POST' });
+        const j = await r.json();
+        if (j.status === 200) {
+          sendBtn.textContent = 'Sent ✅';
+          statusEl.textContent = j.message;
+        } else {
+          sendBtn.textContent = 'Error';
+          statusEl.textContent = (j.message || 'Send failed') + (j.detail ? ' - ' + j.detail : '');
+        }
+      } catch(e) { console.error(e); sendBtn.textContent='Error'; statusEl.textContent='Unexpected error (see console)'; }
+      setTimeout(()=>{ sendBtn.disabled=false; sendBtn.textContent='Send'; }, 2500);
+    });
+  </script>
+</body>
+</html>

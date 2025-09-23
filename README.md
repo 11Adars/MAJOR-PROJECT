@@ -99,3 +99,25 @@ RAZORPAY_KEY_ID=rzp_test_vpCwG1s5IJZOwG
 RAZORPAY_KEY_SECRET=7iVbBYTvG7prvvTerDG2AGuK
 
 RAZORPAY_WEBHOOK_SECRET=adarshapoojary123****
+
+## Gemini Sentence Generation (Optional)
+
+Add natural language sentence generation for recognized ASL sign sequences.
+
+1. Obtain a Gemini API key from Google AI Studio.
+2. In `Sign-Language-Recognition-main/webapp/.env` add:
+  ```
+  GOOGLE_API_KEY=YOUR_GEMINI_KEY
+  ENABLE_SENTENCE_GEN=true
+  ```
+3. Start the ISLR FastAPI server from the `webapp` directory:
+  ```powershell
+  uvicorn app.main:app --host 127.0.0.1 --port 8000 --reload
+  ```
+4. When multiple distinct signs are detected, the backend will call Gemini (debounced by unique sign sequence) to produce a coherent sentence. If unavailable, it falls back to a simple space-joined list.
+
+Security:
+- Do NOT commit real `.env` files.
+- Rotate exposed keys.
+- Keep placeholders only in any distributed `.env.example`.
+

@@ -9,6 +9,7 @@ import Beneficiaries from './components/Beneficiaries';
 import AddBeneficiary from './components/AddBeneficiary';
 import Transfer from './components/Transfer';
 import TransactionHistory from './components/TransactionHistory';
+import SignRecognition from './components/SignRecognition';
 // import Profile from './components/Profile';
 import SetPin from './components/SetPin';
 import Order from './components/AddMoney';
@@ -60,6 +61,10 @@ function App() {
         <Route 
           path="/order" 
           element={isAuthenticated ? <Order /> : <Navigate to="/dashboard" />}
+        />
+        <Route
+          path="/sign-recognition"
+          element={isAuthenticated ? <SignRecognition /> : <Navigate to="/login" />}
         />
 
         {/* Fallback route */}
