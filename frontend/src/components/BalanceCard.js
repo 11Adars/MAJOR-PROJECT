@@ -1,4 +1,5 @@
 import React from 'react';
+import './BalanceCard.css';
 
 import { FaMoneyCheckAlt } from 'react-icons/fa';
 

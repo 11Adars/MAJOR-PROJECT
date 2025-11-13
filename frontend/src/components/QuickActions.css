@@ -1,0 +1,7 @@
+@import '../index.css';
+
+.quick-actions { grid-column: 1 / -1; }
+.action-buttons { display:grid; grid-template-columns: repeat(auto-fill,minmax(160px,1fr)); gap: var(--space-4); }
+.action-btn { display:flex; flex-direction:column; align-items:center; justify-content:center; gap: var(--space-3); padding: var(--space-5); background: var(--color-surface); border:1px solid var(--color-border); border-radius: var(--radius); cursor:pointer; transition: var(--transition-fast); position:relative; box-shadow: var(--shadow-xs); }
+.action-btn:hover { transform: translateY(-4px); border-color: var(--color-primary); box-shadow: var(--shadow-glow-primary); background: linear-gradient(180deg,#ffffff,#f5f8fb); }
+.action-btn svg { font-size: 1.75rem; color: var(--color-primary); }

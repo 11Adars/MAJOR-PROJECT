@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import Home from './components/Home';
 import Register from './components/Register';
@@ -10,13 +10,25 @@ import AddBeneficiary from './components/AddBeneficiary';
 import Transfer from './components/Transfer';
 import TransactionHistory from './components/TransactionHistory';
 import SignRecognition from './components/SignRecognition';
-// import Profile from './components/Profile';
+import SupportTickets from './components/SupportTickets';
 import SetPin from './components/SetPin';
 import Order from './components/AddMoney';
-import './components/styles.css';
+import SplashScreen from './components/SplashScreen'; // Import the splash screen
 
 function App() {
+  const [loading, setLoading] = useState(true);
   const isAuthenticated = !!localStorage.getItem('token');
+
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setLoading(false);
+    }, 3000); // Splash screen duration: 3 seconds
+    return () => clearTimeout(timer);
+  }, []);
+
+  if (loading) {
+    return <SplashScreen />;
+  }
 
   return (
     <Router>
@@ -65,6 +77,10 @@ function App() {
         <Route
           path="/sign-recognition"
           element={isAuthenticated ? <SignRecognition /> : <Navigate to="/login" />}
+        />
+        <Route
+          path="/support-tickets"
+          element={isAuthenticated ? <SupportTickets /> : <Navigate to="/login" />}
         />
 
         {/* Fallback route */}

@@ -1,0 +1,6 @@
+@import '../index.css';
+
+.auth-container { background: var(--gradient-surface); border:1px solid var(--color-border); border-radius: var(--radius-lg); box-shadow: var(--shadow-md); backdrop-filter: blur(6px); max-width: 420px; padding: var(--space-6); margin: var(--space-12) auto; }
+.form-group { display:flex; flex-direction:column; gap: var(--space-3); margin-bottom: var(--space-4); }
+.success { color: var(--color-success); margin: var(--space-3) 0; }
+.error { color: var(--color-danger); margin: var(--space-3) 0; }

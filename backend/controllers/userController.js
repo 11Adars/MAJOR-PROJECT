@@ -209,6 +209,7 @@ exports.registerVoice = async (req, res) => {
 };
 
 
+// Consolidated and hardened voice login implementation
 exports.loginVoice = async (req, res) => {
     const { username } = req.body;
     const audioPath = req.file.path;
@@ -216,92 +217,7 @@ exports.loginVoice = async (req, res) => {
     try {
         console.log('Starting voice login...', { username });
 
-        const userResult = await pool.query(
-            'SELECT * FROM users WHERE username = $1 AND voice_registered = true',
-            [username]
-        );
-
-        if (userResult.rows.length === 0) {
-            return res.status(404).json({ error: 'User not found or voice not registered' });
-        }
-
-        const formData = new FormData();
-        formData.append('audio', fs.createReadStream(audioPath));
-
-        const { data } = await axios.post('http://127.0.0.1:5001/voice-verify', formData, {
-            headers: {
-                ...formData.getHeaders(),
-                'Accept': 'application/json'
-            }
-        });
-
-        if (!data.success) {
-            throw new Error(data.error || 'Voice verification failed');
-        }
-
-        const loginFeatures = data.voice_features;
-        const loginEmbedding = data.embedding;
-        const savedData = userResult.rows[0].voice_data;
-
-        // Calculate embedding similarity
-        const embeddingSimilarity = calculateSimilarity(loginEmbedding, savedData.embedding);
-        
-        // Calculate biometric feature similarity
-        const biometricSimilarity = calculateBiometricMatch(loginFeatures, savedData.voice_features);
-
-        console.log('Voice verification scores:', {
-            embeddingSimilarity,
-            biometricSimilarity
-        });
-
-        // Use stricter thresholds for authentication
-        if (embeddingSimilarity > 0.75) {
-            await pool.query(
-                'INSERT INTO login_history (user_id, auth_method, success, similarity_score) VALUES ($1, $2, $3, $4)',
-                [userResult.rows[0].id, 'voice', true, embeddingSimilarity]
-            );
-
-            const token = generateToken(userResult.rows[0].id);
-            res.json({ 
-                success: true, 
-                token,
-                scores: {
-                    embedding: embeddingSimilarity,
-                    biometric: biometricSimilarity
-                }
-            });
-        } else {
-
-            await pool.query(
-        'INSERT INTO login_history (user_id, auth_method, success, similarity_score) VALUES ($1, $2, $3, $4)',
-        [userResult.rows[0].id, 'voice', false, embeddingSimilarity]
-    );
-            res.status(401).json({ 
-                error: 'Voice authentication failed',
-                scores: {
-                    embedding: embeddingSimilarity,
-                    biometric: biometricSimilarity
-                }
-            });
-        }
-
-    } catch (err) {
-        console.error('Voice login error:', err);
-        res.status(500).json({ error: 'Voice login failed: ' + err.message });
-    } finally {
-        if (fs.existsSync(audioPath)) {
-            fs.unlinkSync(audioPath);
-        }
-    }
-};
-exports.loginVoice = async (req, res) => {
-    const { username } = req.body;
-    const audioPath = req.file.path;
-
-    try {
-        console.log('Starting voice login...', { username });
-
-        // Check for user and voice data
+    // Check for user and voice data
         const userResult = await pool.query(
             'SELECT * FROM users WHERE username = $1',
             [username]
@@ -326,25 +242,55 @@ exports.loginVoice = async (req, res) => {
 
         // Process login audio
         const formData = new FormData();
-        formData.append('audio', fs.createReadStream(audioPath));
+    formData.append('audio', fs.createReadStream(audioPath), {
+      filename: 'voice.wav',
+      contentType: 'audio/wav'
+    });
 
-        const { data } = await axios.post('http://127.0.0.1:5001/voice-verify', formData, {
-            headers: {
-                ...formData.getHeaders(),
-                'Accept': 'application/json'
-            }
-        });
+    // Call ML service and capture both success and error responses to aid debugging
+    let mlResponse;
+    try {
+      mlResponse = await axios.post('http://127.0.0.1:5001/voice-verify', formData, {
+        headers: {
+          ...formData.getHeaders(),
+          Accept: 'application/json'
+        },
+        maxContentLength: Infinity,
+        maxBodyLength: Infinity,
+        validateStatus: () => true // allow reading non-2xx responses
+      });
+    } catch (callErr) {
+      console.error('Error calling ML service:', callErr.message);
+      throw new Error('Unable to reach voice verification service');
+    }
 
-        if (!data.success || !data.embedding || !data.voice_features) {
-            throw new Error('Invalid voice verification response');
-        }
+    const { status, data } = mlResponse;
+    if (status !== 200) {
+      console.error('ML service non-200 response:', { status, data });
+      const errMsg = (data && (data.error || data.message)) || `ML service error (${status})`;
+      throw new Error(errMsg);
+    }
+
+    // Defensive checks for response shape
+    if (!data || typeof data !== 'object') {
+      console.error('Unexpected ML response type:', typeof data);
+      throw new Error('Invalid voice verification response');
+    }
+    if (data.success !== true) {
+      console.error('ML service reported failure:', data);
+      throw new Error(data.error || 'Voice verification failed');
+    }
+    if (!Array.isArray(data.embedding) || !data.voice_features) {
+      console.error('Missing required fields in ML response:', Object.keys(data));
+      throw new Error('Invalid voice verification response');
+    }
 
         // Calculate similarities
-        const loginEmbedding = data.embedding;
-        const loginFeatures = data.voice_features;
+    const loginEmbedding = data.embedding;
+    const loginFeatures = data.voice_features;
         
-        const embeddingSimilarity = calculateSimilarity(loginEmbedding, user.voice_data.embedding);
-        const biometricSimilarity = calculateBiometricMatch(loginFeatures, user.voice_data.voice_features);
+    const embeddingSimilarity = calculateSimilarity(loginEmbedding, user.voice_data.embedding);
+    const biometricSimilarity = calculateBiometricMatch(loginFeatures, user.voice_data.voice_features);
 
         // Calculate combined score
         const weights = {
@@ -401,8 +347,8 @@ exports.loginVoice = async (req, res) => {
         }
 
     } catch (err) {
-        console.error('Voice login error:', err);
-        res.status(500).json({ error: 'Voice login failed: ' + err.message });
+    console.error('Voice login error:', err);
+    res.status(500).json({ error: 'Voice login failed: ' + err.message });
     } finally {
         if (fs.existsSync(audioPath)) {
             fs.unlinkSync(audioPath);

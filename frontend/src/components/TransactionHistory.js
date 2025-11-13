@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from 'react';
+import './TransactionHistory.css';
 import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
 

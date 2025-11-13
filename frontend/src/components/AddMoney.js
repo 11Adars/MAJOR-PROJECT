@@ -1,5 +1,6 @@
 // Example: AddMoney.js
 import React, { useState } from 'react';
+import './AddMoney.css';
 import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
 
@@ -48,7 +49,7 @@ function AddMoney() {
   };
 
   return (
-    <div>
+    <div className="container">
       <input
         type="number"
         placeholder="Amount (INR)"

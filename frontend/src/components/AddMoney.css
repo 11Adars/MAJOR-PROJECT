@@ -1,0 +1,4 @@
+@import '../index.css';
+
+.container { margin: 0 auto; padding: var(--space-8) var(--space-6); max-width: 680px; }
+.container input { margin-right: var(--space-3); max-width: 240px; }

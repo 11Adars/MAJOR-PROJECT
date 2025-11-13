@@ -1,0 +1,699 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sign Language Recognition - BankAssist AI</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .header {
+            text-align: center;
+            color: white;
+            margin-bottom: 30px;
+        }
+
+        .header h1 {
+            font-size: 2.5rem;
+            margin-bottom: 10px;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+        }
+
+        .header p {
+            font-size: 1.1rem;
+            opacity: 0.9;
+        }
+
+        .main-content {
+            display: grid;
+            grid-template-columns: 1fr 400px;
+            gap: 20px;
+            margin-bottom: 20px;
+        }
+
+        @media (max-width: 968px) {
+            .main-content {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        .video-section {
+            background: white;
+            border-radius: 16px;
+            padding: 20px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+        }
+
+        .video-wrapper {
+            position: relative;
+            border-radius: 12px;
+            overflow: hidden;
+            background: #000;
+        }
+
+        #videoElement {
+            width: 100%;
+            display: block;
+        }
+
+        .video-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            pointer-events: none;
+        }
+
+        .status-bar {
+            position: absolute;
+            top: 20px;
+            left: 20px;
+            right: 20px;
+            background: rgba(0,0,0,0.7);
+            color: white;
+            padding: 15px 20px;
+            border-radius: 8px;
+            font-size: 1rem;
+            font-weight: 600;
+        }
+
+        .status-bar.recording {
+            background: rgba(220, 38, 38, 0.9);
+            animation: pulse 1.5s ease-in-out infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.7; }
+        }
+
+        .controls-panel {
+            background: white;
+            border-radius: 16px;
+            padding: 20px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+        }
+
+        .controls-section {
+            margin-bottom: 20px;
+        }
+
+        .controls-section h3 {
+            color: #667eea;
+            margin-bottom: 15px;
+            font-size: 1.2rem;
+        }
+
+        .control-buttons {
+            display: grid;
+            gap: 10px;
+        }
+
+        .btn {
+            padding: 12px 20px;
+            border: none;
+            border-radius: 8px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+        }
+
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+        }
+
+        .btn:active {
+            transform: translateY(0);
+        }
+
+        .btn-primary {
+            background: #667eea;
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background: #5568d3;
+        }
+
+        .btn-success {
+            background: #10b981;
+            color: white;
+        }
+
+        .btn-success:hover {
+            background: #059669;
+        }
+
+        .btn-danger {
+            background: #ef4444;
+            color: white;
+        }
+
+        .btn-danger:hover {
+            background: #dc2626;
+        }
+
+        .btn-warning {
+            background: #f59e0b;
+            color: white;
+        }
+
+        .btn-warning:hover {
+            background: #d97706;
+        }
+
+        .btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        .keywords-display {
+            background: #f3f4f6;
+            border-radius: 8px;
+            padding: 15px;
+            min-height: 80px;
+            margin-bottom: 15px;
+        }
+
+        .keywords-display h4 {
+            color: #374151;
+            margin-bottom: 10px;
+            font-size: 0.9rem;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .keywords-list {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+        }
+
+        .keyword-tag {
+            background: #667eea;
+            color: white;
+            padding: 6px 12px;
+            border-radius: 6px;
+            font-size: 0.9rem;
+            font-weight: 500;
+        }
+
+        .sentence-display {
+            background: #ecfdf5;
+            border-left: 4px solid #10b981;
+            border-radius: 8px;
+            padding: 15px;
+            margin-bottom: 15px;
+        }
+
+        .sentence-display h4 {
+            color: #065f46;
+            margin-bottom: 10px;
+            font-size: 0.9rem;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .sentence-text {
+            color: #047857;
+            font-size: 1rem;
+            font-weight: 500;
+            line-height: 1.5;
+        }
+
+        .instructions {
+            background: white;
+            border-radius: 16px;
+            padding: 20px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+        }
+
+        .instructions h3 {
+            color: #667eea;
+            margin-bottom: 15px;
+            font-size: 1.2rem;
+        }
+
+        .instructions ul {
+            list-style: none;
+            padding: 0;
+        }
+
+        .instructions li {
+            padding: 10px 0;
+            border-bottom: 1px solid #e5e7eb;
+            color: #374151;
+        }
+
+        .instructions li:last-child {
+            border-bottom: none;
+        }
+
+        .instructions li strong {
+            color: #667eea;
+            margin-right: 10px;
+        }
+
+        .loading {
+            display: none;
+            text-align: center;
+            padding: 20px;
+        }
+
+        .loading.active {
+            display: block;
+        }
+
+        .spinner {
+            border: 3px solid #f3f4f6;
+            border-top: 3px solid #667eea;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 10px;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .error-message {
+            background: #fee2e2;
+            border-left: 4px solid #ef4444;
+            color: #991b1b;
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 15px;
+            display: none;
+        }
+
+        .error-message.active {
+            display: block;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🤟 Sign Language Recognition</h1>
+            <p>BankAssist AI - Customer Support</p>
+        </div>
+
+        <div class="main-content">
+            <div class="video-section">
+                <div class="video-wrapper">
+                    <video id="videoElement" autoplay playsinline></video>
+                    <div class="video-overlay">
+                        <div id="statusBar" class="status-bar">
+                            Initializing camera...
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="controls-panel">
+                <div class="error-message" id="errorMessage"></div>
+                
+                <div class="controls-section">
+                    <h3>📹 Recording</h3>
+                    <div class="control-buttons">
+                        <button id="recordBtn" class="btn btn-primary" disabled>
+                            <span>⏺️</span> Start Recording
+                        </button>
+                        <button id="stopBtn" class="btn btn-danger" disabled>
+                            <span>⏹️</span> Stop Recording
+                        </button>
+                    </div>
+                </div>
+
+                <div class="keywords-display">
+                    <h4>Recorded Keywords</h4>
+                    <div class="keywords-list" id="keywordsList">
+                        <span style="color: #9ca3af;">No keywords yet</span>
+                    </div>
+                </div>
+
+                <div class="controls-section">
+                    <h3>✨ Actions</h3>
+                    <div class="control-buttons">
+                        <button id="generateBtn" class="btn btn-success" disabled>
+                            <span>🤖</span> Generate Query
+                        </button>
+                        <button id="clearLastBtn" class="btn btn-warning" disabled>
+                            <span>↩️</span> Remove Last
+                        </button>
+                        <button id="clearAllBtn" class="btn btn-warning" disabled>
+                            <span>🗑️</span> Clear All
+                        </button>
+                    </div>
+                </div>
+
+                <div class="sentence-display" id="sentenceDisplay" style="display: none;">
+                    <h4>Generated Query</h4>
+                    <div class="sentence-text" id="sentenceText"></div>
+                    <button id="submitToSupportBtn" class="btn btn-primary" style="margin-top: 15px; width: 100%;">
+                        <span>📧</span> Submit to Bank Support
+                    </button>
+                </div>
+
+                <div class="loading" id="loadingIndicator">
+                    <div class="spinner"></div>
+                    <p>Processing...</p>
+                </div>
+            </div>
+        </div>
+
+        <div class="instructions">
+            <h3>📖 How to Use</h3>
+            <ul>
+                <li><strong>Step 1:</strong> Click "Start Recording" and perform your sign language gesture</li>
+                <li><strong>Step 2:</strong> Click "Stop Recording" when done</li>
+                <li><strong>Step 3:</strong> The system will recognize the sign and add it as a keyword</li>
+                <li><strong>Step 4:</strong> Repeat steps 1-3 to add more keywords</li>
+                <li><strong>Step 5:</strong> Click "Generate Query" to convert keywords into a natural sentence</li>
+                <li><strong>Note:</strong> Hold your pose steady for 2-3 seconds for best results</li>
+            </ul>
+        </div>
+    </div>
+
+    <script>
+        let videoElement = document.getElementById('videoElement');
+        let statusBar = document.getElementById('statusBar');
+        let recordBtn = document.getElementById('recordBtn');
+        let stopBtn = document.getElementById('stopBtn');
+        let generateBtn = document.getElementById('generateBtn');
+        let clearLastBtn = document.getElementById('clearLastBtn');
+        let clearAllBtn = document.getElementById('clearAllBtn');
+        let keywordsList = document.getElementById('keywordsList');
+        let sentenceDisplay = document.getElementById('sentenceDisplay');
+        let sentenceText = document.getElementById('sentenceText');
+        let loadingIndicator = document.getElementById('loadingIndicator');
+        let errorMessage = document.getElementById('errorMessage');
+
+        let isRecording = false;
+        let recordingSequence = [];
+        let keywords = [];
+        let mediaStream = null;
+        let animationFrameId = null;
+
+        // Initialize camera
+        async function initCamera() {
+            try {
+                mediaStream = await navigator.mediaDevices.getUserMedia({ 
+                    video: { 
+                        width: { ideal: 1280 },
+                        height: { ideal: 720 }
+                    } 
+                });
+                videoElement.srcObject = mediaStream;
+                statusBar.textContent = 'Ready - Click "Start Recording" to begin';
+                statusBar.classList.remove('recording');
+                recordBtn.disabled = false;
+                updateButtonStates();
+            } catch (err) {
+                showError('Failed to access camera: ' + err.message);
+                statusBar.textContent = 'Camera access denied';
+            }
+        }
+
+        // Process video frame
+        async function processFrame() {
+            if (!isRecording) return;
+
+            const canvas = document.createElement('canvas');
+            canvas.width = videoElement.videoWidth;
+            canvas.height = videoElement.videoHeight;
+            const ctx = canvas.getContext('2d');
+            ctx.drawImage(videoElement, 0, 0);
+            
+            const frameData = canvas.toDataURL('image/jpeg', 0.8);
+            
+            try {
+                const response = await fetch('/api/process-frame', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ frame: frameData })
+                });
+                
+                const data = await response.json();
+                
+                if (data.success && data.landmarks) {
+                    recordingSequence.push(data.landmarks);
+                }
+            } catch (err) {
+                console.error('Frame processing error:', err);
+            }
+            
+            if (isRecording) {
+                animationFrameId = setTimeout(processFrame, 100); // Process every 100ms
+            }
+        }
+
+        // Start recording
+        recordBtn.addEventListener('click', () => {
+            isRecording = true;
+            recordingSequence = [];
+            statusBar.textContent = 'RECORDING... Perform your sign gesture';
+            statusBar.classList.add('recording');
+            recordBtn.disabled = true;
+            stopBtn.disabled = false;
+            sentenceDisplay.style.display = 'none';
+            hideError();
+            processFrame();
+        });
+
+        // Stop recording
+        stopBtn.addEventListener('click', async () => {
+            isRecording = false;
+            if (animationFrameId) {
+                clearTimeout(animationFrameId);
+            }
+            statusBar.textContent = 'Processing...';
+            statusBar.classList.remove('recording');
+            stopBtn.disabled = true;
+            loadingIndicator.classList.add('active');
+            
+            try {
+                const response = await fetch('/api/predict', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ sequence: recordingSequence })
+                });
+                
+                const data = await response.json();
+                
+                if (data.success && data.prediction) {
+                    keywords.push(data.prediction);
+                    updateKeywordsDisplay();
+                    statusBar.textContent = `Added: ${data.prediction} (Confidence: ${(data.confidence * 100).toFixed(1)}%)`;
+                } else {
+                    statusBar.textContent = data.message || 'Prediction uncertain. Try again.';
+                }
+            } catch (err) {
+                showError('Prediction failed: ' + err.message);
+                statusBar.textContent = 'Error - Try again';
+            } finally {
+                loadingIndicator.classList.remove('active');
+                recordBtn.disabled = false;
+                updateButtonStates();
+            }
+        });
+
+        // Generate sentence
+        generateBtn.addEventListener('click', async () => {
+            loadingIndicator.classList.add('active');
+            statusBar.textContent = 'Generating query...';
+            generateBtn.disabled = true;
+            
+            try {
+                const response = await fetch('/api/generate-sentence', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ keywords: keywords })
+                });
+                
+                const data = await response.json();
+                
+                if (data.success && data.sentence) {
+                    sentenceText.textContent = data.sentence;
+                    sentenceDisplay.style.display = 'block';
+                    statusBar.textContent = 'Query generated successfully!';
+                } else {
+                    showError('Failed to generate sentence');
+                }
+            } catch (err) {
+                showError('Generation failed: ' + err.message);
+                statusBar.textContent = 'Error - Try again';
+            } finally {
+                loadingIndicator.classList.remove('active');
+                generateBtn.disabled = false;
+            }
+        });
+
+        // Clear last keyword
+        clearLastBtn.addEventListener('click', () => {
+            if (keywords.length > 0) {
+                const removed = keywords.pop();
+                updateKeywordsDisplay();
+                statusBar.textContent = `Removed: ${removed}`;
+                sentenceDisplay.style.display = 'none';
+            }
+        });
+
+        // Clear all keywords
+        clearAllBtn.addEventListener('click', () => {
+            keywords = [];
+            updateKeywordsDisplay();
+            statusBar.textContent = 'All keywords cleared';
+            sentenceDisplay.style.display = 'none';
+        });
+
+        // Store token received from parent window
+        let authToken = null;
+        
+        // Listen for auth token from parent window
+        window.addEventListener('message', (event) => {
+            if (event.data.type === 'AUTH_TOKEN') {
+                authToken = event.data.token;
+                console.log('Auth token received from parent window');
+            }
+        });
+
+        // Submit to Support
+        document.getElementById('submitToSupportBtn').addEventListener('click', async () => {
+            const queryText = sentenceText.textContent;
+            if (!queryText) {
+                showError('No query to submit');
+                return;
+            }
+
+            // Get auth token from parent window or localStorage
+            const token = authToken || localStorage.getItem('token');
+            if (!token) {
+                showError('Please login to submit support queries');
+                statusBar.textContent = 'Authentication required';
+                return;
+            }
+
+            loadingIndicator.classList.add('active');
+            statusBar.textContent = 'Submitting query to support...';
+            document.getElementById('submitToSupportBtn').disabled = true;
+
+            try {
+                const response = await fetch('/api/submit-to-support', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ 
+                        query_text: queryText,
+                        token: token
+                    })
+                });
+
+                const data = await response.json();
+
+                if (data.success) {
+                    statusBar.textContent = `✅ Query submitted! Ticket #${data.ticket_id}`;
+                    statusBar.style.backgroundColor = 'rgba(16, 185, 129, 0.9)';
+                    
+                    // Show success message
+                    sentenceDisplay.innerHTML = `
+                        <h4>✅ Query Submitted Successfully!</h4>
+                        <div class="sentence-text" style="background: #ecfdf5; padding: 15px; border-left: 4px solid #10b981; margin: 10px 0;">
+                            <p style="margin: 0; font-weight: bold;">Ticket #${data.ticket_id}</p>
+                            <p style="margin: 10px 0 0 0; font-size: 14px;">Your query has been sent to bank support. You'll receive an email notification when they respond. Check your dashboard to track the status.</p>
+                        </div>
+                        <button onclick="window.location.reload()" class="btn btn-primary" style="margin-top: 15px; width: 100%;">
+                            <span>➕</span> Submit Another Query
+                        </button>
+                    `;
+
+                    // Clear keywords after successful submission
+                    setTimeout(() => {
+                        keywords = [];
+                        updateKeywordsDisplay();
+                    }, 2000);
+                } else {
+                    showError('Failed to submit query: ' + (data.error || 'Unknown error'));
+                    statusBar.textContent = 'Submission failed';
+                    document.getElementById('submitToSupportBtn').disabled = false;
+                }
+            } catch (err) {
+                showError('Submission failed: ' + err.message);
+                statusBar.textContent = 'Error - Try again';
+                document.getElementById('submitToSupportBtn').disabled = false;
+            } finally {
+                loadingIndicator.classList.remove('active');
+                setTimeout(() => {
+                    statusBar.style.backgroundColor = '';
+                }, 3000);
+            }
+        });
+
+        // Update keywords display
+        function updateKeywordsDisplay() {
+            if (keywords.length === 0) {
+                keywordsList.innerHTML = '<span style="color: #9ca3af;">No keywords yet</span>';
+            } else {
+                keywordsList.innerHTML = keywords
+                    .map(kw => `<span class="keyword-tag">${kw}</span>`)
+                    .join('');
+            }
+            updateButtonStates();
+        }
+
+        // Update button states
+        function updateButtonStates() {
+            const hasKeywords = keywords.length > 0;
+            generateBtn.disabled = !hasKeywords;
+            clearLastBtn.disabled = !hasKeywords;
+            clearAllBtn.disabled = !hasKeywords;
+        }
+
+        // Show error
+        function showError(message) {
+            errorMessage.textContent = message;
+            errorMessage.classList.add('active');
+        }
+
+        // Hide error
+        function hideError() {
+            errorMessage.classList.remove('active');
+        }
+
+        // Initialize on load
+        initCamera();
+
+        // Cleanup on page unload
+        window.addEventListener('beforeunload', () => {
+            if (mediaStream) {
+                mediaStream.getTracks().forEach(track => track.stop());
+            }
+        });
+    </script>
+</body>
+</html>

@@ -2,7 +2,7 @@ import React, { useRef, useState, useEffect } from 'react';
 import { audioConfig, processAudio } from '../utils/audioUtils';
 import Webcam from 'react-webcam';
 import axios from 'axios';
-import './styles.css';
+import './Login.css';
 
 function Login({ mode }) {
   // State management

@@ -1,0 +1,4 @@
+@import '../index.css';
+
+.container { margin: 0 auto; padding: var(--space-8) var(--space-6); max-width: 640px; }
+.container form { display:flex; flex-direction:column; gap: var(--space-4); background: var(--gradient-surface); border:1px solid var(--color-border); border-radius: var(--radius-lg); padding: var(--space-6); box-shadow: var(--shadow-sm); }

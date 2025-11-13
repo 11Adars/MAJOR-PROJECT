@@ -5,6 +5,7 @@ const dotenv = require('dotenv');
 const { registerFace, loginFace, registerVoice, loginVoice,getUserData,getLoginHistory,logout,sendOtp,verifyOtp } = require('./controllers/userController');
 const path = require('path');
 const authMiddleware = require('./middleware/authMiddleware');
+const emailPollingService = require('./services/emailPollingService');
 
 const razorpay = require('./razorpay'); // Add this line
 const bankController = require('./controllers/bankController');
@@ -173,7 +174,45 @@ app.get('/api/support/sign-recognition-url', authMiddleware, (req, res) => {
   return res.json({ url });
 });
 
+// Support Ticket Routes
+const supportController = require('./controllers/supportController');
+
+// Submit a new support ticket
+app.post('/api/support/tickets', authMiddleware, supportController.submitTicket);
+
+// Get all tickets for logged-in user
+app.get('/api/support/tickets', authMiddleware, supportController.getUserTickets);
+
+// Get specific ticket details with responses
+app.get('/api/support/tickets/:ticketId', authMiddleware, supportController.getTicketDetails);
+
+// Add response to ticket (bank support)
+app.post('/api/support/tickets/:ticketId/responses', authMiddleware, supportController.addTicketResponse);
+
+// Mark ticket as resolved
+app.patch('/api/support/tickets/:ticketId/resolve', authMiddleware, supportController.resolveTicket);
+
+// Get ticket statistics
+app.get('/api/support/stats', authMiddleware, supportController.getTicketStats);
+
 // Start server
 const PORT = process.env.PORT || 5000;
-app.listen(PORT, () => console.log(`Backend running on port ${PORT}`));
+app.listen(PORT, () => {
+  console.log(`Backend running on port ${PORT}`);
+  
+  // Start email polling service
+  try {
+    emailPollingService.start();
+  } catch (error) {
+    console.error('Failed to start email polling service:', error.message);
+    console.log('Email polling will be disabled. Bank responses must be added manually.');
+  }
+});
+
+// Graceful shutdown
+process.on('SIGINT', () => {
+  console.log('\nShutting down gracefully...');
+  emailPollingService.stop();
+  process.exit(0);
+});
 

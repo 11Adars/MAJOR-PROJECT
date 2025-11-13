@@ -1,5 +1,6 @@
 import React from 'react';
-import { FaUserFriends, FaMoneyCheckAlt, FaHistory, FaHeadset } from 'react-icons/fa';
+import './QuickActions.css';
+import { FaUserFriends, FaMoneyCheckAlt, FaHistory, FaHeadset, FaTicketAlt } from 'react-icons/fa';
 import { useNavigate } from 'react-router-dom';
 
 function QuickActions() {
@@ -22,6 +23,9 @@ function QuickActions() {
 			</button>
 			<button className="action-btn" onClick={openSupport}>
 				<FaHeadset /> Customer Support
+			</button>
+			<button className="action-btn" onClick={() => navigate('/support-tickets')}>
+				<FaTicketAlt /> Support Tickets
 			</button>
 		</div>
 	);
