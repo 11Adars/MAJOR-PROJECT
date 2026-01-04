@@ -4,3 +4,183 @@
 .container h2 { margin-bottom: var(--space-5); }
 .container form { display:flex; flex-direction:column; gap: var(--space-4); background: var(--gradient-surface); border:1px solid var(--color-border); border-radius: var(--radius-lg); padding: var(--space-6); box-shadow: var(--shadow-sm); }
 .container .action-btn { align-self:flex-start; }
+
+/* Biometric Authentication Styles */
+.biometric-auth-container {
+  background: var(--gradient-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg);
+  padding: var(--space-6);
+  box-shadow: var(--shadow-sm);
+  text-align: center;
+}
+
+.biometric-auth-container h3 {
+  color: var(--color-primary);
+  margin-bottom: var(--space-3);
+  font-size: 1.5rem;
+}
+
+.auth-instruction {
+  color: var(--color-text);
+  margin-bottom: var(--space-4);
+  opacity: 0.9;
+  font-size: 1rem;
+}
+
+.webcam-wrapper {
+  width: 100%;
+  max-width: 500px;
+  margin: 0 auto var(--space-4);
+  border-radius: var(--radius-lg);
+  overflow: hidden;
+  border: 2px solid var(--color-primary);
+  box-shadow: 0 0 20px rgba(37, 99, 235, 0.3);
+}
+
+.transfer-webcam {
+  width: 100%;
+  height: auto;
+  display: block;
+}
+
+.auth-progress-container {
+  margin-bottom: var(--space-4);
+}
+
+.auth-progress-bar {
+  width: 100%;
+  height: 28px;
+  background: rgba(0, 0, 0, 0.3);
+  border-radius: 14px;
+  overflow: hidden;
+  margin-bottom: var(--space-2);
+  border: 1px solid rgba(37, 99, 235, 0.3);
+}
+
+.auth-progress-fill {
+  height: 100%;
+  background: linear-gradient(90deg, #2563eb, #3b82f6, #60a5fa);
+  transition: width 0.3s ease;
+  border-radius: 14px;
+  box-shadow: 0 0 20px rgba(37, 99, 235, 0.6);
+  animation: shimmer 1.5s ease-in-out infinite;
+}
+
+@keyframes shimmer {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.8; }
+}
+
+.auth-progress-text {
+  color: var(--color-primary);
+  font-weight: 600;
+  font-size: 1.1rem;
+  margin: 0;
+}
+
+/* Biometric Scores Display */
+.biometric-scores {
+  margin-top: var(--space-4);
+  padding: var(--space-4);
+  background: rgba(37, 99, 235, 0.05);
+  border-radius: var(--radius-md);
+  border: 1px solid rgba(37, 99, 235, 0.2);
+}
+
+.biometric-scores h4 {
+  color: var(--color-primary);
+  margin-bottom: var(--space-3);
+  font-size: 1.1rem;
+}
+
+.score-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: var(--space-3);
+}
+
+.score-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: var(--space-2) var(--space-3);
+  background: rgba(255, 255, 255, 0.05);
+  border-radius: var(--radius-sm);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.score-item.fusion-score {
+  grid-column: 1 / -1;
+  background: rgba(37, 99, 235, 0.1);
+  border: 1px solid rgba(37, 99, 235, 0.3);
+  font-weight: 600;
+  font-size: 1.1rem;
+}
+
+.score-label {
+  color: var(--color-text);
+  opacity: 0.9;
+}
+
+.score-value {
+  color: var(--color-primary);
+  font-weight: 600;
+}
+
+/* Transfer Button */
+.transfer-btn {
+  background: linear-gradient(135deg, #2563eb, #3b82f6);
+  font-size: 1rem;
+  padding: var(--space-3) var(--space-5);
+  width: 100%;
+}
+
+.transfer-btn:hover:not(:disabled) {
+  background: linear-gradient(135deg, #1e40af, #2563eb);
+  transform: translateY(-2px);
+  box-shadow: 0 4px 20px rgba(37, 99, 235, 0.4);
+}
+
+/* Messages */
+.success-message {
+  color: #10b981;
+  background: rgba(16, 185, 129, 0.1);
+  padding: var(--space-3);
+  border-radius: var(--radius-md);
+  border: 1px solid rgba(16, 185, 129, 0.3);
+  margin-top: var(--space-4);
+  font-weight: 500;
+}
+
+.error-message {
+  color: #ef4444;
+  background: rgba(239, 68, 68, 0.1);
+  padding: var(--space-3);
+  border-radius: var(--radius-md);
+  border: 1px solid rgba(239, 68, 68, 0.3);
+  margin-top: var(--space-4);
+  font-weight: 500;
+}
+
+/* Back Button */
+.back-btn {
+  margin-top: var(--space-4);
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid var(--color-border);
+}
+
+.back-btn:hover:not(:disabled) {
+  background: rgba(255, 255, 255, 0.1);
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+  .score-grid {
+    grid-template-columns: 1fr;
+  }
+  
+  .webcam-wrapper {
+    max-width: 100%;
+  }
+}

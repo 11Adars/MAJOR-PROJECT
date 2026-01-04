@@ -6,9 +6,15 @@ import { useNavigate } from 'react-router-dom';
 
 function AddMoney() {
   const [amount, setAmount] = useState('');
+  const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
 
   const handleAddMoney = async () => {
+    if (!amount || Number(amount) <= 0) {
+      alert('Please enter a valid amount');
+      return;
+    }
+    setLoading(true);
     // 1. Create order from backend
     const res = await axios.post('http://127.0.0.1:5000/api/razorpay/order', { amount :Number(amount)}, {
       headers: { Authorization: `Bearer ${localStorage.getItem('token')}` }
@@ -49,14 +55,32 @@ function AddMoney() {
   };
 
   return (
-    <div className="container">
-      <input
-        type="number"
-        placeholder="Amount (INR)"
-        value={amount}
-        onChange={e => setAmount(e.target.value)}
-      />
-      <button onClick={handleAddMoney}>Add Money</button>
+    <div className="add-money-container">
+      <button className="back-btn" onClick={() => navigate('/dashboard')}>
+        <span>←</span> Back
+      </button>
+      <div className="add-money-card">
+        <h2>💰 Add Money</h2>
+        <p className="subtitle">Top up your wallet instantly</p>
+        <div className="amount-input-group">
+          <span className="currency-symbol">₹</span>
+          <input
+            type="number"
+            placeholder="Enter amount"
+            value={amount}
+            onChange={e => setAmount(e.target.value)}
+            min="1"
+            disabled={loading}
+          />
+        </div>
+        <button 
+          className="add-money-btn" 
+          onClick={handleAddMoney}
+          disabled={loading}
+        >
+          {loading ? 'Processing...' : 'Add Money via Razorpay'}
+        </button>
+      </div>
     </div>
   );
 }

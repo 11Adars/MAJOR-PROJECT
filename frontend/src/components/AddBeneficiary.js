@@ -24,16 +24,48 @@ function AddBeneficiary() {
   };
 
   return (
-    <div className="container">
-      <h2>Add Beneficiary</h2>
-      <form onSubmit={handleSubmit}>
-        <input name="name" placeholder="Name" value={form.name} onChange={handleChange} required />
-        <input name="account_number" placeholder="Account Number" value={form.account_number} onChange={handleChange} required />
-        <input name="ifsc" placeholder="IFSC Code" value={form.ifsc} onChange={handleChange} required />
-        <button className="action-btn" type="submit">Add</button>
-      </form>
-      {message && <p>{message}</p>}
-      <button className="action-btn" onClick={() => navigate('/beneficiaries')}>Back</button>
+    <div className="add-beneficiary-container">
+      <button className="back-btn" onClick={() => navigate('/beneficiaries')}>
+        <span>←</span> Back
+      </button>
+      <div className="add-beneficiary-card">
+        <h2>➕ Add New Beneficiary</h2>
+        <p className="subtitle">Save beneficiary details for quick transfers</p>
+        <form onSubmit={handleSubmit}>
+          <div className="form-group">
+            <label>Full Name</label>
+            <input 
+              name="name" 
+              placeholder="Enter beneficiary name" 
+              value={form.name} 
+              onChange={handleChange} 
+              required 
+            />
+          </div>
+          <div className="form-group">
+            <label>Account Number</label>
+            <input 
+              name="account_number" 
+              placeholder="Enter account number" 
+              value={form.account_number} 
+              onChange={handleChange} 
+              required 
+            />
+          </div>
+          <div className="form-group">
+            <label>IFSC Code</label>
+            <input 
+              name="ifsc" 
+              placeholder="Enter IFSC code" 
+              value={form.ifsc} 
+              onChange={handleChange} 
+              required 
+            />
+          </div>
+          {message && <p className={message.includes('added') ? 'success-msg' : 'error-msg'}>{message}</p>}
+          <button className="submit-btn" type="submit">Save Beneficiary</button>
+        </form>
+      </div>
     </div>
   );
 }

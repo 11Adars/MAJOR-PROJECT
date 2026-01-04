@@ -22,22 +22,30 @@ function SetPin() {
   };
 
   return (
-    <div className="container">
-      <h2>Set/Change PIN</h2>
-      <form onSubmit={handleSubmit}>
-        <input
-          type="password"
-          placeholder="Enter new PIN"
-          value={pin}
-          onChange={e => setPin(e.target.value)}
-          minLength={4}
-          maxLength={6}
-          required
-        />
-        <button className="action-btn" type="submit">Set PIN</button>
-      </form>
-      {message && <p>{message}</p>}
-      <button className="action-btn" onClick={() => navigate('/profile')}>Back</button>
+    <div className="set-pin-container">
+      <button className="back-btn" onClick={() => navigate('/profile')}>
+        <span>←</span> Back
+      </button>
+      <div className="set-pin-card">
+        <h2>🔐 Set/Change PIN</h2>
+        <p className="subtitle">Create a secure PIN for transactions</p>
+        <form onSubmit={handleSubmit}>
+          <div className="form-group">
+            <label>New PIN (4-6 digits)</label>
+            <input
+              type="password"
+              placeholder="Enter new PIN"
+              value={pin}
+              onChange={e => setPin(e.target.value)}
+              minLength={4}
+              maxLength={6}
+              required
+            />
+          </div>
+          {message && <p className={message.includes('success') ? 'success-msg' : 'error-msg'}>{message}</p>}
+          <button className="submit-btn" type="submit">Set PIN</button>
+        </form>
+      </div>
     </div>
   );
 }

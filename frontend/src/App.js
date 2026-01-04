@@ -13,17 +13,36 @@ import SignRecognition from './components/SignRecognition';
 import SupportTickets from './components/SupportTickets';
 import SetPin from './components/SetPin';
 import Order from './components/AddMoney';
+import BiometricEnrollment from './components/BiometricEnrollment';
 import SplashScreen from './components/SplashScreen'; // Import the splash screen
 
 function App() {
   const [loading, setLoading] = useState(true);
-  const isAuthenticated = !!localStorage.getItem('token');
+  const [isAuthenticated, setIsAuthenticated] = useState(!!localStorage.getItem('token'));
 
   useEffect(() => {
     const timer = setTimeout(() => {
       setLoading(false);
     }, 3000); // Splash screen duration: 3 seconds
     return () => clearTimeout(timer);
+  }, []);
+
+  // Check for token changes (e.g., after login/logout)
+  useEffect(() => {
+    const checkAuth = () => {
+      setIsAuthenticated(!!localStorage.getItem('token'));
+    };
+    
+    // Listen for storage changes
+    window.addEventListener('storage', checkAuth);
+    
+    // Check auth on mount and interval (for same-tab changes)
+    const interval = setInterval(checkAuth, 1000);
+    
+    return () => {
+      window.removeEventListener('storage', checkAuth);
+      clearInterval(interval);
+    };
   }, []);
 
   if (loading) {
@@ -57,6 +76,10 @@ function App() {
         <Route 
           path="/transfer" 
           element={isAuthenticated ? <Transfer /> : <Navigate to="/dashboard" />} 
+        />
+        <Route 
+          path="/biometric-enrollment" 
+          element={isAuthenticated ? <BiometricEnrollment /> : <Navigate to="/dashboard" />} 
         />
         <Route 
           path="/history" 

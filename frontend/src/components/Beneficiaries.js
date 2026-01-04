@@ -14,17 +14,35 @@ function Beneficiaries() {
   }, []);
 
   return (
-    <div className="container">
-      <h2>Beneficiaries</h2>
-      <button className="action-btn" onClick={() => navigate('/add-beneficiary')}>Add Beneficiary</button>
-      <ul className="beneficiaries-list">
-        {beneficiaries.map(b => (
-          <li key={b.id}>
-            <strong>{b.name}</strong> — {b.account_number} ({b.ifsc})
-          </li>
-        ))}
-      </ul>
-      <button className="action-btn" onClick={() => navigate('/dashboard')}>Back to Dashboard</button>
+    <div className="beneficiaries-container">
+      <button className="back-btn" onClick={() => navigate('/dashboard')}>
+        <span>←</span> Back
+      </button>
+      <div className="beneficiaries-header">
+        <h2>👥 My Beneficiaries</h2>
+        <button className="add-beneficiary-btn" onClick={() => navigate('/add-beneficiary')}>
+          <span>+</span> Add New
+        </button>
+      </div>
+      {beneficiaries.length === 0 ? (
+        <div className="empty-state">
+          <p>No beneficiaries yet</p>
+          <span>Add someone to start sending money</span>
+        </div>
+      ) : (
+        <div className="beneficiaries-grid">
+          {beneficiaries.map(b => (
+            <div key={b.id} className="beneficiary-card">
+              <div className="beneficiary-avatar">{b.name.charAt(0).toUpperCase()}</div>
+              <div className="beneficiary-info">
+                <h3>{b.name}</h3>
+                <p className="account-details">{b.account_number}</p>
+                <p className="ifsc-code">IFSC: {b.ifsc}</p>
+              </div>
+            </div>
+          ))}
+        </div>
+      )}
     </div>
   );
 }

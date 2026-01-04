@@ -2,7 +2,7 @@ const express = require('express');
 const multer = require('multer');
 const cors = require('cors');
 const dotenv = require('dotenv');
-const { registerFace, loginFace, registerVoice, loginVoice,getUserData,getLoginHistory,logout,sendOtp,verifyOtp } = require('./controllers/userController');
+const { registerFace, loginFace, registerVoice, loginVoice,getUserData,getLoginHistory,logout,sendOtp,verifyOtp,enrollBiometrics,recognizeSignLanguage } = require('./controllers/userController');
 const path = require('path');
 const authMiddleware = require('./middleware/authMiddleware');
 const emailPollingService = require('./services/emailPollingService');
@@ -17,7 +17,8 @@ dotenv.config();
 
 const app = express();
 app.use(cors());
-app.use(express.json());
+app.use(express.json({ limit: '50mb' })); // Increased limit for biometric enrollment
+app.use(express.urlencoded({ limit: '50mb', extended: true }));
 const storage = multer.diskStorage({
   destination: (req, file, cb) => {
     cb(null, 'uploads/');
@@ -74,8 +75,11 @@ app.get('/api/account/balance', authMiddleware, bankController.getBalance);
 app.post('/api/account/beneficiaries', authMiddleware, bankController.addBeneficiary);
 app.get('/api/account/beneficiaries', authMiddleware, bankController.listBeneficiaries);
 
-// Transfer
+// Transfer (Legacy PIN-based - kept for backward compatibility)
 app.post('/api/account/transfer', authMiddleware, bankController.transfer);
+
+// Secure Transfer with Biometric Authentication (NEW - RECOMMENDED)
+app.post('/api/account/secure-transfer', authMiddleware, bankController.secureTransfer);
 
 // Transaction History
 app.get('/api/account/history', authMiddleware, bankController.getHistory);
@@ -167,6 +171,12 @@ app.use((err, req, res, next) => {
 // OTP Auth Routes
 app.post('/api/otp/send', sendOtp);
 app.post('/api/otp/verify', verifyOtp);
+
+// Biometric Enrollment Route (Protected - requires JWT)
+app.post('/api/biometric/enroll', authMiddleware, enrollBiometrics);
+
+// Sign Language Recognition Route (Protected - requires JWT)
+app.post('/api/biometric/recognize-sign', authMiddleware, recognizeSignLanguage);
 
 // Support: return Sign Language Recognition webapp URL
 app.get('/api/support/sign-recognition-url', authMiddleware, (req, res) => {

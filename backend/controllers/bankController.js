@@ -1,6 +1,7 @@
 const pool = require('../db');
 const bcrypt = require('bcrypt');
 const razorpay = require('../razorpay');
+const biometricService = require('../services/biometricService');
 
 // 1. Set or update PIN
 exports.setPin = async (req, res) => {
@@ -186,6 +187,227 @@ exports.transfer = async (req, res) => {
   } catch (err) {
     console.error('Transfer error:', err);
     res.status(500).json({ message: 'Transfer failed.' });
+  }
+};
+
+// 6b. Secure Transfer with Biometric Authentication (REPLACES PIN-based transfer)
+exports.secureTransfer = async (req, res) => {
+  const userId = req.userId;
+  const { amount, beneficiary_id, videoFrames } = req.body;
+
+  console.log('🔐 Secure biometric transfer initiated for user ID:', userId);
+
+  // Input validation
+  if (!beneficiary_id || isNaN(Number(beneficiary_id))) {
+    return res.status(400).json({ message: 'Valid beneficiary is required.' });
+  }
+  if (!amount || isNaN(Number(amount)) || Number(amount) <= 0) {
+    return res.status(400).json({ message: 'Amount must be a positive number.' });
+  }
+  if (!videoFrames || !Array.isArray(videoFrames)) {
+    return res.status(400).json({ message: 'Video frames required for biometric authentication.' });
+  }
+  if (videoFrames.length < 20) {
+    return res.status(400).json({ message: 'Insufficient frames. Please provide at least 20 frames.' });
+  }
+
+  try {
+    // Step 1: Check if user has enrolled biometrics
+    const userCheck = await pool.query(
+      'SELECT id, username, face_biometric, hand_biometric, style_biometric FROM users WHERE id = $1',
+      [userId]
+    );
+    
+    if (userCheck.rows.length === 0) {
+      return res.status(404).json({ message: 'User not found.' });
+    }
+
+    const user = userCheck.rows[0];
+    
+    // Check if user has enrolled biometrics for transfer authentication
+    // NOTE: face_biometric is for face login, NOT for transfer auth
+    // Transfer auth uses hand_biometric and style_biometric as enrollment markers
+    if (!user.hand_biometric || !user.style_biometric) {
+      return res.status(403).json({ 
+        message: 'Biometric authentication not enrolled. Please enroll your biometrics via dashboard first.',
+        enrollmentRequired: true
+      });
+    }
+
+    console.log(`✅ User ${user.username} has biometrics enrolled for transfer authentication`);
+
+    // Step 2: Convert base64 frames to Buffers
+    const frameBuffers = biometricService.base64ArrayToBuffers(videoFrames);
+    console.log(`📹 Converted ${frameBuffers.length} frames for verification`);
+
+    // Step 3: Verify biometrics using NS-AGF (REAL FUSION: face + hand + style)
+    let verificationResult;
+    try {
+      verificationResult = await biometricService.verifyBiometrics(frameBuffers, userId);
+    } catch (verifyErr) {
+      console.error('❌ Biometric verification error:', verifyErr.message);
+      
+      // Check if NS-AGF service is not running
+      if (verifyErr.message.includes('ECONNREFUSED') || verifyErr.message.includes('not running')) {
+        return res.status(503).json({ 
+          message: 'Biometric verification service unavailable',
+          details: 'NS-AGF API is not running. Please start: python ns_agf/api_service.py',
+          serviceRequired: true
+        });
+      }
+      
+      // Log failed authentication attempt
+      await pool.query(
+        `INSERT INTO biometric_auth_log 
+         (user_id, auth_type, face_score, hand_score, style_score, fusion_score, authenticated, ip_address, user_agent)
+         VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)`,
+        [userId, 'transfer', 0, 0, 0, 0, false, req.ip, req.headers['user-agent']]
+      );
+
+      return res.status(500).json({ 
+        message: 'Biometric verification failed',
+        details: verifyErr.message
+      });
+    }
+
+    // Extract scores from NS-AGF response
+    const authenticated = verificationResult.authenticated;
+    const faceScore = verificationResult.faceScore;
+    const handScore = verificationResult.handScore;
+    const styleScore = verificationResult.styleScore;
+    const fusionScore = verificationResult.fusionScore;
+
+    console.log('🔍 Biometric scores (NS-AGF Fusion):');
+    console.log(`   👤 Face: ${faceScore.toFixed(3)}`);
+    console.log(`   ✋ Hand: ${handScore.toFixed(3)}`);
+    console.log(`   ✍️  Style: ${styleScore.toFixed(3)}`);
+    console.log(`   🔗 Fusion: ${fusionScore.toFixed(3)}`);
+
+    // Step 4: Check if authentication passed (threshold: 0.65)
+    if (!authenticated || fusionScore < 0.65) {
+      console.error('❌ Authentication failed - fusion score below threshold:', fusionScore);
+      
+      // Log failed authentication with scores
+      await pool.query(
+        `INSERT INTO biometric_auth_log 
+         (user_id, auth_type, face_score, hand_score, style_score, fusion_score, authenticated, ip_address, user_agent)
+         VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)`,
+        [userId, 'transfer', faceScore, handScore, styleScore, fusionScore, false, req.ip, req.headers['user-agent']]
+      );
+
+      return res.status(401).json({ 
+        message: 'Biometric authentication failed - insufficient match',
+        scores: { faceScore, handScore, styleScore, fusionScore },
+        threshold: 0.65
+      });
+    }
+
+    console.log('✅ Biometric authentication successful! (Face + Hand + Style Fusion)');
+
+    // Step 5: Get user account and beneficiary
+    const accountResult = await pool.query(
+      'SELECT id, balance, account_number FROM accounts WHERE user_id = $1',
+      [userId]
+    );
+    if (accountResult.rows.length === 0) {
+      return res.status(404).json({ message: 'Account not found.' });
+    }
+    const account = accountResult.rows[0];
+
+    if (parseFloat(account.balance) < parseFloat(amount)) {
+      return res.status(400).json({ message: 'Insufficient balance.' });
+    }
+
+    const beneficiaryResult = await pool.query(
+      'SELECT * FROM beneficiaries WHERE id = $1 AND user_id = $2',
+      [beneficiary_id, userId]
+    );
+    if (beneficiaryResult.rows.length === 0) {
+      return res.status(404).json({ message: 'Beneficiary not found.' });
+    }
+    const beneficiary = beneficiaryResult.rows[0];
+
+    // Step 6: Process transfer (in transaction)
+    const client = await pool.connect();
+    
+    try {
+      await client.query('BEGIN');
+
+      // Deduct from sender
+      const newBalance = parseFloat(account.balance) - parseFloat(amount);
+      await client.query(
+        'UPDATE accounts SET balance = $1 WHERE id = $2',
+        [newBalance, account.id]
+      );
+
+      // Insert transaction record
+      const transactionResult = await client.query(
+        `INSERT INTO transactions (user_id, type, amount, to_account, status, reference_id)
+         VALUES ($1, $2, $3, $4, $5, $6) RETURNING id`,
+        [userId, 'debit', amount, beneficiary.account_number, 'success', `bio_${Date.now()}`]
+      );
+      
+      const transactionId = transactionResult.rows[0].id;
+
+      // Log successful biometric authentication with transaction link
+      await client.query(
+        `INSERT INTO biometric_auth_log 
+         (user_id, auth_type, face_score, hand_score, style_score, fusion_score, authenticated, transaction_id, ip_address, user_agent)
+         VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10)`,
+        [userId, 'transfer', faceScore, handScore, styleScore, fusionScore, true, transactionId, req.ip, req.headers['user-agent']]
+      );
+
+      await client.query('COMMIT');
+
+      console.log(`✅ Transfer successful: ${amount} to ${beneficiary.name} (Account: ${beneficiary.account_number})`);
+
+      res.json({ 
+        success: true,
+        message: 'Transfer completed successfully with biometric authentication',
+        data: {
+          transactionId,
+          amount,
+          beneficiary: beneficiary.name,
+          newBalance,
+          biometricScores: {
+            face: faceScore,
+            hand: handScore,
+            style: styleScore,
+            fusion: fusionScore
+          }
+        }
+      });
+
+    } catch (transactionErr) {
+      await client.query('ROLLBACK');
+      console.error('❌ Transaction error:', transactionErr);
+      throw transactionErr;
+    } finally {
+      client.release();
+    }
+
+  } catch (err) {
+    console.error('Secure transfer error:', err);
+    
+    // Handle specific errors
+    if (err.message && err.message.includes('ECONNREFUSED')) {
+      return res.status(503).json({ 
+        message: 'Biometric service unavailable',
+        details: 'NS-AGF API service is not running. Please contact support.'
+      });
+    }
+
+    if (err.message && err.message.includes('User not enrolled')) {
+      return res.status(404).json({ 
+        message: 'Biometric authentication failed',
+        details: 'User biometrics not found in verification service'
+      });
+    }
+
+    res.status(500).json({ 
+      message: 'Transfer failed', 
+      details: err.message 
+    });
   }
 };
 

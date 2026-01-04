@@ -358,3 +358,32 @@ The project showcases advanced technical skills while addressing a real social n
 **Project Status**: ✅ **Production Ready** - All core features implemented and functional  
 **Target Users**: Deaf and hearing-impaired individuals seeking accessible banking solutions  
 **Technical Achievement**: Successful integration of banking, biometrics, and sign language AI in a cohesive system
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+Cell 1: Create folder structure
+!mkdir -p /kaggle/working/src/graph
+!mkdir -p /kaggle/working/src/model
+
+Cell 2: Paste topology.py
+%%writefile /kaggle/working/src/graph/topology.py
+# Paste entire content of topology.py here
+
+Cell 3: Paste nsagf.py
+%%writefile /kaggle/working/src/model/nsagf.py
+# Paste entire content of nsagf.py here
+
+!touch /kaggle/working/src/__init__.py
+!touch /kaggle/working/src/graph/__init__.py
+!touch /kaggle/working/src/model/__init__.py

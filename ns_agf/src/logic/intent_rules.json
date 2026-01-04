@@ -1,0 +1,163 @@
+{
+  "sign_to_intent_mapping": {
+    "Hello": "greeting",
+    "morning": "greeting",
+    "Bank": "access_bank",
+    "ATM": "access_atm",
+    "account": "check_balance",
+    "Transfer Money": "transfer",
+    "amount": "slot_amount",
+    "address": "slot_address",
+    "I": "slot_self",
+    "manager": "contact_manager",
+    "online": "access_online",
+    "Interest": "check_interest",
+    "Illegal": "alert_fraud"
+  },
+  "intents": {
+    "greeting": {
+      "required_slots": [],
+      "optional_slots": [],
+      "keywords": ["hello", "morning", "hi", "greetings"],
+      "confidence_threshold": 0.7,
+      "description": "Customer greeting",
+      "response": "Welcome to our banking service! How can I help you today?"
+    },
+    "access_bank": {
+      "required_slots": [],
+      "optional_slots": ["authentication"],
+      "keywords": ["bank", "access"],
+      "confidence_threshold": 0.75,
+      "description": "Request to access banking services",
+      "response": "Please authenticate to access your bank account"
+    },
+    "access_atm": {
+      "required_slots": [],
+      "optional_slots": ["authentication"],
+      "keywords": ["atm", "machine"],
+      "confidence_threshold": 0.75,
+      "description": "Request to access ATM services",
+      "response": "ATM services available. Please authenticate"
+    },
+    "check_balance": {
+      "required_slots": [],
+      "optional_slots": ["account_type"],
+      "keywords": ["balance", "check", "account", "money", "show"],
+      "confidence_threshold": 0.75,
+      "description": "Check account balance",
+      "response": "Your current balance is: {balance}"
+    },
+    "transfer": {
+      "required_slots": ["amount", "recipient"],
+      "optional_slots": ["account_from", "account_to"],
+      "keywords": ["transfer", "send", "money", "pay"],
+      "confidence_threshold": 0.80,
+      "description": "Transfer money to another account",
+      "safety_checks": ["amount_limit", "recipient_validation", "balance_check"],
+      "requires_confirmation": true,
+      "response": "Transfer {amount} to {recipient}. Confirm?"
+    },
+    "check_interest": {
+      "required_slots": [],
+      "optional_slots": ["account_type", "period"],
+      "keywords": ["interest", "rate", "earnings"],
+      "confidence_threshold": 0.70,
+      "description": "Check interest rates or earned interest",
+      "response": "Your current interest rate is: {rate}%"
+    },
+    "contact_manager": {
+      "required_slots": [],
+      "optional_slots": ["reason"],
+      "keywords": ["manager", "help", "support", "complaint"],
+      "confidence_threshold": 0.75,
+      "description": "Request to speak with bank manager",
+      "response": "Connecting you to a bank manager. Please wait..."
+    },
+    "access_online": {
+      "required_slots": [],
+      "optional_slots": ["authentication"],
+      "keywords": ["online", "internet", "web", "mobile"],
+      "confidence_threshold": 0.70,
+      "description": "Access online banking services",
+      "response": "Please sign in to online banking"
+    },
+    "alert_fraud": {
+      "required_slots": [],
+      "optional_slots": ["description"],
+      "keywords": ["illegal", "fraud", "suspicious", "unauthorized"],
+      "confidence_threshold": 0.85,
+      "description": "Report illegal or fraudulent activity",
+      "priority": "high",
+      "response": "Security alert logged. Manager will contact you immediately."
+    }
+  },
+  "slots": {
+    "amount": {
+      "type": "numeric",
+      "validation": {
+        "min": 1,
+        "max": 100000
+      },
+      "extraction_pattern": "numeric",
+      "prompt": "How much would you like to transfer? Please sign the amount."
+    },
+    "recipient": {
+      "type": "string",
+      "validation": {
+        "pattern": "^(ACCOUNT_|USER_|[A-Z0-9]+).*"
+      },
+      "extraction_pattern": "account_id",
+      "prompt": "Who would you like to transfer to? Please sign the account number or name."
+    },
+    "address": {
+      "type": "string",
+      "extraction_pattern": "address",
+      "prompt": "Please sign your address for verification."
+    },
+    "account_type": {
+      "type": "enum",
+      "values": ["SAVINGS", "CHECKING", "CREDIT"],
+      "prompt": "Which account? Please sign: SAVINGS, CHECKING, or CREDIT"
+    }
+  },
+  "semantic_constraints": {
+    "invalid_sequences": [
+      {
+        "sequence": ["check_balance", "transfer"],
+        "reason": "Cannot transfer immediately after balance check without specifying amount",
+        "exception": "amount_provided"
+      },
+      {
+        "sequence": ["greeting", "transfer"],
+        "reason": "Must authenticate before transferring money",
+        "exception": "authenticated"
+      }
+    ],
+    "required_authentication": [
+      "transfer",
+      "check_balance",
+      "access_online",
+      "check_interest"
+    ],
+    "required_confirmations": ["transfer"],
+    "transaction_intents": ["transfer", "check_balance", "check_interest"]
+  },
+  "confidence_thresholds": {
+    "transfer": 0.80,
+    "alert_fraud": 0.85,
+    "check_balance": 0.75,
+    "access_bank": 0.75,
+    "access_atm": 0.75,
+    "contact_manager": 0.75,
+    "check_interest": 0.70,
+    "access_online": 0.70,
+    "greeting": 0.70
+  },
+  "safety_rules": {
+    "max_transfer_amount": 100000,
+    "daily_transaction_limit": 500000,
+    "max_attempts_per_day": 5,
+    "fraud_alert_threshold": 3,
+    "require_two_factor_above": 50000
+  }
+}

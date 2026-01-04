@@ -1,4 +1,228 @@
-@import '../index.css';
+/* Add Money Container */
+.add-money-container {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  background: radial-gradient(circle at 50% 10%, #ffffff, var(--color-bg) 55%, var(--color-bg-alt));
+  padding: 2rem;
+  position: relative;
+  overflow: hidden;
+}
 
-.container { margin: 0 auto; padding: var(--space-8) var(--space-6); max-width: 680px; }
-.container input { margin-right: var(--space-3); max-width: 240px; }
+/* Floating Background Elements */
+.add-money-container::before {
+  content: '';
+  position: absolute;
+  width: 500px;
+  height: 500px;
+  background: var(--gradient-primary);
+  opacity: 0.05;
+  border-radius: 50%;
+  top: -200px;
+  left: -100px;
+  animation: float 7s ease-in-out infinite;
+}
+
+.add-money-container::after {
+  content: '';
+  position: absolute;
+  width: 400px;
+  height: 400px;
+  background: var(--gradient-primary);
+  opacity: 0.05;
+  border-radius: 50%;
+  bottom: -150px;
+  right: -100px;
+  animation: float 9s ease-in-out infinite;
+}
+
+@keyframes float {
+  0%, 100% { transform: translateY(0) rotate(0deg); }
+  50% { transform: translateY(-20px) rotate(5deg); }
+}
+
+/* Back Button */
+.back-btn {
+  position: absolute;
+  top: 2rem;
+  left: 2rem;
+  padding: 0.75rem 1.5rem;
+  background: white;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-pill);
+  color: var(--color-text);
+  font-weight: 600;
+  cursor: pointer;
+  transition: var(--transition);
+  box-shadow: var(--shadow-sm);
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  z-index: 10;
+}
+
+.back-btn:hover {
+  background: var(--gradient-primary);
+  color: white;
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-glow-primary);
+}
+
+.back-btn span {
+  font-size: 1.2rem;
+}
+
+/* Add Money Card */
+.add-money-card {
+  background: white;
+  padding: 3rem;
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-lg);
+  width: 100%;
+  max-width: 480px;
+  border: 1px solid var(--color-border);
+  position: relative;
+  z-index: 1;
+  animation: slideUp 0.5s ease;
+}
+
+@keyframes slideUp {
+  from {
+    opacity: 0;
+    transform: translateY(30px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.add-money-card h2 {
+  color: var(--color-text);
+  font-size: 2rem;
+  margin-bottom: 0.5rem;
+  text-align: center;
+  font-weight: 700;
+}
+
+.subtitle {
+  color: var(--color-text-soft);
+  text-align: center;
+  margin-bottom: 2rem;
+  font-size: var(--text-sm);
+}
+
+/* Amount Input Group */
+.amount-input-group {
+  position: relative;
+  margin-bottom: 2rem;
+}
+
+.currency-symbol {
+  position: absolute;
+  left: 1.5rem;
+  top: 50%;
+  transform: translateY(-50%);
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: var(--color-primary);
+  z-index: 2;
+}
+
+.amount-input-group input {
+  width: 100%;
+  padding: 1.25rem 1.5rem 1.25rem 3rem;
+  border: 2px solid var(--color-border);
+  border-radius: var(--radius);
+  font-size: 1.5rem;
+  font-weight: 600;
+  background: var(--color-surface);
+  transition: var(--transition);
+  outline: none;
+  color: var(--color-text);
+}
+
+.amount-input-group input:focus {
+  border-color: var(--color-primary);
+  box-shadow: 0 0 0 3px var(--color-primary-glow);
+  transform: translateY(-2px);
+}
+
+.amount-input-group input::placeholder {
+  color: var(--color-text-soft);
+  font-weight: 500;
+}
+
+.amount-input-group input:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+/* Add Money Button */
+.add-money-btn {
+  width: 100%;
+  padding: 1.25rem;
+  background: var(--gradient-primary);
+  color: white;
+  border: none;
+  border-radius: var(--radius-pill);
+  font-size: var(--text-base);
+  font-weight: 700;
+  letter-spacing: 0.5px;
+  cursor: pointer;
+  transition: var(--transition);
+  box-shadow: var(--shadow-glow-primary);
+  position: relative;
+  overflow: hidden;
+}
+
+.add-money-btn::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(90deg, transparent, rgba(255,255,255,0.3), transparent);
+  transition: var(--transition-slow);
+}
+
+.add-money-btn:hover::before {
+  left: 100%;
+}
+
+.add-money-btn:hover:not(:disabled) {
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-glow-primary), var(--shadow-lg);
+}
+
+.add-money-btn:disabled {
+  opacity: 0.7;
+  cursor: not-allowed;
+  transform: none;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+  .add-money-card {
+    padding: 2rem;
+    max-width: 100%;
+  }
+
+  .add-money-card h2 {
+    font-size: 1.75rem;
+  }
+
+  .back-btn {
+    top: 1rem;
+    left: 1rem;
+    padding: 0.5rem 1rem;
+    font-size: 0.9rem;
+  }
+
+  .amount-input-group input {
+    font-size: 1.25rem;
+  }
+}

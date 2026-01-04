@@ -31,7 +31,7 @@ uploads/
 python_service/__pycache__/
 frontend/build/
 backend/uploads/
-
+ns_agf/models/ns_agcn.pth
 # Sign Language Project specific
 # Trained models (keep the final ones but ignore temporary/test models)
 *.pkl
@@ -91,3 +91,6 @@ temp/
 
 
 Sign/slm_model_cache/
+
+python_service/pretrained_models/speaker_verification/embedding_model.ckpt
+ns_agf/models/ns_agcn.pth

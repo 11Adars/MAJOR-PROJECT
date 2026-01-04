@@ -1,6 +1,6 @@
 import React from 'react';
 import './QuickActions.css';
-import { FaUserFriends, FaMoneyCheckAlt, FaHistory, FaHeadset, FaTicketAlt } from 'react-icons/fa';
+import { FaUserFriends, FaMoneyCheckAlt, FaHistory, FaHeadset, FaTicketAlt, FaFingerprint } from 'react-icons/fa';
 import { useNavigate } from 'react-router-dom';
 
 function QuickActions() {
@@ -17,6 +17,9 @@ function QuickActions() {
 			</button>
 			<button className="action-btn" onClick={() => navigate('/transfer')}>
 				<FaMoneyCheckAlt /> Transfer Money
+			</button>
+			<button className="action-btn biometric-btn" onClick={() => navigate('/biometric-enrollment')}>
+				<FaFingerprint /> Enroll Biometrics
 			</button>
 			<button className="action-btn" onClick={() => navigate('/history')}>
 				<FaHistory /> Transaction History

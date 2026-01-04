@@ -1,261 +1,146 @@
-import React, { useRef, useState, useEffect } from 'react';
-import { audioConfig, processAudio } from '../utils/audioUtils';
+import React, { useRef, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import Webcam from 'react-webcam';
 import axios from 'axios';
 import './Login.css';
 
-function Login({ mode }) {
-  // State management
+function Login() {
+  const navigate = useNavigate();
+  
+  // Form states
   const [username, setUsername] = useState('');
   const [message, setMessage] = useState('');
   const [isLoading, setIsLoading] = useState(false);
-  const [loginMode, setLoginMode] = useState(mode || 'face');
 
   // Face login states
   const webcamRef = useRef(null);
   const [capturedImage, setCapturedImage] = useState(null);
 
-  // Voice login states
-  const [recording, setRecording] = useState(false);
-  const [audioBlob, setAudioBlob] = useState(null);
-  const [audioURL, setAudioURL] = useState('');
-  const mediaRecorderRef = useRef(null);
-  const audioChunksRef = useRef([]);
-
-  // Cleanup effect
-  useEffect(() => {
-    return () => {
-      if (audioURL) {
-        URL.revokeObjectURL(audioURL);
-      }
-      if (mediaRecorderRef.current && recording) {
-        mediaRecorderRef.current.stop();
-      }
-    };
-  }, [audioURL, recording]);
-
-  // Face login handlers
-  const capture = () => {
-    const imageSrc = webcamRef.current.getScreenshot();
-    setCapturedImage(imageSrc);
-    setMessage('');
-  };
-
-  // Voice login handlers.
-
-const startRecording = async () => {
-  try {
-    console.log('Starting audio recording...');
-    const stream = await navigator.mediaDevices.getUserMedia({ 
-      audio: {
-        channelCount: audioConfig.channelCount,
-        sampleRate: audioConfig.sampleRate,
-        sampleSize: audioConfig.bitsPerSample,
-        echoCancellation: true,
-        noiseSuppression: true,
-        autoGainControl: true
-      } 
-    });
-    
-    audioChunksRef.current = [];
-    const mediaRecorder = new MediaRecorder(stream, {
-      mimeType: 'audio/webm;codecs=opus',
-      audioBitsPerSecond: 128000
-    });
-    
-    mediaRecorderRef.current = mediaRecorder;
-    
-    mediaRecorder.ondataavailable = (e) => {
-      if (e.data.size > 0) {
-        audioChunksRef.current.push(e.data);
-      }
-    };
-
-    mediaRecorder.onstop = async () => {
-      try {
-        if (audioChunksRef.current.length === 0) {
-          throw new Error('No audio data recorded');
-        }
-
-        const audioBlob = new Blob(audioChunksRef.current, { type: 'audio/webm' });
-        const wavBlob = await processAudio(audioBlob);
-        
-        setAudioBlob(wavBlob);
-        const url = URL.createObjectURL(wavBlob);
-        setAudioURL(url);
-
-      } catch (err) {
-        console.error('Audio processing error:', err);
-        setMessage('Error processing audio: ' + err.message);
-      } finally {
-        stream.getTracks().forEach(track => track.stop());
-      }
-    };
-
-    mediaRecorder.start(100);
-    setRecording(true);
-    setMessage('Recording in progress...');
-
-    // Record for 3 seconds
-    setTimeout(() => {
-      if (mediaRecorderRef.current && recording) {
-        mediaRecorderRef.current.stop();
-        setRecording(false);
-      }
-    }, 3000); // Changed from 9000 to 3000 ms
-
-  } catch (err) {
-    console.error('Recording initialization error:', err);
-    setMessage('Error accessing microphone: ' + err.message);
-  }
-};
-
-  const stopRecording = () => {
-    if (mediaRecorderRef.current && recording) {
-      mediaRecorderRef.current.stop();
-      setRecording(false);
+  // Capture face photo
+  const captureFace = () => {
+    if (webcamRef.current) {
+      const imageSrc = webcamRef.current.getScreenshot();
+      setCapturedImage(imageSrc);
+      setMessage('✅ Face photo captured');
     }
   };
 
-  
   // Form validation
-  const validateInput = () => {
+  const validateForm = () => {
     if (!username.trim()) {
-      setMessage('Username is required');
+      setMessage('❌ Username is required');
+      return false;
+    }
+    if (!capturedImage) {
+      setMessage('❌ Please capture your face photo');
       return false;
     }
     return true;
   };
 
-  // Login handler
+  // Login with face + password
   const loginUser = async () => {
-    if (!validateInput()) return;
+    if (!validateForm()) return;
 
     setIsLoading(true);
-    setMessage('');
+    setMessage('📤 Logging in...');
 
     try {
+      // Convert base64 image to blob
+      const blob = await (await fetch(capturedImage)).blob();
+      
+      // Create FormData
       const formData = new FormData();
       formData.append('username', username);
+      formData.append('image', new File([blob], 'face.jpg', { type: 'image/jpeg' }));
 
-      if (loginMode === 'face') {
-        if (!capturedImage) {
-          setMessage('Please capture an image first');
-          return;
+      // Login with backend
+      const response = await axios.post(
+        'http://localhost:5000/api/login',
+        formData,
+        {
+          headers: { 'Content-Type': 'multipart/form-data' }
         }
+      );
 
-        const blob = await (await fetch(capturedImage)).blob();
-        formData.append('image', new File([blob], 'face.jpg', { type: 'image/jpeg' }));
+      const { token } = response.data;
+      localStorage.setItem('token', token);
+      
+      setMessage('✅ Login successful! Redirecting...');
+      setTimeout(() => {
+        navigate('/dashboard');
+      }, 1000);
 
-        const res = await axios.post('http://127.0.0.1:5000/api/login', formData, {
-          headers: {
-            'Content-Type': 'multipart/form-data'
-          }
-        });
-
-        localStorage.setItem('token', res.data.token);
-        setMessage('Login successful!');
-        window.location.href = '/dashboard';
-      } else {
-        if (!audioBlob) {
-          setMessage('Please record your voice first');
-          return;
-        }
-
-        formData.append('audio', new File([audioBlob], 'voice.wav', { type: 'audio/wav' }));
-
-        const res = await axios.post('http://127.0.0.1:5000/api/voice/login', formData, {
-          headers: {
-            'Content-Type': 'multipart/form-data'
-          }
-        });
-
-        localStorage.setItem('token', res.data.token);
-        setMessage('Login successful!');
-        window.location.href = '/dashboard';
-      }
     } catch (err) {
       console.error('Login error:', err);
-      setMessage(err.response?.data?.error || 'Login failed: Invalid credentials');
-    } finally {
+      const errorMsg = err.response?.data?.error || 'Login failed';
+      setMessage(`❌ ${errorMsg}`);
       setIsLoading(false);
     }
   };
 
   return (
     <div className="login-container">
-      <h2>Login</h2>
+      <button className="back-btn" onClick={() => navigate('/')}>
+        <span>←</span> Back to Home
+      </button>
       
-      <div className="login-mode-buttons">
-        <button 
-          onClick={() => setLoginMode('face')}
-          className={loginMode === 'face' ? 'active' : ''}
+      <h1>🔐 Login</h1>
+      
+      <div className="form-section">
+        <input 
+          type="text"
+          placeholder="Username" 
+          value={username} 
+          onChange={(e) => setUsername(e.target.value)}
           disabled={isLoading}
-        >
-          Face Login
-        </button>
-        <button 
-          onClick={() => setLoginMode('voice')}
-          className={loginMode === 'voice' ? 'active' : ''}
-          disabled={isLoading}
-        >
-          Voice Login
-        </button>
+          required
+        />
       </div>
       
-      <input 
-        placeholder="Username" 
-        value={username} 
-        onChange={(e) => setUsername(e.target.value)}
-        disabled={isLoading}
-      />
-      
-      {loginMode === 'face' ? (
-        <div className="face-login">
-          <Webcam ref={webcamRef} screenshotFormat="image/jpeg" />
-          <button onClick={capture} disabled={isLoading}>
-            Capture
-          </button>
-          {capturedImage && (
-            <img src={capturedImage} alt="Captured" className="captured-image" />
-          )}
+      <div className="face-section">
+        <h3>📸 Capture Face Photo</h3>
+        <div className="webcam-container">
+          <Webcam 
+            ref={webcamRef} 
+            screenshotFormat="image/jpeg"
+            className="webcam-preview"
+          />
         </div>
-      ) : (
-        <div className="voice-login">
-          <button 
-            onClick={startRecording} 
-            disabled={recording || isLoading}
-          >
-            Start Recording
-          </button>
-          <button 
-            onClick={stopRecording} 
-            disabled={!recording || isLoading}
-          >
-            Stop Recording
-          </button>
-          {audioURL && (
-            <div className="audio-preview">
-              <p>Recorded Audio:</p>
-              <audio controls src={audioURL}></audio>
-            </div>
-          )}
-        </div>
-      )}
+        
+        <button 
+          onClick={captureFace} 
+          disabled={isLoading}
+          className="capture-btn"
+        >
+          📷 Capture Face
+        </button>
+        
+        {capturedImage && (
+          <div className="captured-preview">
+            <img src={capturedImage} alt="Captured Face" />
+            <p>✅ Face captured successfully</p>
+          </div>
+        )}
+      </div>
       
       {message && (
-        <p className={message.includes('successful') ? 'success' : 'error'}>
+        <div className={`message ${message.includes('✅') ? 'success' : 'error'}`}>
           {message}
-        </p>
+        </div>
       )}
       
       <button 
         onClick={loginUser} 
-        disabled={isLoading}
+        disabled={isLoading || !capturedImage}
         className="login-button"
       >
-        {isLoading ? 'Logging in...' : 'Login'}
+        {isLoading ? '🔄 Logging in...' : '🚀 Login'}
       </button>
+      
+      <p className="register-link">
+        Don't have an account? <span onClick={() => navigate('/register')}>Register here</span>
+      </p>
     </div>
   );
 }
