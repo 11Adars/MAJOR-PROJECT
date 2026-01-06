@@ -289,6 +289,8 @@ function Dashboard() {
   const [balance, setBalance] = useState(null);
   const [transactions, setTransactions] = useState([]);
   const [bankLoading, setBankLoading] = useState(true);
+  const [biometricEnrolled, setBiometricEnrolled] = useState(false);
+  const [showEnrollmentBanner, setShowEnrollmentBanner] = useState(false);
   const [stats, setStats] = useState({
     monthlySpent: 0,
     monthlyReceived: 0,
@@ -367,6 +369,13 @@ function Dashboard() {
           throw new Error('No user data received');
         }
         setUserData(userResponse.data);
+
+        // Check biometric enrollment status
+        const biometricStatus = userResponse.data.biometric_enrolled || 
+                                userResponse.data.biometricEnrolled ||
+                                false;
+        setBiometricEnrolled(biometricStatus);
+        setShowEnrollmentBanner(!biometricStatus);
 
         // Fetch login history (handle potential 404)
         let loginHistoryData = [];
@@ -644,6 +653,38 @@ function Dashboard() {
             })}
           </div>
         </section>
+
+        {/* Biometric Enrollment Banner */}
+        {showEnrollmentBanner && (
+          <section className="enrollment-banner">
+            <div className="banner-content">
+              <div className="banner-icon">
+                <FaShieldAlt size={40} />
+              </div>
+              <div className="banner-text">
+                <h3>🔐 Secure Your Transfers with Biometric Authentication</h3>
+                <p>
+                  Enroll your biometrics (face + hand + behavioral style) to enable 
+                  PIN-free secure transfers with our advanced multi-modal authentication system.
+                </p>
+              </div>
+              <div className="banner-actions">
+                <button 
+                  className="btn-enroll"
+                  onClick={() => navigate('/biometric-enrollment')}
+                >
+                  Enroll Now <FaChevronRight />
+                </button>
+                <button 
+                  className="btn-dismiss"
+                  onClick={() => setShowEnrollmentBanner(false)}
+                >
+                  Maybe Later
+                </button>
+              </div>
+            </div>
+          </section>
+        )}
 
         {/* Stats Overview */}
         <section className="stats-overview">

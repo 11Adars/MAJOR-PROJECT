@@ -9,6 +9,11 @@ CREATE TABLE IF NOT EXISTS support_tickets (
     query_text TEXT NOT NULL,
     query_source VARCHAR(50) DEFAULT 'sign_language',
     status VARCHAR(50) DEFAULT 'pending',
+    -- Sign language specific columns
+    sign_recognized VARCHAR(255),
+    intent_detected VARCHAR(100),
+    slm_used BOOLEAN DEFAULT FALSE,
+    confidence_score DECIMAL(3, 2),
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );

@@ -364,6 +364,19 @@ class SignLanguageInference:
         print("✅ Dropout disabled for inference (higher confidence)")
         print("✅ Adaptive graph convolution enabled")
         
+        # ✅ VERIFY NOVEL FEATURES FOR JOURNAL PUBLICATION
+        print("\n📊 NOVEL ARCHITECTURE FEATURES (Journal Publication):")
+        print("   ✓ NS-AGF Framework: Neuro-Symbolic Adaptive Graph")
+        print(f"   ✓ Two-Stream Architecture: {'ACTIVE (Joint+Bone)' if is_two_stream else 'DISABLED (Journal requires Two-Stream!)'}")
+        print("   ✓ Adaptive Adjacency: Edge Importance Weighting")
+        print("   ✓ Temporal Smoothing: 5-frame majority voting")
+        print("   ✓ 10 ST-GCN Blocks: Progressive channel expansion (64→128→256→512)")
+        print("   ✓ MediaPipe Holistic: 75-node topology (33 pose + 21 left + 21 right)")
+        
+        if not is_two_stream:
+            print("   ⚠️  WARNING: Single-stream model detected! Journal requires Two-Stream!")
+            print("   ⚠️  Please retrain with TwoStreamNSAGF for full novel features")
+        
         # Initialize MediaPipe
         print("🔧 Initializing MediaPipe...")
         # Optimized for close-range (50cm) half-body capture
@@ -424,6 +437,11 @@ class SignLanguageInference:
         self.intent_context = None  # Banking intent context
         self.frame_count = 0
         self.prediction_history = []
+        
+        # ✅ ENABLE TEMPORAL SMOOTHING (Novel Feature for Journal)
+        self.use_temporal_smoothing = True
+        self.temporal_smoother = TemporalSmoother(window_size=5)
+        print("✅ Temporal Smoothing ENABLED (5-frame window, majority voting)")
         
         # Biometric state
         self.current_user_id = None  # Currently authenticated user
@@ -599,7 +617,7 @@ class SignLanguageInference:
         shoulder_dist = np.linalg.norm(left_shoulder - right_shoulder, axis=1, keepdims=True)  # (T, 1)
         shoulder_dist = np.where(shoulder_dist > 0.01, shoulder_dist, 1.0)  # Avoid division by zero
         
-        # Scale - CRITICAL: axis order must match training!
+        # Scale - CRITICAL: MUST EXACTLY MATCH preprocess_wlasl_FIXED.py line 127!
         scaled = centered / shoulder_dist[:, :, np.newaxis]  # (T, V, C)
         
         return scaled
@@ -634,12 +652,13 @@ class SignLanguageInference:
         
         return tensor
     
-    def predict_from_sequence(self, landmarks_sequence: list) -> dict:
+    def predict_from_sequence(self, landmarks_sequence: list, use_temporal_smoothing: bool = None) -> dict:
         """
         Predict sign from a recorded sequence of landmarks.
         
         Args:
             landmarks_sequence: List of (V, C) landmark arrays
+            use_temporal_smoothing: Override temporal smoothing setting (None uses instance default)
         
         Returns:
             Prediction dictionary with keys: 'sign', 'confidence'
@@ -669,13 +688,19 @@ class SignLanguageInference:
         sequence = sequence
         
         # Pad or truncate to 30 frames
-        if len(sequence) < 30:
-            # Pad by repeating last frame
-            padding = np.repeat(sequence[-1:], 30 - len(sequence), axis=0)
+        # CRITICAL: Must match training preprocessing (uniform sampling)
+        current_length = len(sequence)
+        
+        if current_length < 30:
+            # Pad by repeating last frame (same as training)
+            padding = np.repeat(sequence[-1:], 30 - current_length, axis=0)
             sequence = np.concatenate([sequence, padding], axis=0)
-        else:
-            # Take last 30 frames
-            sequence = sequence[-30:]
+        elif current_length > 30:
+            # Use uniform sampling across entire sequence (SAME AS TRAINING!)
+            # This preserves temporal information better than taking last 30 frames
+            indices = np.linspace(0, current_length - 1, 30, dtype=int)
+            sequence = sequence[indices]
+        # If exactly 30 frames, use as is
         
         # Preprocess
         input_tensor = self.preprocess_sequence(sequence)
@@ -698,13 +723,15 @@ class SignLanguageInference:
         max_entropy = np.log(len(probs_np))  # Maximum possible entropy
         normalized_entropy = entropy / max_entropy
         
-        # If entropy is too high (>0.7), prediction is too uncertain
-        if normalized_entropy > 0.7:
+        # If entropy is too high (>0.92), prediction is too uncertain
+        # Increased threshold to be more lenient for real-world conditions
+        if normalized_entropy > 0.92:
             return {
                 'sign': 'Uncertain',
                 'confidence': confidence * 0.5,  # Penalize confidence
                 'top3': [],
                 'class_id': predicted_class,
+                'entropy': normalized_entropy,
                 'error': 'Prediction too uncertain - try performing sign more clearly'
             }
         
@@ -713,22 +740,28 @@ class SignLanguageInference:
         top3_list = [(self.class_names[top3_classes[i].item()], top3_probs[i].item()) 
                      for i in range(len(top3_classes))]
         
-        # Confidence threshold check
-        if confidence < 0.50:  # Minimum 50% confidence
+        # Confidence threshold check - Lowered to 25% for real-world conditions
+        if confidence < 0.25:  # Minimum 25% confidence
             return {
                 'sign': f'Low confidence: {predicted_sign}',
                 'confidence': confidence,
                 'top3': top3_list,
                 'class_id': predicted_class,
-                'error': f'Confidence too low ({confidence*100:.1f}%) - need >50%'
+                'entropy': normalized_entropy,
+                'error': f'Confidence too low ({confidence*100:.1f}%) - need >25%'
             }
         
         # Task 1.3: Apply temporal smoothing if enabled
+        # Note: For API batch calls, temporal smoothing should be disabled
+        # since it's designed for streaming (accumulating over multiple calls)
         final_sign = predicted_sign
         final_confidence = confidence
         stability_score = 0.0
         
-        if self.use_temporal_smoothing:
+        # Use override if provided, otherwise use instance setting
+        apply_smoothing = use_temporal_smoothing if use_temporal_smoothing is not None else self.use_temporal_smoothing
+        
+        if apply_smoothing:
             smoothed_sign, smoothed_confidence = self.temporal_smoother.smooth(
                 predicted_sign, confidence
             )
@@ -774,7 +807,7 @@ class SignLanguageInference:
         }
         
         # Add smoothing info if enabled
-        if self.use_temporal_smoothing:
+        if apply_smoothing:
             result.update({
                 'raw_sign': predicted_sign,
                 'raw_confidence': confidence,

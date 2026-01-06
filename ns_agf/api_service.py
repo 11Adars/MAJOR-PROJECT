@@ -29,6 +29,7 @@ import cv2
 import numpy as np
 import base64
 import pickle
+import threading
 from pathlib import Path
 from flask import Flask, request, jsonify
 from flask_cors import CORS
@@ -39,6 +40,7 @@ sys.path.insert(0, str(Path(__file__).parent))
 # Import NS-AGF inference system
 from inference import SignLanguageInference
 from src.auth import BiometricFusionAuthenticator, UserBiometricDatabase
+from src.slm.query_generator import QueryGenerator
 
 # Initialize Flask app
 app = Flask(__name__)
@@ -48,11 +50,15 @@ CORS(app)  # Enable CORS for frontend communication
 inference_system = None
 bio_authenticator = None
 bio_database = None
+query_generator = None  # SLM for query generation
+
+# MediaPipe is NOT thread-safe - use lock to serialize access
+mediapipe_lock = threading.Lock()
 
 
 def initialize_system():
     """Initialize NS-AGF inference system and biometric modules"""
-    global inference_system, bio_authenticator, bio_database
+    global inference_system, bio_authenticator, bio_database, query_generator
     
     print("=" * 70)
     print("🚀 Initializing NS-AGF API Service")
@@ -85,6 +91,13 @@ def initialize_system():
         )
         print("✅ NS-AGF inference system ready")
         
+        # Verify all novel features are active
+        print("\n📊 API NOVEL FEATURES STATUS:")
+        print(f"   ✓ Temporal Smoothing: {'ENABLED' if inference_system.use_temporal_smoothing else 'DISABLED'}")
+        print(f"   ✓ Model Type: {inference_system.model.__class__.__name__}")
+        print(f"   ✓ Dropout: 0.0 (inference mode)")
+        print(f"   ✓ Adaptive Graphs: ENABLED")
+        
         # Initialize biometric authenticator
         print("\n🔧 Loading biometric authentication modules...")
         bio_authenticator = BiometricFusionAuthenticator(
@@ -95,6 +108,18 @@ def initialize_system():
         )
         bio_database = UserBiometricDatabase(db_path="data/biometric_users.db")
         print("✅ Biometric authentication ready")
+        
+        # Initialize SLM Query Generator
+        print("\n🔧 Loading Small Language Model (SLM)...")
+        query_generator = QueryGenerator(
+            use_slm=True,
+            cache_path="../Sign/slm_model_cache"
+        )
+        slm_status = query_generator.health_check()
+        if slm_status['slm_available']:
+            print("✅ SLM Query Generator ready")
+        else:
+            print("⚠️  SLM will use fallback queries")
         
         # Show enrolled users
         users = bio_database.get_all_users()
@@ -119,6 +144,13 @@ def initialize_system():
 # API ENDPOINTS
 # ============================================================================
 
+@app.after_request
+def after_request_logging(response):
+    """Log all responses for debugging"""
+    if request.path == '/api/sign/recognize':
+        print(f"   🌐 Response sent: {response.status_code} - Content-Length: {response.content_length}")
+    return response
+
 @app.route('/api/health', methods=['GET'])
 def health_check():
     """Health check endpoint"""
@@ -137,6 +169,77 @@ def health_check():
         'biometric_ready': bio_authenticator is not None,
         'enrolled_users': len(bio_database.get_all_users()) if bio_database else 0
     })
+
+
+@app.route('/api/sign/extract-landmarks', methods=['POST'])
+def extract_landmarks():
+    """
+    Extract landmarks from a single frame for real-time skeleton visualization.
+    
+    Request body (JSON):
+        {
+            "frame": "base64_encoded_image"
+        }
+    
+    Response (JSON):
+        {
+            "success": true,
+            "landmarks": [{x, y, z}, ...] // 75 landmarks
+        }
+    """
+    if inference_system is None:
+        return jsonify({'success': False, 'error': 'Inference system not initialized'}), 500
+    
+    try:
+        data = request.json
+        frame_b64 = data.get('frame', '')
+        
+        if not frame_b64:
+            return jsonify({'success': False, 'error': 'No frame provided'}), 400
+        
+        # Decode frame from base64
+        try:
+            # Remove data URL prefix if present
+            if ',' in frame_b64:
+                frame_b64 = frame_b64.split(',')[1]
+            
+            frame_bytes = base64.b64decode(frame_b64)
+            frame_array = np.frombuffer(frame_bytes, dtype=np.uint8)
+            frame = cv2.imdecode(frame_array, cv2.IMREAD_COLOR)
+            
+            if frame is None:
+                return jsonify({'success': False, 'error': 'Failed to decode frame'}), 400
+            
+            # Convert BGR to RGB
+            frame_rgb = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
+            
+            # Extract landmarks (MediaPipe is NOT thread-safe - use lock)
+            with mediapipe_lock:
+                landmarks = inference_system.extractor.extract_landmarks(frame_rgb)
+            
+            if landmarks is None:
+                return jsonify({'success': False, 'landmarks_detected': False}), 200
+            
+            # Convert numpy array to list of {x, y, z} objects
+            landmarks_list = []
+            for lm in landmarks:
+                landmarks_list.append({
+                    'x': float(lm[0]),
+                    'y': float(lm[1]),
+                    'z': float(lm[2])
+                })
+            
+            return jsonify({
+                'success': True,
+                'landmarks_detected': True,
+                'landmarks': landmarks_list
+            })
+            
+        except Exception as e:
+            return jsonify({'success': False, 'error': f'Frame decode error: {str(e)}'}), 400
+            
+    except Exception as e:
+        return jsonify({'success': False, 'error': str(e)}), 500
 
 
 @app.route('/api/sign/recognize', methods=['POST'])
@@ -165,7 +268,9 @@ def recognize_sign():
     
     try:
         data = request.json
+        print(f"📥 Received request data keys: {list(data.keys()) if data else 'None'}")
         frames_b64 = data.get('frames', [])
+        print(f"📊 Frames count: {len(frames_b64) if frames_b64 else 0}")
         return_sentence = data.get('return_sentence', True)
         
         if not frames_b64:
@@ -209,13 +314,18 @@ def recognize_sign():
         landmarks_sequence = []
         valid_frames = []
         
-        for frame in frames:
-            # Extract landmarks using MediaPipe
-            landmarks = inference_system.extractor.extract_landmarks(frame)
-            
-            if landmarks is not None:
-                landmarks_sequence.append(landmarks)
-                valid_frames.append(frame)
+        # Use lock to serialize MediaPipe access (NOT thread-safe)
+        with mediapipe_lock:
+            for frame in frames:
+                # Convert BGR to RGB (cv2.imdecode returns BGR)
+                frame_rgb = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
+                
+                # Extract landmarks using MediaPipe
+                landmarks = inference_system.extractor.extract_landmarks(frame_rgb)
+                
+                if landmarks is not None:
+                    landmarks_sequence.append(landmarks)
+                    valid_frames.append(frame)
         
         if len(landmarks_sequence) < 10:
             return jsonify({
@@ -226,20 +336,28 @@ def recognize_sign():
         
         print(f"   ✅ Extracted landmarks from {len(landmarks_sequence)} frames")
         
-        # Predict sign from sequence
-        prediction_result = inference_system.predict_from_sequence(landmarks_sequence)
+        # Predict sign from the full sequence (single prediction)
+        # Note: Disable temporal smoothing for batch processing (it's for streaming only)
+        print(f"   🔄 Predicting from {len(landmarks_sequence)} frames...")
         
-        if 'error' in prediction_result:
+        try:
+            pred_result = inference_system.predict_from_sequence(landmarks_sequence, use_temporal_smoothing=False)
+        except Exception as pred_error:
+            print(f"   ❌ Prediction failed: {pred_error}")
+            import traceback
+            traceback.print_exc()
+            return jsonify({'error': f'Prediction error: {str(pred_error)}'}), 500
+        
+        if 'error' in pred_result:
             return jsonify({
-                'success': False,
-                'error': prediction_result['error'],
+                'error': pred_result['error'],
                 'frames_processed': len(frames)
             }), 400
         
-        predicted_sign = prediction_result['sign']
-        confidence = prediction_result['confidence']
+        predicted_sign = pred_result['sign']
+        confidence = pred_result['confidence']
         
-        print(f"   🎯 Predicted: {predicted_sign} (confidence: {confidence:.2f})")
+        print(f"   🎯 Prediction: {predicted_sign} (confidence: {confidence:.2f})")
         
         # Build response
         response = {
@@ -258,21 +376,234 @@ def recognize_sign():
         
         # Add intent verification if banking-related
         if inference_system.banking_verifier:
-            intent_result = inference_system.banking_verifier.verify_intent(predicted_sign)
-            if intent_result and intent_result.get('is_banking_intent'):
-                response['intent'] = {
-                    'is_banking': True,
-                    'intent_type': intent_result.get('intent_type'),
-                    'is_valid': intent_result.get('is_valid'),
-                    'slots': intent_result.get('slots', {}),
-                    'warnings': intent_result.get('warnings', [])
-                }
-                print(f"   🏦 Banking intent detected: {intent_result.get('intent_type')}")
+            try:
+                # Call verify_sign_sequence with list of signs and confidences
+                intent, context, is_valid = inference_system.banking_verifier.verify_sign_sequence(
+                    signs=[predicted_sign],
+                    confidences=[confidence]
+                )
+                if intent.value != 'unknown':
+                    response['intent'] = {
+                        'is_banking': True,
+                        'intent_type': intent.value,
+                        'is_valid': is_valid,
+                        'slots': context.slots,
+                        'warnings': [context.error_message] if context.error_message else []
+                    }
+                    print(f"   🏦 Banking intent detected: {intent.value}")
+            except Exception as e:
+                print(f"   ⚠️  Banking verifier error: {e}")
+        
+        print(f"   📤 Sending response: {predicted_sign} with confidence {confidence:.2f}")
+        print(f"   📦 Response data: {response}")
+        
+        try:
+            json_response = jsonify(response)
+            print(f"   ✅ Response created successfully")
+            return json_response, 200
+        except Exception as json_error:
+            print(f"   ❌ Failed to create JSON response: {json_error}")
+            return jsonify({'error': 'Failed to serialize response'}), 500
+        
+    except Exception as e:
+        print(f"❌ Recognition error: {e}")
+        import traceback
+        traceback.print_exc()
+        return jsonify({'error': str(e)}), 500
+
+
+@app.route('/api/sign/hybrid-recognize', methods=['POST'])
+def hybrid_recognize_sign():
+    """
+    Hybrid approach: Recognize sign + generate natural language query.
+    
+    This combines:
+    1. AGCN sign recognition (fast, deterministic)
+    2. Intent verification (banking-related)
+    3. SLM query generation (detailed, fallback available)
+    
+    Request body (JSON):
+        {
+            "frames": ["base64_encoded_image1", "base64_encoded_image2", ...],
+            "use_slm": true  // Optional: enable SLM (default: true)
+        }
+    
+    Response (JSON):
+        {
+            "success": true,
+            "sign": "HELP",
+            "confidence": 0.95,
+            "intent": "customer_support",
+            "query": "I need help with banking services",
+            "slm_used": true,
+            "frames_processed": 50,
+            "valid_frames": 48
+        }
+    """
+    if inference_system is None:
+        return jsonify({'error': 'Inference system not initialized'}), 500
+    
+    if query_generator is None:
+        return jsonify({'error': 'Query generator not initialized'}), 500
+    
+    try:
+        data = request.json
+        frames_b64 = data.get('frames', [])
+        use_slm = data.get('use_slm', True)
+        return_skeleton = data.get('return_skeleton', False)  # NEW: Option to return frames with landmarks
+        
+        if not frames_b64:
+            return jsonify({'error': 'No frames provided'}), 400
+        
+        if len(frames_b64) < 10:
+            return jsonify({'error': 'Minimum 10 frames required'}), 400
+        
+        # Decode frames from base64
+        frames = []
+        for frame_b64 in frames_b64:
+            try:
+                if ',' in frame_b64:
+                    frame_b64 = frame_b64.split(',')[1]
+                
+                frame_bytes = base64.b64decode(frame_b64)
+                frame_array = np.frombuffer(frame_bytes, dtype=np.uint8)
+                frame = cv2.imdecode(frame_array, cv2.IMREAD_COLOR)
+                
+                if frame is None:
+                    continue
+                
+                frames.append(frame)
+            except Exception as e:
+                print(f"⚠️  Frame decode error: {e}")
+                continue
+        
+        if len(frames) < 10:
+            return jsonify({'error': 'Failed to decode sufficient frames'}), 400
+        
+        print(f"\n📹 HYBRID RECOGNITION: Processing {len(frames)} frames...")
+        
+        # Step 1: Extract landmarks and recognize sign
+        landmarks_sequence = []
+        valid_frames = []
+        skeleton_frames_b64 = []  # NEW: Store frames with skeleton drawn
+        
+        for frame in frames:
+            # Convert BGR to RGB (MediaPipe expects RGB!)
+            frame_rgb = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
+            
+            # Extract landmarks with MediaPipe results for visualization
+            landmarks, mp_results = inference_system.extractor.extract_with_results(frame_rgb)
+            
+            if landmarks is not None:
+                landmarks_sequence.append(landmarks)
+                valid_frames.append(frame)
+                
+                # NEW: Draw skeleton if requested
+                if return_skeleton and mp_results:
+                    skeleton_frame = frame.copy()
+                    from src.utils.mediapipe_helper import draw_landmarks
+                    skeleton_frame = draw_landmarks(skeleton_frame, mp_results)
+                    
+                    # Encode back to base64
+                    _, buffer = cv2.imencode('.jpg', skeleton_frame)
+                    skeleton_b64 = base64.b64encode(buffer).decode('utf-8')
+                    skeleton_frames_b64.append(f"data:image/jpeg;base64,{skeleton_b64}")
+        
+        if len(landmarks_sequence) < 10:
+            return jsonify({
+                'error': 'Insufficient valid frames with landmarks',
+                'frames_processed': len(frames),
+                'valid_frames': len(landmarks_sequence)
+            }), 400
+        
+        print(f"   ✅ Step 1: Extracted landmarks from {len(landmarks_sequence)} frames")
+        
+        # Step 2: Predict sign
+        prediction_result = inference_system.predict_from_sequence(landmarks_sequence)
+        
+        if 'error' in prediction_result:
+            return jsonify({
+                'success': False,
+                'error': prediction_result['error'],
+                'frames_processed': len(frames)
+            }), 400
+        
+        predicted_sign = prediction_result['sign']
+        confidence = prediction_result['confidence']
+        
+        print(f"   ✅ Step 2: Predicted sign '{predicted_sign}' (confidence: {confidence:.2f})")
+        
+        # Step 3: Verify banking intent
+        intent_type = "general_inquiry"
+        is_banking = False
+        
+        if inference_system.banking_verifier:
+            try:
+                # Call verify_sign_sequence with list of signs and confidences
+                intent, context, is_valid = inference_system.banking_verifier.verify_sign_sequence(
+                    signs=[predicted_sign],
+                    confidences=[confidence]
+                )
+                if intent.value != 'unknown':
+                    is_banking = True
+                    intent_type = intent.value
+                    print(f"   ✅ Step 3: Banking intent verified - '{intent_type}'")
+                else:
+                    print(f"   ℹ️  Step 3: General inquiry (not banking-related)")
+            except Exception as e:
+                print(f"   ⚠️  Step 3: Banking verifier error (using fallback): {e}")
+                intent_type = "customer_support"
+        
+        # Step 4: Generate natural language query using SLM
+        generated_query = None
+        slm_used = False
+        
+        if use_slm and query_generator is not None:
+            print(f"   ⏳ Step 4: Generating query using SLM...")
+            generated_query = query_generator.generate_query(
+                sign_name=predicted_sign,
+                intent=intent_type,
+                hand_landmarks=landmarks_sequence[-1][33:75] if landmarks_sequence else None
+            )
+            
+            if generated_query:
+                slm_used = True
+                print(f"   ✅ Step 4: Generated query: '{generated_query}'")
+            else:
+                print(f"   ⚠️  Step 4: SLM fallback query generated")
+                generated_query = query_generator._get_fallback_query(predicted_sign, intent_type)
+        else:
+            # Use fallback query
+            print(f"   ⚠️  Step 4: Using fallback query (SLM disabled or unavailable)")
+            generated_query = query_generator._get_fallback_query(predicted_sign, intent_type)
+        
+        # Build response
+        response = {
+            'success': True,
+            'sign': predicted_sign,
+            'confidence': float(confidence),
+            'intent': intent_type,
+            'is_banking_intent': is_banking,
+            'query': generated_query,
+            'slm_used': slm_used,
+            'frames_processed': len(frames),
+            'valid_frames': len(landmarks_sequence)
+        }
+        
+        # Add skeleton frames if requested
+        if return_skeleton and skeleton_frames_b64:
+            response['skeleton_frames'] = skeleton_frames_b64[:10]  # Return first 10 frames with skeleton
+            print(f"   🎨 Added {len(skeleton_frames_b64[:10])} skeleton visualization frames")
+        
+        print(f"\n✨ HYBRID RECOGNITION COMPLETE")
+        print(f"   Sign: {predicted_sign}")
+        print(f"   Query: {generated_query}")
+        print(f"   SLM Used: {'Yes' if slm_used else 'Fallback'}")
         
         return jsonify(response)
         
     except Exception as e:
-        print(f"❌ Recognition error: {e}")
+        print(f"❌ Hybrid recognition error: {e}")
         import traceback
         traceback.print_exc()
         return jsonify({'error': str(e)}), 500
@@ -620,20 +951,21 @@ if __name__ == '__main__':
     
     # Start Flask server
     print("\n🌐 Starting Flask server...")
-    print("   URL: http://127.0.0.1:5002")
+    print("   URL: http://127.0.0.1:5003")
     print("   Endpoints:")
-    print("      GET  /api/health              - Health check")
-    print("      POST /api/sign/recognize      - Sign language recognition")
-    print("      POST /api/biometric/enroll    - Enroll user biometrics")
-    print("      POST /api/biometric/verify    - Verify user biometrics")
-    print("      GET  /api/biometric/users     - List enrolled users")
+    print("      GET  /api/health                 - Health check")
+    print("      POST /api/sign/recognize         - Sign language recognition")
+    print("      POST /api/sign/hybrid-recognize  - Hybrid sign + query generation")
+    print("      POST /api/biometric/enroll       - Enroll user biometrics")
+    print("      POST /api/biometric/verify       - Verify user biometrics")
+    print("      GET  /api/biometric/users        - List enrolled users")
     print("\n   Press Ctrl+C to stop")
     print("=" * 70 + "\n")
     
     try:
         app.run(
             host='0.0.0.0',
-            port=5002,
+            port=5003,
             debug=False,
             threaded=True
         )

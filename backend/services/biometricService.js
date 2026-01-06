@@ -19,7 +19,7 @@ const axios = require('axios');
 const FormData = require('form-data');
 
 // NS-AGF Python service URL (can be configured via environment variable)
-const NS_AGF_SERVICE_URL = process.env.NS_AGF_SERVICE_URL || 'http://127.0.0.1:5002';
+const NS_AGF_SERVICE_URL = process.env.NS_AGF_SERVICE_URL || 'http://127.0.0.1:5003';
 
 // Timeout for API requests (30 seconds for video processing)
 const API_TIMEOUT = 30000;
@@ -244,16 +244,16 @@ async function verifyBiometrics(videoFrames, userId) {
  * 
  * This is used in customer support to convert sign language gestures into text queries.
  * 
- * @param {Array<string>} videoFrames - Array of base64-encoded frames (from frontend)
+ * @param {Buffer[]} videoFrames - Array of image buffers (JPEG format)
  * @param {Object} options - Recognition options
  * @param {boolean} options.returnSentence - Combine multiple signs into sentence
  * @returns {Promise<Object>} Recognition result with detected sign and confidence
  * @throws {Error} If recognition fails
  * 
  * @example
- * const frames = [base64Frame1, base64Frame2, ...]; // 50+ base64 frames
+ * const frames = [buffer1, buffer2, ...]; // 30+ JPEG buffers
  * const result = await recognizeSign(frames, { returnSentence: true });
- * // Returns: { success, data: { recognizedSign, sentence, intent, confidence } }
+ * // Returns: { success, sign, confidence, sentence, intent }
  */
 async function recognizeSign(videoFrames, options = {}) {
   // Validate inputs
@@ -264,11 +264,18 @@ async function recognizeSign(videoFrames, options = {}) {
   console.log(`🤟 Recognizing sign language (${videoFrames.length} frames)`);
   
   try {
-    // Send request to NS-AGF Flask service on port 8000 (use 127.0.0.1 to force IPv4)
+    // Convert buffers to base64 (NS-AGF API expects JSON with base64 frames)
+    const framesBase64 = videoFrames.map(buffer => {
+      const base64 = buffer.toString('base64');
+      return `data:image/jpeg;base64,${base64}`;
+    });
+    
+    // Send request to NS-AGF API
     const response = await axios.post(
-      'http://127.0.0.1:8000/api/biometric/recognize-sign',
+      `${NS_AGF_SERVICE_URL}/api/sign/recognize`,
       {
-        videoFrames: videoFrames  // Already base64 strings from frontend
+        frames: framesBase64,
+        return_sentence: options.returnSentence !== false
       },
       {
         headers: { 'Content-Type': 'application/json' },
@@ -277,46 +284,36 @@ async function recognizeSign(videoFrames, options = {}) {
     );
     
     if (response.data.success) {
-      const { recognizedSign, sentence, intent, confidence, frames_processed } = response.data.data;
+      console.log(`   ✅ Sign recognized: ${response.data.sign}`);
+      console.log(`   📊 Confidence: ${response.data.confidence.toFixed(2)}`);
       
-      console.log(`   ✅ Sign recognized: ${recognizedSign}`);
-      console.log(`   📊 Confidence: ${(confidence * 100).toFixed(1)}%`);
-      console.log(`   🎯 Intent: ${intent}`);
-      console.log(`   📝 Sentence: ${sentence}`);
+      if (response.data.intent && response.data.intent.is_banking) {
+        console.log(`   🏦 Banking intent detected: ${response.data.intent.intent_type}`);
+      }
       
       return {
         success: true,
-        data: {
-          recognizedSign,
-          sentence,
-          intent,
-          confidence,
-          framesProcessed: frames_processed
-        }
+        sign: response.data.sign,
+        confidence: response.data.confidence,
+        sentence: response.data.sentence,
+        framesProcessed: response.data.frames_processed,
+        validFrames: response.data.valid_frames,
+        intent: response.data.intent || null
       };
     } else {
-      throw new Error(response.data.message || 'Sign recognition failed');
+      throw new Error(response.data.error || 'Sign recognition failed');
     }
     
   } catch (error) {
     console.error('❌ Sign recognition error:', error.message);
     
     if (error.response) {
-      const apiError = error.response.data.message || error.response.statusText;
-      return {
-        success: false,
-        message: `Sign recognition failed: ${apiError}`
-      };
+      const apiError = error.response.data.error || error.response.statusText;
+      throw new Error(`Sign recognition failed: ${apiError}`);
     } else if (error.code === 'ECONNREFUSED') {
-      return {
-        success: false,
-        message: 'NS-AGF service is not running. Please start: python ns_agf_flask_service.py'
-      };
+      throw new Error('NS-AGF service is not running. Please start: python ns_agf/api_service.py');
     } else {
-      return {
-        success: false,
-        message: `Sign recognition failed: ${error.message}`
-      };
+      throw new Error(`Sign recognition failed: ${error.message}`);
     }
   }
 }

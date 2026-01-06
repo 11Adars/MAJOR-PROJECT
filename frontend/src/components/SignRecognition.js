@@ -1,4 +1,4 @@
-import React, { useState, useRef, useEffect, useCallback } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import Webcam from 'react-webcam';
 import axios from 'axios';
@@ -7,256 +7,177 @@ import './SignRecognition.css';
 function SignRecognition() {
   const navigate = useNavigate();
   const webcamRef = useRef(null);
+  const captureIntervalRef = useRef(null);
   const canvasRef = useRef(null);
+  const animationRef = useRef(null);
+  const processingRef = useRef(false); // Track if request is in flight
   
   const [isRecording, setIsRecording] = useState(false);
-  const [recordedFrames, setRecordedFrames] = useState([]);
-  const [recognizedText, setRecognizedText] = useState('');
-  const [editableText, setEditableText] = useState('');
+  const [currentFrames, setCurrentFrames] = useState([]);
+  const [recognizedWords, setRecognizedWords] = useState([]); // Array of recognized words
   const [isProcessing, setIsProcessing] = useState(false);
   const [message, setMessage] = useState('');
-  const [countdown, setCountdown] = useState(0);
   const [progress, setProgress] = useState(0);
-  
-  // Enhanced features from inference.py
-  const [confidence, setConfidence] = useState(0);
-  const [intent, setIntent] = useState('');
-  const [detectedSigns, setDetectedSigns] = useState([]);
-  const [top3Predictions, setTop3Predictions] = useState([]);
-  const [showLandmarks, setShowLandmarks] = useState(true);
-  const [useSmoothing, setUseSmoothing] = useState(true);
-  const [confidenceThreshold, setConfidenceThreshold] = useState(0.7);
-  const [smoothingWindow, setSmoothingWindow] = useState(5);
-  const [isLiveMode, setIsLiveMode] = useState(false);
-  const [serviceHealth, setServiceHealth] = useState(null);
+  const [lastRecognition, setLastRecognition] = useState('');
   const [landmarksDetected, setLandmarksDetected] = useState(false);
+  const [skeletonEnabled, setSkeletonEnabled] = useState(true);
 
-  // Hand connections for drawing skeleton
-  const HAND_CONNECTIONS = [
-    [0, 1], [1, 2], [2, 3], [3, 4],           // Thumb
-    [0, 5], [5, 6], [6, 7], [7, 8],           // Index
-    [0, 9], [9, 10], [10, 11], [11, 12],      // Middle
-    [0, 13], [13, 14], [14, 15], [15, 16],    // Ring
-    [0, 17], [17, 18], [18, 19], [19, 20],    // Pinky
-    [5, 9], [9, 13], [13, 17]                  // Palm
-  ];
-
-  // Pose connections (upper body)
+  // MediaPipe Holistic pose connections for skeleton drawing
   const POSE_CONNECTIONS = [
-    [11, 12], // Shoulders
-    [11, 13], [13, 15], // Left arm
-    [12, 14], [14, 16], // Right arm
-    [0, 1], [0, 4],     // Eyes
-    [1, 2], [4, 5],     // Eye to ear
-    [2, 3], [5, 6],     // Ear
-    [11, 23], [12, 24], // Torso
-    [23, 24]            // Hips
+    [0, 1], [1, 2], [2, 3], [3, 7], [0, 4], [4, 5], [5, 6], [6, 8],
+    [9, 10], [11, 12], [11, 13], [13, 15], [15, 17], [15, 19], [15, 21],
+    [17, 19], [12, 14], [14, 16], [16, 18], [16, 20], [16, 22], [18, 20],
+    [11, 23], [12, 24], [23, 24], [23, 25], [24, 26], [25, 27], [26, 28],
+    [27, 29], [28, 30], [29, 31], [30, 32], [27, 31], [28, 32]
   ];
 
-  // Draw landmarks on canvas
-  const drawLandmarks = useCallback((landmarks) => {
-    const canvas = canvasRef.current;
-    const webcam = webcamRef.current;
-    
-    if (!canvas || !webcam || !webcam.video) return;
-    
-    const video = webcam.video;
-    const ctx = canvas.getContext('2d');
-    
-    // Set canvas size to match video
-    canvas.width = video.videoWidth;
-    canvas.height = video.videoHeight;
-    
-    // Clear canvas
-    ctx.clearRect(0, 0, canvas.width, canvas.height);
-    
-    if (!landmarks || !landmarks.detected) {
-      // Show "No pose detected" message
-      ctx.fillStyle = 'rgba(255, 0, 0, 0.8)';
-      ctx.font = '24px Arial';
-      ctx.textAlign = 'center';
-      ctx.fillText('⚠️ No pose detected - Please stand in frame', canvas.width / 2, 40);
+  const HAND_CONNECTIONS = [
+    [0, 1], [1, 2], [2, 3], [3, 4], [0, 5], [5, 6], [6, 7], [7, 8],
+    [5, 9], [9, 10], [10, 11], [11, 12], [9, 13], [13, 14], [14, 15], [15, 16],
+    [13, 17], [17, 18], [18, 19], [19, 20], [0, 17]
+  ];
+
+  // Draw skeleton overlay on canvas
+  useEffect(() => {
+    // Don't draw skeleton when disabled
+    if (!skeletonEnabled) {
+      const canvas = canvasRef.current;
+      if (canvas) {
+        const ctx = canvas.getContext('2d');
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+      }
       return;
     }
-    
-    const { pose, left_hand, right_hand } = landmarks;
-    
-    // Mirror the x coordinates since webcam is mirrored
-    const mirrorX = (x) => 1 - x;
-    
-    // Draw pose connections (green)
-    ctx.strokeStyle = '#00FF00';
-    ctx.lineWidth = 3;
-    POSE_CONNECTIONS.forEach(([i, j]) => {
-      if (pose[i] && pose[j]) {
-        const [x1, y1] = [mirrorX(pose[i][0]) * canvas.width, pose[i][1] * canvas.height];
-        const [x2, y2] = [mirrorX(pose[j][0]) * canvas.width, pose[j][1] * canvas.height];
-        ctx.beginPath();
-        ctx.moveTo(x1, y1);
-        ctx.lineTo(x2, y2);
-        ctx.stroke();
-      }
-    });
-    
-    // Draw pose landmarks (green dots)
-    ctx.fillStyle = '#00FF00';
-    pose.slice(0, 25).forEach(([x, y, z], idx) => {
-      const px = mirrorX(x) * canvas.width;
-      const py = y * canvas.height;
-      ctx.beginPath();
-      ctx.arc(px, py, 4, 0, 2 * Math.PI);
-      ctx.fill();
-    });
-    
-    // Draw left hand (cyan)
-    if (left_hand && left_hand.some(lm => lm[0] !== 0 || lm[1] !== 0)) {
-      ctx.strokeStyle = '#00FFFF';
-      ctx.lineWidth = 2;
-      HAND_CONNECTIONS.forEach(([i, j]) => {
-        const [x1, y1] = [mirrorX(left_hand[i][0]) * canvas.width, left_hand[i][1] * canvas.height];
-        const [x2, y2] = [mirrorX(left_hand[j][0]) * canvas.width, left_hand[j][1] * canvas.height];
-        ctx.beginPath();
-        ctx.moveTo(x1, y1);
-        ctx.lineTo(x2, y2);
-        ctx.stroke();
-      });
-      
-      ctx.fillStyle = '#00FFFF';
-      left_hand.forEach(([x, y]) => {
-        const px = mirrorX(x) * canvas.width;
-        const py = y * canvas.height;
-        ctx.beginPath();
-        ctx.arc(px, py, 3, 0, 2 * Math.PI);
-        ctx.fill();
-      });
-    }
-    
-    // Draw right hand (magenta)
-    if (right_hand && right_hand.some(lm => lm[0] !== 0 || lm[1] !== 0)) {
-      ctx.strokeStyle = '#FF00FF';
-      ctx.lineWidth = 2;
-      HAND_CONNECTIONS.forEach(([i, j]) => {
-        const [x1, y1] = [mirrorX(right_hand[i][0]) * canvas.width, right_hand[i][1] * canvas.height];
-        const [x2, y2] = [mirrorX(right_hand[j][0]) * canvas.width, right_hand[j][1] * canvas.height];
-        ctx.beginPath();
-        ctx.moveTo(x1, y1);
-        ctx.lineTo(x2, y2);
-        ctx.stroke();
-      });
-      
-      ctx.fillStyle = '#FF00FF';
-      right_hand.forEach(([x, y]) => {
-        const px = mirrorX(x) * canvas.width;
-        const py = y * canvas.height;
-        ctx.beginPath();
-        ctx.arc(px, py, 3, 0, 2 * Math.PI);
-        ctx.fill();
-      });
-    }
-    
-    // Draw detection status
-    ctx.fillStyle = '#00FF00';
-    ctx.font = '16px Arial';
-    ctx.textAlign = 'left';
-    ctx.fillText('✓ Pose Detected', 10, 25);
-    
-    const hasLeftHand = left_hand && left_hand.some(lm => lm[0] !== 0);
-    const hasRightHand = right_hand && right_hand.some(lm => lm[0] !== 0);
-    
-    if (hasLeftHand) ctx.fillText('✓ Left Hand', 10, 45);
-    if (hasRightHand) ctx.fillText('✓ Right Hand', 10, 65);
-  }, []);
 
-  // Real-time landmark extraction
-  const extractLandmarksRealtime = useCallback(async () => {
-    if (!webcamRef.current || !showLandmarks) return;
-    
-    try {
-      const screenshot = webcamRef.current.getScreenshot();
-      if (!screenshot) return;
-      
-      const base64Frame = screenshot.split(',')[1];
-      
-      const response = await axios.post(
-        'http://localhost:8000/api/biometric/extract-landmarks',
-        { frame: base64Frame },
-        { timeout: 500 }  // Quick timeout for real-time
-      );
-      
-      if (response.data.success) {
-        setLandmarksDetected(response.data.data.detected);
-        drawLandmarks(response.data.data);
-      }
-    } catch (err) {
-      // Silently ignore errors for real-time extraction
-    }
-  }, [showLandmarks, drawLandmarks]);
-
-  // Real-time landmark extraction loop
-  useEffect(() => {
-    let intervalId;
-    
-    if (showLandmarks && !isProcessing) {
-      intervalId = setInterval(extractLandmarksRealtime, 100);  // 10 FPS for landmarks
-    }
-    
-    return () => {
-      if (intervalId) clearInterval(intervalId);
-    };
-  }, [showLandmarks, isProcessing, extractLandmarksRealtime]);
-
-  // Check service health on mount
-  useEffect(() => {
-    checkServiceHealth();
-    const healthInterval = setInterval(checkServiceHealth, 30000); // Check every 30s
-    return () => clearInterval(healthInterval);
-  }, []);
-
-  const checkServiceHealth = async () => {
-    try {
-      const response = await axios.get('http://localhost:8000/health');
-      setServiceHealth(response.data);
-    } catch (err) {
-      setServiceHealth({ status: 'error', message: 'Service unavailable' });
-    }
-  };
-
-  const clearHistory = () => {
-    setDetectedSigns([]);
-    setTop3Predictions([]);
-    setMessage('🗑️ History cleared');
-  };
-
-  const handleStartRecording = () => {
-    setRecordedFrames([]);
-    setRecognizedText('');
-    setEditableText('');
-    setMessage('');
-    setProgress(0);
-    
-    // 3 second countdown
-    setCountdown(3);
-    const countdownInterval = setInterval(() => {
-      setCountdown(prev => {
-        if (prev <= 1) {
-          clearInterval(countdownInterval);
-          startCapture();
-          return 0;
+    const drawSkeleton = async () => {
+      // Check ref immediately - stops skeleton during recognition
+      if (processingRef.current) {
+        const canvas = canvasRef.current;
+        if (canvas) {
+          const ctx = canvas.getContext('2d');
+          ctx.clearRect(0, 0, canvas.width, canvas.height);
         }
-        return prev - 1;
-      });
-    }, 1000);
-  };
+        // Keep checking but don't make API calls
+        animationRef.current = requestAnimationFrame(drawSkeleton);
+        return;
+      }
+      
+      const video = webcamRef.current?.video;
+      const canvas = canvasRef.current;
+      
+      if (!video || !canvas || video.readyState !== 4) {
+        animationRef.current = requestAnimationFrame(drawSkeleton);
+        return;
+      }
 
-  const startCapture = () => {
+      const ctx = canvas.getContext('2d');
+      canvas.width = video.videoWidth;
+      canvas.height = video.videoHeight;
+
+      // Clear canvas
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+      // Capture current frame for landmark detection
+      const screenshot = webcamRef.current.getScreenshot();
+      if (!screenshot) {
+        animationRef.current = requestAnimationFrame(drawSkeleton);
+        return;
+      }
+
+      try {
+        // Send frame to backend for landmark extraction
+        const base64Frame = screenshot.split(',')[1];
+        const response = await axios.post(
+          'http://localhost:5003/api/sign/extract-landmarks',
+          { frame: base64Frame },
+          { timeout: 100 }
+        );
+
+        if (response.data.success && response.data.landmarks) {
+          setLandmarksDetected(true);
+          const landmarks = response.data.landmarks; // Array of {x, y, z}
+
+          // Draw pose landmarks (0-32)
+          ctx.strokeStyle = '#00FF00';
+          ctx.lineWidth = 2;
+          POSE_CONNECTIONS.forEach(([start, end]) => {
+            if (start < 33 && end < 33 && landmarks[start] && landmarks[end]) {
+              ctx.beginPath();
+              ctx.moveTo(landmarks[start].x * canvas.width, landmarks[start].y * canvas.height);
+              ctx.lineTo(landmarks[end].x * canvas.width, landmarks[end].y * canvas.height);
+              ctx.stroke();
+            }
+          });
+
+          // Draw left hand landmarks (33-53)
+          ctx.strokeStyle = '#FF0000';
+          HAND_CONNECTIONS.forEach(([start, end]) => {
+            const leftStart = 33 + start;
+            const leftEnd = 33 + end;
+            if (landmarks[leftStart] && landmarks[leftEnd]) {
+              ctx.beginPath();
+              ctx.moveTo(landmarks[leftStart].x * canvas.width, landmarks[leftStart].y * canvas.height);
+              ctx.lineTo(landmarks[leftEnd].x * canvas.width, landmarks[leftEnd].y * canvas.height);
+              ctx.stroke();
+            }
+          });
+
+          // Draw right hand landmarks (54-74)
+          ctx.strokeStyle = '#0000FF';
+          HAND_CONNECTIONS.forEach(([start, end]) => {
+            const rightStart = 54 + start;
+            const rightEnd = 54 + end;
+            if (landmarks[rightStart] && landmarks[rightEnd]) {
+              ctx.beginPath();
+              ctx.moveTo(landmarks[rightStart].x * canvas.width, landmarks[rightStart].y * canvas.height);
+              ctx.lineTo(landmarks[rightEnd].x * canvas.width, landmarks[rightEnd].y * canvas.height);
+              ctx.stroke();
+            }
+          });
+
+          // Draw landmark points
+          ctx.fillStyle = '#FFFFFF';
+          landmarks.forEach((lm, idx) => {
+            if (lm) {
+              ctx.beginPath();
+              ctx.arc(lm.x * canvas.width, lm.y * canvas.height, 3, 0, 2 * Math.PI);
+              ctx.fill();
+            }
+          });
+        } else {
+          setLandmarksDetected(false);
+        }
+      } catch (err) {
+        // Silently fail for real-time drawing
+        setLandmarksDetected(false);
+      }
+
+      animationRef.current = requestAnimationFrame(drawSkeleton);
+    };
+
+    animationRef.current = requestAnimationFrame(drawSkeleton);
+
+    return () => {
+      if (animationRef.current) {
+        cancelAnimationFrame(animationRef.current);
+      }
+    };
+  }, [skeletonEnabled]); // Only depends on skeletonEnabled, processingRef is checked inside
+
+  // Start recording frames
+  const handleStartRecording = () => {
+    if (isRecording) return;
+    
+    setMessage('🎥 Recording... Perform ONE sign clearly');
     setIsRecording(true);
-    setMessage('🎥 Recording... Please perform your signs');
+    setProgress(0);
+    setCurrentFrames([]);
     
     const frames = [];
-    const totalFrames = 50; // 5 seconds of recording
+    const totalFrames = 50;
     let frameCount = 0;
     
-    const captureInterval = setInterval(() => {
+    captureIntervalRef.current = setInterval(() => {
       if (webcamRef.current) {
         const screenshot = webcamRef.current.getScreenshot();
         if (screenshot) {
@@ -266,81 +187,127 @@ function SignRecognition() {
           
           const progressPercent = Math.round((frameCount / totalFrames) * 100);
           setProgress(progressPercent);
+          setCurrentFrames(frames);
           
           if (frameCount >= totalFrames) {
-            clearInterval(captureInterval);
+            clearInterval(captureIntervalRef.current);
             setIsRecording(false);
-            setRecordedFrames(frames);
-            recognizeSign(frames);
+            setMessage('✅ Recording complete! Click "Stop & Recognize" to process.');
           }
         }
       }
-    }, 100); // Capture every 100ms (50 frames in 5 seconds)
+    }, 100);
   };
 
-  const recognizeSign = async (frames) => {
+  // Stop recording and recognize the sign
+  const handleStopRecording = async () => {
+    // Prevent multiple simultaneous recognitions using ref (faster than state)
+    if (processingRef.current) {
+      console.log('⏳ Already processing, ignoring click...');
+      return;
+    }
+    
+    // Prevent multiple simultaneous recognitions
+    if (isProcessing) {
+      console.log('⏳ Already processing (state), please wait...');
+      return;
+    }
+    
+    if (captureIntervalRef.current) {
+      clearInterval(captureIntervalRef.current);
+    }
+    setIsRecording(false);
+    
+    if (currentFrames.length < 10) {
+      setMessage('❌ Not enough frames captured. Try again.');
+      return;
+    }
+    
+    // Set both ref and state
+    processingRef.current = true;
     setIsProcessing(true);
-    setMessage('🔍 Recognizing sign language...');
+    setMessage('🔍 Recognizing sign...');
     
     try {
+      console.log('📤 Sending', currentFrames.length, 'frames to API...');
+      // Call NS-AGF API directly for single sign recognition (no ticket creation)
       const response = await axios.post(
-        'http://localhost:5000/api/biometric/recognize-sign',
-        { videoFrames: frames },
+        'http://localhost:5003/api/sign/recognize',
+        { frames: currentFrames },
         {
           headers: {
             'Authorization': `Bearer ${localStorage.getItem('token')}`,
             'Content-Type': 'application/json'
-          }
+          },
+          timeout: 30000  // Increased to 30 seconds for MediaPipe processing
         }
       );
 
-      const { recognizedSign, sentence, intent, confidence, top3, frames_processed } = response.data.data;
+      const recognizedSign = response.data.sign || 'Unknown';
+      const confidence = response.data.confidence || 0;
       
-      const fullText = sentence || recognizedSign || 'No sign recognized';
-      setRecognizedText(fullText);
-      setEditableText(fullText);
-      setConfidence(confidence || 0);
-      setIntent(intent || 'UNKNOWN');
+      console.log('✅ Received response:', recognizedSign, confidence);
       
-      // Add to detected signs history
-      if (recognizedSign) {
-        setDetectedSigns(prev => [...prev, { 
-          sign: recognizedSign, 
-          confidence, 
-          time: new Date().toLocaleTimeString() 
-        }]);
-      }
-      
-      // Store top 3 predictions if available
-      if (top3) {
-        setTop3Predictions(top3);
-      }
-      
-      setMessage(`✅ Recognized: "${recognizedSign}" | Intent: ${intent} | Confidence: ${(confidence * 100).toFixed(1)}%`);
-      setIsProcessing(false);
+      // Add word to sentence
+      setRecognizedWords(prev => [...prev, recognizedSign]);
+      setLastRecognition(`${recognizedSign} (${(confidence * 100).toFixed(1)}%)`);
+      setMessage(`✅ Recognized: "${recognizedSign}" with ${(confidence * 100).toFixed(0)}% confidence`);
+      setCurrentFrames([]);
+      setProgress(0);
       
     } catch (err) {
       console.error('Sign recognition error:', err);
-      setMessage('❌ ' + (err.response?.data?.message || 'Sign recognition failed'));
+      console.log('Error response:', err.response);
+      const errorMsg = err.response?.data?.error || err.response?.data?.message || err.message || 'Recognition failed';
+      setMessage(`❌ ${errorMsg}`);
+    } finally {
+      processingRef.current = false;  // Clear ref
       setIsProcessing(false);
     }
   };
 
-  const handleSubmitTicket = async () => {
-    if (!editableText.trim()) {
-      setMessage('❌ Please enter or edit the query text');
+  // Clear last word from sentence
+  const handleClearLastWord = () => {
+    if (recognizedWords.length > 0) {
+      setRecognizedWords(prev => prev.slice(0, -1));
+      setMessage('🗑️ Last word removed');
+      setLastRecognition('');
+    }
+  };
+
+  // Reset entire sentence
+  const handleReset = () => {
+    setRecognizedWords([]);
+    setCurrentFrames([]);
+    setProgress(0);
+    setMessage('');
+    setLastRecognition('');
+    if (captureIntervalRef.current) {
+      clearInterval(captureIntervalRef.current);
+    }
+    setIsRecording(false);
+  };
+
+  // Submit sentence for intent analysis and ticket creation
+  const handlePredict = async () => {
+    if (recognizedWords.length === 0) {
+      setMessage('❌ No signs captured. Please record at least one sign.');
       return;
     }
 
+    setIsProcessing(true);
+    setMessage('🔍 Analyzing sentence with Intent + SLM...');
+    
     try {
-      setIsProcessing(true);
-      setMessage('📤 Submitting support ticket...');
+      const sentence = recognizedWords.join(' ');
       
-      await axios.post(
-        'http://localhost:5000/api/support/tickets',
-        {
-          query_text: editableText,
-          query_source: 'sign_language'
+      // Call backend hybrid endpoint with the sentence
+      const response = await axios.post(
+        'http://localhost:5000/api/support/tickets/hybrid-sign-sentence',
+        { 
+          sentence: sentence,
+          words: recognizedWords,
+          use_slm: true
         },
         {
           headers: {
@@ -350,81 +317,61 @@ function SignRecognition() {
         }
       );
 
-      setMessage('✅ Support ticket submitted successfully!');
+      const { sign_language_data } = response.data;
+      const generatedQuery = sign_language_data?.query_generated || sentence;
+      const intent = sign_language_data?.intent || 'general';
       
+      setMessage(`✅ Ticket created! Intent: ${intent} | Query: "${generatedQuery}"`);
+      
+      // Navigate to tickets after 2 seconds
       setTimeout(() => {
         navigate('/support-tickets');
       }, 2000);
       
     } catch (err) {
-      console.error('Ticket submission error:', err);
-      setMessage('❌ ' + (err.response?.data?.message || 'Failed to submit ticket'));
+      console.error('Prediction error:', err);
+      const errorMsg = err.response?.data?.message || 'Prediction failed';
+      setMessage(`❌ ${errorMsg}`);
+    } finally {
       setIsProcessing(false);
     }
-  };
-
-  const handleReset = () => {
-    setRecordedFrames([]);
-    setRecognizedText('');
-    setEditableText('');
-    setMessage('');
-    setProgress(0);
-    setConfidence(0);
-    setIntent('');
-    setTop3Predictions([]);
   };
 
   return (
     <div className="sign-recognition-container">
       <div className="sign-recognition-header">
-        <h2>🤟 NS-AGF Sign Language Recognition</h2>
-        <div className="header-controls">
-          {serviceHealth && (
-            <span className={`service-status ${serviceHealth.status === 'ok' ? 'online' : 'offline'}`}>
-              ● {serviceHealth.status === 'ok' ? 'Service Online' : 'Service Offline'}
-              {serviceHealth.num_classes && ` (${serviceHealth.num_classes} classes)`}
-            </span>
-          )}
-          <button onClick={() => navigate('/support-tickets')} className="back-link">
-            ← Back to Support
-          </button>
-        </div>
+        <h2>🤟 Sign Language Recognition - Build Your Query</h2>
+        <button onClick={() => navigate('/support-tickets')} className="back-link">
+          ← Back to Support
+        </button>
       </div>
 
       <div className="sign-main-content">
         <div className="webcam-section">
-          <div className="webcam-wrapper-large" style={{ position: 'relative' }}>
+          <div className="webcam-wrapper">
             <Webcam
               ref={webcamRef}
-              screenshotFormat="image/jpeg"
-              className="sign-webcam-large"
+              screenshotFormat="image/png"
+              className="sign-webcam"
               audio={false}
-              mirrored={true}
-              videoConstraints={{
-                width: 1280,
-                height: 720,
-                facingMode: "user"
+              mirrored={false}
+            />
+            <canvas 
+              ref={canvasRef} 
+              className="skeleton-overlay"
+              style={{
+                position: 'absolute',
+                top: 0,
+                left: 0,
+                width: '100%',
+                height: '100%',
+                pointerEvents: 'none'
               }}
             />
             
-            {/* Landmark visualization canvas */}
-            {showLandmarks && (
-              <canvas
-                ref={canvasRef}
-                style={{
-                  position: 'absolute',
-                  top: 0,
-                  left: 0,
-                  width: '100%',
-                  height: '100%',
-                  pointerEvents: 'none'
-                }}
-              />
-            )}
-            
-            {countdown > 0 && (
-              <div className="countdown-overlay">
-                <div className="countdown-number">{countdown}</div>
+            {!landmarksDetected && skeletonEnabled && (
+              <div className="landmark-warning">
+                ⚠️ No landmarks detected - adjust position/lighting
               </div>
             )}
             
@@ -434,26 +381,6 @@ function SignRecognition() {
                 <span>Recording...</span>
               </div>
             )}
-            
-            {/* Landmark toggle button */}
-            <button
-              onClick={() => setShowLandmarks(!showLandmarks)}
-              style={{
-                position: 'absolute',
-                bottom: '10px',
-                right: '10px',
-                background: showLandmarks ? '#00ff00' : '#666',
-                color: '#000',
-                border: 'none',
-                padding: '8px 12px',
-                borderRadius: '5px',
-                cursor: 'pointer',
-                fontSize: '12px',
-                fontWeight: 'bold'
-              }}
-            >
-              {showLandmarks ? '🦴 Landmarks ON' : '🦴 Landmarks OFF'}
-            </button>
           </div>
 
           {isRecording && (
@@ -461,148 +388,89 @@ function SignRecognition() {
               <div className="progress-bar">
                 <div className="progress-fill" style={{ width: `${progress}%` }} />
               </div>
-              <p className="progress-text">{progress}% Complete</p>
+              <p className="progress-text">{progress}% ({currentFrames.length}/50 frames)</p>
             </div>
           )}
 
           <div className="control-buttons">
             <button
+              onClick={() => setSkeletonEnabled(!skeletonEnabled)}
+              className="btn-toggle-skeleton"
+            >
+              {skeletonEnabled ? '👁️ Hide Skeleton' : '👁️‍🗨️ Show Skeleton'}
+            </button>
+            
+            <button
               onClick={handleStartRecording}
               disabled={isRecording || isProcessing}
               className="btn-record"
             >
-              {isRecording ? '🎥 Recording...' : '🎥 Start Recording (5 sec)'}
+              🎥 Start Recording
             </button>
             
-            {recordedFrames.length > 0 && !isRecording && (
-              <button
-                onClick={handleReset}
-                disabled={isProcessing}
-                className="btn-reset"
-              >
-                🔄 Record Again
-              </button>
-            )}
+            <button
+              onClick={handleStopRecording}
+              disabled={!isRecording && currentFrames.length === 0 || isProcessing}
+              className="btn-stop"
+            >
+              ⏹️ Stop & Recognize
+            </button>
             
-            {detectedSigns.length > 0 && (
-              <button
-                onClick={clearHistory}
-                disabled={isProcessing}
-                className="btn-clear"
-              >
-                🗑️ Clear History
-              </button>
-            )}
+            <button
+              onClick={handleClearLastWord}
+              disabled={recognizedWords.length === 0 || isProcessing}
+              className="btn-clear-word"
+            >
+              ⬅️ Clear Last Word
+            </button>
+            
+            <button
+              onClick={handleReset}
+              disabled={isProcessing}
+              className="btn-reset"
+            >
+              🔄 Reset All
+            </button>
           </div>
         </div>
 
         <div className="recognition-section">
-          <h3>Recognition Results</h3>
+          <h3>📝 Your Sentence</h3>
           
-          {/* Confidence and Intent Display */}
-          {confidence > 0 && (
-            <div className="metrics-display">
-              <div className="metric-item">
-                <span className="metric-label">Confidence:</span>
-                <div className="confidence-bar-container">
-                  <div 
-                    className={`confidence-bar ${
-                      confidence > confidenceThreshold ? 'high' :
-                      confidence > 0.5 ? 'medium' : 'low'
-                    }`}
-                    style={{ width: `${confidence * 100}%` }}
-                  >
-                    {(confidence * 100).toFixed(1)}%
-                  </div>
-                </div>
-              </div>
-              <div className="metric-item">
-                <span className="metric-label">Intent:</span>
-                <span className="intent-badge">{intent}</span>
-              </div>
-            </div>
-          )}
-
-          {/* Top 3 Predictions */}
-          {top3Predictions.length > 0 && (
-            <div className="predictions-panel">
-              <h4>Model Predictions (Top 3)</h4>
-              {top3Predictions.map((pred, idx) => (
-                <div key={idx} className={`prediction-item ${idx === 0 ? 'top-prediction' : ''}`}>
-                  <span className="prediction-rank">{idx + 1}.</span>
-                  <span className="prediction-sign">{pred.sign}</span>
-                  <div className="prediction-bar">
-                    <div 
-                      className="prediction-fill"
-                      style={{ width: `${pred.confidence * 100}%` }}
-                    />
-                  </div>
-                  <span className="prediction-confidence">{(pred.confidence * 100).toFixed(1)}%</span>
-                </div>
-              ))}
-            </div>
-          )}
-
-          {/* Detected Signs History */}
-          {detectedSigns.length > 0 && (
-            <div className="history-panel">
-              <h4>Detected Signs History</h4>
-              <div className="history-items">
-                {detectedSigns.slice(-5).reverse().map((item, idx) => (
-                  <div key={idx} className="history-item">
-                    <span className="history-sign">{item.sign}</span>
-                    <span className="history-confidence">{(item.confidence * 100).toFixed(0)}%</span>
-                    <span className="history-time">{item.time}</span>
-                  </div>
+          <div className="sentence-builder">
+            {recognizedWords.length === 0 ? (
+              <p className="empty-sentence">No words captured yet. Start recording!</p>
+            ) : (
+              <div className="words-container">
+                {recognizedWords.map((word, index) => (
+                  <span key={index} className="word-badge">
+                    {word}
+                  </span>
                 ))}
               </div>
+            )}
+          </div>
+
+          {lastRecognition && (
+            <div className="last-recognition">
+              <strong>Last recognized:</strong> {lastRecognition}
             </div>
           )}
-          
-          {isProcessing && !recognizedText && (
-            <div className="processing-state">
-              <div className="spinner"></div>
-              <p>Processing sign language...</p>
+
+          <div className="sentence-preview">
+            <label>Complete Sentence:</label>
+            <div className="sentence-text">
+              {recognizedWords.length > 0 ? recognizedWords.join(' ') : 'Build your sentence by recording signs...'}
             </div>
-          )}
+          </div>
 
-          {recognizedText && (
-            <>
-              <div className="recognized-display">
-                <p className="recognized-original">{recognizedText}</p>
-              </div>
-
-              <div className="edit-section">
-                <label htmlFor="editQuery">Edit or confirm your query:</label>
-                <textarea
-                  id="editQuery"
-                  value={editableText}
-                  onChange={(e) => setEditableText(e.target.value)}
-                  rows={6}
-                  placeholder="Edit the recognized text if needed..."
-                  disabled={isProcessing}
-                />
-              </div>
-
-              <button
-                onClick={handleSubmitTicket}
-                disabled={isProcessing || !editableText.trim()}
-                className="btn-submit"
-              >
-                {isProcessing ? '📤 Submitting...' : '📤 Submit Support Ticket'}
-              </button>
-            </>
-          )}
-
-          {!recognizedText && !isProcessing && (
-            <div className="empty-state">
-              <p>👆 Click "Start Recording" to capture your sign language query</p>
-              <p className="instruction">
-                The system will record for 5 seconds. Perform your signs clearly
-                in front of the camera.
-              </p>
-            </div>
-          )}
+          <button
+            onClick={handlePredict}
+            disabled={recognizedWords.length === 0 || isProcessing}
+            className="btn-predict"
+          >
+            {isProcessing ? '⏳ Processing...' : '🚀 Predict & Submit Ticket'}
+          </button>
         </div>
       </div>
 
@@ -615,13 +483,15 @@ function SignRecognition() {
       <div className="instructions-panel">
         <h3>📋 Instructions</h3>
         <ol>
-          <li>Click "Start Recording" button</li>
-          <li>Wait for 3-second countdown</li>
-          <li>Perform your sign language query (5 seconds)</li>
-          <li>System will recognize and convert to text</li>
-          <li>Review and edit the text if needed</li>
-          <li>Submit as a support ticket</li>
+          <li><strong>Start Recording:</strong> Click to begin capturing frames for one sign</li>
+          <li><strong>Perform Sign:</strong> Make your sign clearly (records for 5 seconds)</li>
+          <li><strong>Stop & Recognize:</strong> Processes the captured sign and adds to sentence</li>
+          <li><strong>Repeat:</strong> Record more signs to build your complete sentence</li>
+          <li><strong>Clear Last Word:</strong> Remove the most recent word if incorrect</li>
+          <li><strong>Reset All:</strong> Clear entire sentence and start over</li>
+          <li><strong>Predict & Submit:</strong> Sends sentence to Intent + SLM for analysis and creates ticket</li>
         </ol>
+        <p className="tip">💡 <strong>Tip:</strong> Build complete sentences like "I need help with loan" or "Check account balance"</p>
       </div>
     </div>
   );

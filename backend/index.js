@@ -205,6 +205,12 @@ app.patch('/api/support/tickets/:ticketId/resolve', authMiddleware, supportContr
 // Get ticket statistics
 app.get('/api/support/stats', authMiddleware, supportController.getTicketStats);
 
+// Submit support ticket via hybrid sign language recognition
+app.post('/api/support/tickets/hybrid-sign', authMiddleware, supportController.submitHybridSignTicket);
+
+// Submit support ticket from multi-sign sentence (no automatic email)
+app.post('/api/support/tickets/hybrid-sign-sentence', authMiddleware, supportController.submitHybridSignSentence);
+
 // Start server
 const PORT = process.env.PORT || 5000;
 app.listen(PORT, () => {

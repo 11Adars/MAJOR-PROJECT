@@ -266,11 +266,274 @@ const getTicketStats = async (req, res) => {
   }
 };
 
+// Submit support ticket using hybrid sign language recognition + query generation
+const submitHybridSignTicket = async (req, res) => {
+  try {
+    const userId = req.userId;
+    const { 
+      frames,                    // Array of base64-encoded frames
+      use_slm = true,           // Whether to use SLM for query generation
+      return_skeleton = false   // NEW: Return frames with skeleton visualization
+    } = req.body;
+
+    if (!frames || !Array.isArray(frames) || frames.length < 10) {
+      return res.status(400).json({ 
+        message: 'At least 10 frames required for sign recognition' 
+      });
+    }
+
+    // Call NS-AGF API for hybrid recognition
+    const axios = require('axios');
+    const NS_AGF_API = process.env.NS_AGF_API || 'http://127.0.0.1:5003';
+
+    console.log(`\n📞 Calling NS-AGF hybrid endpoint...`);
+    console.log(`   Frames: ${frames.length}, SLM: ${use_slm}, Skeleton: ${return_skeleton}`);
+    
+    const hybridResponse = await axios.post(
+      `${NS_AGF_API}/api/sign/hybrid-recognize`,
+      {
+        frames: frames,
+        use_slm: use_slm,
+        return_skeleton: return_skeleton  // NEW: Pass skeleton option
+      },
+      {
+        timeout: 30000,  // 30 second timeout for SLM processing
+        headers: {
+          'Content-Type': 'application/json'
+        }
+      }
+    );
+
+    if (!hybridResponse.data.success) {
+      return res.status(400).json({
+        message: 'Failed to recognize sign language',
+        details: hybridResponse.data.error,
+        confidence: hybridResponse.data.confidence || 0,
+        frames_processed: hybridResponse.data.frames_processed || 0
+      });
+    }
+
+    const recognitionResult = hybridResponse.data;
+    
+    console.log(`\n✅ Sign recognized: ${recognitionResult.sign}`);
+    console.log(`   Confidence: ${recognitionResult.confidence.toFixed(3)}`);
+    console.log(`   Intent: ${recognitionResult.intent}`);
+    console.log(`   Query: ${recognitionResult.query}`);
+    console.log(`   SLM used: ${recognitionResult.slm_used}`);
+
+    // Get user details
+    const userResult = await pool.query(
+      'SELECT username, email FROM users WHERE id = $1',
+      [userId]
+    );
+
+    if (userResult.rows.length === 0) {
+      return res.status(404).json({ message: 'User not found' });
+    }
+
+    const user = userResult.rows[0];
+
+    // Insert ticket into database with sign language details
+    const ticketResult = await pool.query(
+      `INSERT INTO support_tickets 
+        (user_id, user_email, query_text, query_source, status, 
+         sign_recognized, intent_detected, slm_used, confidence_score)
+       VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)
+       RETURNING id, query_text, status, created_at`,
+      [
+        userId,
+        user.email,
+        recognitionResult.query,          // Generated query
+        'sign_language_hybrid',            // Source
+        'pending',                         // Initial status
+        recognitionResult.sign,            // Sign name
+        recognitionResult.intent,          // Intent type
+        recognitionResult.slm_used,        // Whether SLM was used
+        recognitionResult.confidence       // Confidence score
+      ]
+    );
+
+    const ticket = ticketResult.rows[0];
+
+    console.log(`\n💾 Ticket created: ID=${ticket.id}`);
+
+    // Send email to bank support
+    const bankEmailSent = await sendQueryToBank(
+      user.email,
+      user.username,
+      `[SIGN LANGUAGE] ${recognitionResult.sign}\nIntent: ${recognitionResult.intent}\n\nQuery: ${recognitionResult.query}`,
+      ticket.id
+    );
+
+    // Send confirmation to user
+    const userEmailSent = await sendQueryConfirmation(
+      user.email,
+      user.username,
+      recognitionResult.query,
+      ticket.id
+    );
+
+    res.status(201).json({
+      message: 'Support ticket submitted via sign language',
+      ticket: {
+        id: ticket.id,
+        query_text: ticket.query_text,
+        status: ticket.status,
+        created_at: ticket.created_at
+      },
+      sign_language_data: {
+        sign_recognized: recognitionResult.sign,
+        confidence: recognitionResult.confidence,
+        intent: recognitionResult.intent,
+        is_banking_intent: recognitionResult.is_banking_intent,
+        query_generated: recognitionResult.query,
+        slm_used: recognitionResult.slm_used,
+        frames_processed: recognitionResult.frames_processed,
+        valid_frames: recognitionResult.valid_frames,
+        // Include skeleton frames if available for debugging
+        skeleton_frames: recognitionResult.skeleton_frames || []
+      },
+      emails_sent: {
+        to_bank: bankEmailSent,
+        to_user: userEmailSent
+      }
+    });
+
+  } catch (error) {
+    console.error('Error submitting hybrid sign ticket:', error);
+    
+    // Handle specific errors
+    if (error.code === 'ECONNREFUSED') {
+      return res.status(503).json({ 
+        message: 'Sign language service unavailable',
+        details: 'NS-AGF service not running on port 5003'
+      });
+    }
+    
+    if (error.response && error.response.data) {
+      return res.status(error.response.status || 500).json({
+        message: 'Sign language recognition failed',
+        details: error.response.data.error || error.message
+      });
+    }
+    
+    res.status(500).json({ 
+      message: 'Failed to submit support ticket', 
+      error: error.message 
+    });
+  }
+};
+
+// ============================================================================
+// NEW: Submit ticket from multi-sign sentence (no automatic email)
+// ============================================================================
+const submitHybridSignSentence = async (req, res) => {
+  try {
+    const userId = req.userId;
+    const { 
+      sentence,      // Complete sentence from multiple signs
+      words,         // Array of individual recognized words
+      use_slm = true // Whether to use SLM for query enhancement
+    } = req.body;
+
+    if (!sentence || sentence.trim().length === 0) {
+      return res.status(400).json({ 
+        message: 'Sentence is required' 
+      });
+    }
+
+    // Get user details
+    const userResult = await pool.query(
+      'SELECT username, email FROM users WHERE id = $1',
+      [userId]
+    );
+
+    if (userResult.rows.length === 0) {
+      return res.status(404).json({ message: 'User not found' });
+    }
+
+    const user = userResult.rows[0];
+
+    console.log(`\n📝 Processing sign sentence: "${sentence}"`);
+    console.log(`   Words: [${words.join(', ')}]`);
+    console.log(`   SLM enabled: ${use_slm}`);
+
+    // Call SLM for intent analysis and query generation
+    const axios = require('axios');
+    let generatedQuery = sentence;
+    let intent = 'general_inquiry';
+    let slmUsed = false;
+
+    if (use_slm) {
+      try {
+        const slmResponse = await axios.post(
+          'http://localhost:5003/api/slm/generate',
+          { 
+            sign_word: sentence,
+            context: `User performed signs: ${words.join(', ')}`
+          },
+          { timeout: 10000 }
+        );
+
+        if (slmResponse.data && slmResponse.data.query) {
+          generatedQuery = slmResponse.data.query;
+          intent = slmResponse.data.intent || 'general_inquiry';
+          slmUsed = true;
+          console.log(`✅ SLM generated query: "${generatedQuery}"`);
+          console.log(`   Intent: ${intent}`);
+        }
+      } catch (slmError) {
+        console.warn('⚠️ SLM generation failed, using raw sentence:', slmError.message);
+      }
+    }
+
+    // Insert ticket into database (WITHOUT sending emails)
+    const ticketResult = await pool.query(
+      `INSERT INTO support_tickets (user_id, user_email, query_text, query_source, status) 
+       VALUES ($1, $2, $3, 'sign_language', 'pending') 
+       RETURNING id, query_text, status, created_at`,
+      [userId, user.email, generatedQuery.trim()]
+    );
+
+    const ticket = ticketResult.rows[0];
+
+    console.log(`✅ Ticket created: ID=${ticket.id}`);
+    console.log(`   Query: "${generatedQuery}"`);
+    console.log(`   ⚠️ Email notifications DISABLED (manual submission)`);
+
+    res.status(201).json({
+      message: 'Support ticket created successfully (no email sent)',
+      ticket: {
+        id: ticket.id,
+        query_text: ticket.query_text,
+        status: ticket.status,
+        created_at: ticket.created_at
+      },
+      sign_language_data: {
+        original_sentence: sentence,
+        words: words,
+        query_generated: generatedQuery,
+        intent: intent,
+        slm_used: slmUsed
+      }
+    });
+
+  } catch (error) {
+    console.error('Error processing sign sentence:', error);
+    res.status(500).json({ 
+      message: 'Failed to create support ticket', 
+      error: error.message 
+    });
+  }
+};
+
 module.exports = {
   submitTicket,
   getUserTickets,
   getTicketDetails,
   addTicketResponse,
   resolveTicket,
-  getTicketStats
+  getTicketStats,
+  submitHybridSignTicket,
+  submitHybridSignSentence
 };
