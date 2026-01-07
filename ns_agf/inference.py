@@ -401,7 +401,8 @@ class SignLanguageInference:
                 self.banking_verifier = BankingIntentVerifier(
                     rules_path=str(rules_path)
                 )
-                print("✅ Banking Intent Verifier ready (9 intents, safety rules enabled)")
+                num_intents = len(self.banking_verifier.intents)
+                print(f"✅ Banking Intent Verifier ready ({num_intents} intents, safety rules enabled)")
             except Exception as e:
                 print(f"⚠️ Verifier disabled: {e}")
         else:

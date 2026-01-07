@@ -36,6 +36,14 @@ class BankingIntent(Enum):
     CONTACT_MANAGER = "contact_manager"
     ACCESS_ONLINE = "access_online"
     ALERT_FRAUD = "alert_fraud"
+    # New intents added for complete 20-class coverage
+    DELETE_ACCOUNT = "delete_account"
+    REQUEST_HELP = "request_help"
+    LOAN_INQUIRY = "loan_inquiry"
+    PASSBOOK_REQUEST = "passbook_request"
+    REPORT_ISSUE = "report_issue"
+    SPEAK_TO_AGENT = "speak_to_agent"
+    REPORT_MISSING = "report_missing"
     UNKNOWN = "unknown"
     INCOMPLETE = "incomplete"
 

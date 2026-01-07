@@ -466,14 +466,18 @@ const submitHybridSignSentence = async (req, res) => {
 
     if (use_slm) {
       try {
+        console.log(`📝 Calling SLM endpoint with sentence: "${sentence}"`);
         const slmResponse = await axios.post(
-          'http://localhost:5003/api/slm/generate',
+          'http://127.0.0.1:5003/api/slm/generate',
           { 
             sign_word: sentence,
             context: `User performed signs: ${words.join(', ')}`
           },
-          { timeout: 10000 }
+          { timeout: 30000 }  // Increased to 30 seconds for SLM generation
         );
+
+        console.log(`   Response status: ${slmResponse.status}`);
+        console.log(`   Response data:`, slmResponse.data);
 
         if (slmResponse.data && slmResponse.data.query) {
           generatedQuery = slmResponse.data.query;
@@ -481,9 +485,22 @@ const submitHybridSignSentence = async (req, res) => {
           slmUsed = true;
           console.log(`✅ SLM generated query: "${generatedQuery}"`);
           console.log(`   Intent: ${intent}`);
+          console.log(`   SLM Used: ${slmUsed}`);
+        } else {
+          console.warn(`⚠️ No query field in SLM response. Using fallback.`);
+          console.warn(`   Response:`, slmResponse.data);
         }
       } catch (slmError) {
-        console.warn('⚠️ SLM generation failed, using raw sentence:', slmError.message);
+        console.error('❌ SLM generation error:');
+        console.error(`   Message: ${slmError.message}`);
+        console.error(`   Code: ${slmError.code}`);
+        if (slmError.response) {
+          console.error(`   Status: ${slmError.response.status}`);
+          console.error(`   Data:`, slmError.response.data);
+        } else if (slmError.request) {
+          console.error(`   Request: No response received`);
+        }
+        console.warn(`⚠️ Falling back to raw sentence: "${sentence}"`);
       }
     }
 

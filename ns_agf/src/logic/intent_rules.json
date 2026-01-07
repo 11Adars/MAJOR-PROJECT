@@ -12,7 +12,14 @@
     "manager": "contact_manager",
     "online": "access_online",
     "Interest": "check_interest",
-    "Illegal": "alert_fraud"
+    "Illegal": "alert_fraud",
+    "delete": "delete_account",
+    "help": "request_help",
+    "loan": "loan_inquiry",
+    "passbook": "passbook_request",
+    "report": "report_issue",
+    "speak": "speak_to_agent",
+    "missing": "report_missing"
   },
   "intents": {
     "greeting": {
@@ -89,6 +96,65 @@
       "description": "Report illegal or fraudulent activity",
       "priority": "high",
       "response": "Security alert logged. Manager will contact you immediately."
+    },
+    "delete_account": {
+      "required_slots": [],
+      "optional_slots": ["account_type", "reason"],
+      "keywords": ["delete", "remove", "close", "cancel"],
+      "confidence_threshold": 0.80,
+      "description": "Request to delete or close account",
+      "priority": "high",
+      "requires_confirmation": true,
+      "response": "Account deletion requested. This action is irreversible. Please confirm."
+    },
+    "request_help": {
+      "required_slots": [],
+      "optional_slots": ["topic"],
+      "keywords": ["help", "assist", "support", "question"],
+      "confidence_threshold": 0.70,
+      "description": "Request assistance",
+      "response": "How can I help you? Please describe your issue."
+    },
+    "loan_inquiry": {
+      "required_slots": [],
+      "optional_slots": ["loan_type", "amount"],
+      "keywords": ["loan", "borrow", "credit", "financing"],
+      "confidence_threshold": 0.75,
+      "description": "Inquiry about loans",
+      "response": "What type of loan are you interested in? Personal, Home, or Business?"
+    },
+    "passbook_request": {
+      "required_slots": [],
+      "optional_slots": ["account_type"],
+      "keywords": ["passbook", "statement", "record", "history"],
+      "confidence_threshold": 0.70,
+      "description": "Request passbook or account statement",
+      "response": "Preparing your passbook. Please wait..."
+    },
+    "report_issue": {
+      "required_slots": [],
+      "optional_slots": ["issue_type", "description"],
+      "keywords": ["report", "problem", "issue", "complaint"],
+      "confidence_threshold": 0.70,
+      "description": "Report an issue or problem",
+      "response": "Please describe the issue you would like to report."
+    },
+    "speak_to_agent": {
+      "required_slots": [],
+      "optional_slots": ["reason"],
+      "keywords": ["speak", "talk", "agent", "human", "person"],
+      "confidence_threshold": 0.70,
+      "description": "Request to speak with a human agent",
+      "response": "Connecting you to a customer service agent..."
+    },
+    "report_missing": {
+      "required_slots": [],
+      "optional_slots": ["item_type", "description"],
+      "keywords": ["missing", "lost", "stolen", "card"],
+      "confidence_threshold": 0.80,
+      "description": "Report missing card or item",
+      "priority": "high",
+      "response": "Missing item reported. Your card has been temporarily blocked for security."
     }
   },
   "slots": {
@@ -137,9 +203,11 @@
       "transfer",
       "check_balance",
       "access_online",
-      "check_interest"
+      "check_interest",
+      "delete_account",
+      "loan_inquiry"
     ],
-    "required_confirmations": ["transfer"],
+    "required_confirmations": ["transfer", "delete_account"],
     "transaction_intents": ["transfer", "check_balance", "check_interest"]
   },
   "confidence_thresholds": {
@@ -151,7 +219,14 @@
     "contact_manager": 0.75,
     "check_interest": 0.70,
     "access_online": 0.70,
-    "greeting": 0.70
+    "greeting": 0.70,
+    "delete_account": 0.80,
+    "request_help": 0.70,
+    "loan_inquiry": 0.75,
+    "passbook_request": 0.70,
+    "report_issue": 0.70,
+    "speak_to_agent": 0.70,
+    "report_missing": 0.80
   },
   "safety_rules": {
     "max_transfer_amount": 100000,

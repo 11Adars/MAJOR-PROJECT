@@ -382,17 +382,32 @@ def recognize_sign():
                     signs=[predicted_sign],
                     confidences=[confidence]
                 )
+                print(f"   🔍 Intent verification result: {intent.value}, is_valid={is_valid}")
                 if intent.value != 'unknown':
+                    # Get intent description from rules
+                    intent_desc = "Banking operation"
+                    if hasattr(inference_system.banking_verifier, 'intents'):
+                        intent_config = inference_system.banking_verifier.intents.get(intent.value, {})
+                        intent_desc = intent_config.get('description', intent_desc)
+                    
                     response['intent'] = {
                         'is_banking': True,
-                        'intent_type': intent.value,
+                        'type': intent.value,  # Frontend expects 'type' not 'intent_type'
+                        'description': intent_desc,
                         'is_valid': is_valid,
+                        'confidence_threshold': inference_system.banking_verifier.confidence_thresholds.get(intent.value, 0.75),
                         'slots': context.slots,
                         'warnings': [context.error_message] if context.error_message else []
                     }
-                    print(f"   🏦 Banking intent detected: {intent.value}")
+                    print(f"   🏦 Banking intent detected: {intent.value} (valid={is_valid})")
+                else:
+                    print(f"   ℹ️  No banking intent detected for '{predicted_sign}'")
             except Exception as e:
                 print(f"   ⚠️  Banking verifier error: {e}")
+                import traceback
+                traceback.print_exc()
+        else:
+            print(f"   ⚠️  Banking verifier not available")
         
         print(f"   📤 Sending response: {predicted_sign} with confidence {confidence:.2f}")
         print(f"   📦 Response data: {response}")
@@ -410,6 +425,146 @@ def recognize_sign():
         import traceback
         traceback.print_exc()
         return jsonify({'error': str(e)}), 500
+
+
+@app.route('/api/slm/generate', methods=['POST'])
+def slm_generate_query():
+    """
+    Generate natural language query from sign words using SLM.
+    
+    Request body (JSON):
+        {
+            "sign_word": "ATM help account",
+            "context": "User performed signs: ATM, help, account"
+        }
+    
+    Response (JSON):
+        {
+            "success": true,
+            "query": "I need help accessing my ATM and checking my account balance",
+            "intent": "access_atm",
+            "slm_used": true
+        }
+    """
+    global query_generator
+    
+    try:
+        data = request.json
+        sign_word = data.get('sign_word', '')
+        context = data.get('context', '')
+        
+        if not sign_word:
+            return jsonify({'error': 'sign_word is required'}), 400
+        
+        print(f"\n📝 SLM Query Generation Request")
+        print(f"   Sign words: {sign_word}")
+        print(f"   Context: {context}")
+        
+        # Generate query using SLM
+        generated_query = sign_word  # Default to raw input
+        intent = 'general_inquiry'
+        slm_used = False
+        
+        if query_generator is not None:
+            try:
+                # Split sign_word into individual keywords for better SLM processing
+                keywords = [word.strip().upper() for word in sign_word.split() if word.strip()]
+                
+                print(f"   📌 Keywords extracted: {keywords}")
+                
+                # Use the first keyword to detect banking intent
+                first_keyword = keywords[0] if keywords else sign_word
+                intent = detect_banking_intent(first_keyword)
+                
+                # Pass the full phrase to SLM to generate a natural query
+                # The SLM will work better with the multi-word input
+                result = query_generator.generate_query(' '.join(keywords), intent)
+                
+                if result and isinstance(result, str) and result.strip():
+                    generated_query = result.strip()
+                    slm_used = query_generator.slm_model is not None
+                    print(f"   ✅ SLM generated: {generated_query}")
+                    print(f"   Intent: {intent}")
+                    print(f"   SLM Used: {slm_used}")
+                elif result and isinstance(result, dict) and 'query' in result:
+                    generated_query = result['query']
+                    intent = result.get('intent', intent)
+                    slm_used = result.get('slm_used', True)
+                    print(f"   ✅ SLM generated: {generated_query}")
+                    print(f"   Intent: {intent}")
+                else:
+                    # Fallback
+                    generated_query = create_fallback_query(' '.join(keywords), intent)
+                    print(f"   Using fallback: {generated_query}")
+            except Exception as slm_error:
+                print(f"   ⚠️ SLM generation failed: {slm_error}")
+                import traceback
+                traceback.print_exc()
+                # Fallback to simple mapping
+                intent = detect_banking_intent(sign_word)
+                generated_query = create_fallback_query(sign_word, intent)
+                print(f"   Using fallback: {generated_query}")
+        else:
+            # No SLM available, use fallback
+            intent = detect_banking_intent(sign_word)
+            generated_query = create_fallback_query(sign_word, intent)
+            print(f"   ⚠️ SLM not available, using fallback: {generated_query}")
+        
+        return jsonify({
+            'success': True,
+            'query': generated_query,
+            'intent': intent,
+            'slm_used': slm_used,
+            'original_input': sign_word
+        })
+        
+    except Exception as e:
+        print(f"❌ SLM generation error: {e}")
+        return jsonify({'error': str(e)}), 500
+
+
+def detect_banking_intent(sign_words):
+    """Detect banking intent from sign words"""
+    words_lower = sign_words.lower()
+    
+    intent_keywords = {
+        'delete_account': ['delete', 'remove', 'close', 'cancel'],
+        'check_balance': ['balance', 'account', 'money', 'how much'],
+        'transfer_money': ['transfer', 'send', 'money'],
+        'access_atm': ['atm', 'cash', 'withdraw'],
+        'get_loan': ['loan', 'borrow', 'credit'],
+        'report_issue': ['report', 'problem', 'issue', 'illegal', 'missing'],
+        'speak_manager': ['manager', 'speak', 'talk', 'help'],
+        'account_info': ['address', 'info', 'information', 'passbook'],
+        'online_banking': ['online', 'internet', 'digital'],
+        'interest_rates': ['interest', 'rate']
+    }
+    
+    for intent, keywords in intent_keywords.items():
+        for keyword in keywords:
+            if keyword in words_lower:
+                return intent
+    
+    return 'general_inquiry'
+
+
+def create_fallback_query(sign_words, intent):
+    """Create a fallback query without SLM"""
+    fallback_templates = {
+        'delete_account': f"I want to delete or close my account. Request: {sign_words}",
+        'check_balance': f"I want to check my account balance. Request: {sign_words}",
+        'transfer_money': f"I need to transfer money. Request: {sign_words}",
+        'access_atm': f"I need help with ATM services. Request: {sign_words}",
+        'get_loan': f"I want information about loans. Request: {sign_words}",
+        'report_issue': f"I need to report an issue. Request: {sign_words}",
+        'speak_manager': f"I would like to speak with a manager. Request: {sign_words}",
+        'account_info': f"I need information about my account. Request: {sign_words}",
+        'online_banking': f"I need help with online banking. Request: {sign_words}",
+        'interest_rates': f"I want to know about interest rates. Request: {sign_words}",
+        'general_inquiry': f"I have a banking inquiry. Request: {sign_words}"
+    }
+    
+    return fallback_templates.get(intent, fallback_templates['general_inquiry'])
 
 
 @app.route('/api/sign/hybrid-recognize', methods=['POST'])

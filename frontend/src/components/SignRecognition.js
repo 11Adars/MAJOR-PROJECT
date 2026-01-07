@@ -21,6 +21,15 @@ function SignRecognition() {
   const [lastRecognition, setLastRecognition] = useState('');
   const [landmarksDetected, setLandmarksDetected] = useState(false);
   const [skeletonEnabled, setSkeletonEnabled] = useState(true);
+  
+  // Intent verification states for banking security
+  const [detectedIntent, setDetectedIntent] = useState(null);
+  const [showIntentConfirmation, setShowIntentConfirmation] = useState(false);
+  const [pendingSign, setPendingSign] = useState(null);
+  const [intentHistory, setIntentHistory] = useState([]); // Track all detected intents
+
+  // High-risk intents that require confirmation
+  const HIGH_RISK_INTENTS = ['delete_account', 'transfer', 'alert_fraud', 'report_missing'];
 
   // MediaPipe Holistic pose connections for skeleton drawing
   const POSE_CONNECTIONS = [
@@ -239,19 +248,52 @@ function SignRecognition() {
             'Authorization': `Bearer ${localStorage.getItem('token')}`,
             'Content-Type': 'application/json'
           },
-          timeout: 30000  // Increased to 30 seconds for MediaPipe processing
+          timeout: 10000 //ncreased to 30 seconds for MediaPipe processing
         }
       );
 
       const recognizedSign = response.data.sign || 'Unknown';
       const confidence = response.data.confidence || 0;
+      const intentData = response.data.intent || null;
       
       console.log('✅ Received response:', recognizedSign, confidence);
+      console.log('🏦 Intent data:', intentData);
+      
+      // Check if this is a HIGH-RISK banking intent that requires confirmation
+      if (intentData && HIGH_RISK_INTENTS.includes(intentData.type)) {
+        // HIGH-RISK intent detected - ALWAYS show confirmation dialog
+        // Let the user decide whether to proceed, even with lower confidence
+        const confidenceWarning = !intentData.is_valid 
+          ? `⚠️ Low confidence detected (${(confidence * 100).toFixed(0)}%). ` 
+          : '';
+        
+        setPendingSign({ 
+          sign: recognizedSign, 
+          confidence, 
+          intent: intentData,
+          hasConfidenceWarning: !intentData.is_valid
+        });
+        setDetectedIntent(intentData);
+        setShowIntentConfirmation(true);
+        setMessage(`⚠️ HIGH-RISK ACTION DETECTED: ${intentData.description || intentData.type}`);
+        setCurrentFrames([]);
+        setProgress(0);
+        return; // Don't add to sentence yet - wait for user confirmation
+      }
+      
+      // Regular intent or no intent - add to sentence directly
+      if (intentData) {
+        setIntentHistory(prev => [...prev, { sign: recognizedSign, intent: intentData.type, confidence }]);
+        setDetectedIntent(intentData);
+      }
       
       // Add word to sentence
       setRecognizedWords(prev => [...prev, recognizedSign]);
       setLastRecognition(`${recognizedSign} (${(confidence * 100).toFixed(1)}%)`);
-      setMessage(`✅ Recognized: "${recognizedSign}" with ${(confidence * 100).toFixed(0)}% confidence`);
+      
+      // Show intent information if detected
+      const intentMsg = intentData ? ` | 🏦 Intent: ${intentData.type}` : '';
+      setMessage(`✅ Recognized: "${recognizedSign}" with ${(confidence * 100).toFixed(0)}% confidence${intentMsg}`);
       setCurrentFrames([]);
       setProgress(0);
       
@@ -264,6 +306,32 @@ function SignRecognition() {
       processingRef.current = false;  // Clear ref
       setIsProcessing(false);
     }
+  };
+
+  // Handle confirmation of high-risk intent
+  const handleConfirmIntent = () => {
+    if (pendingSign) {
+      // User confirmed the high-risk action
+      setRecognizedWords(prev => [...prev, pendingSign.sign]);
+      setLastRecognition(`${pendingSign.sign} (${(pendingSign.confidence * 100).toFixed(1)}%) ✅ CONFIRMED`);
+      setIntentHistory(prev => [...prev, { 
+        sign: pendingSign.sign, 
+        intent: pendingSign.intent.type, 
+        confidence: pendingSign.confidence,
+        confirmed: true 
+      }]);
+      setMessage(`✅ HIGH-RISK ACTION CONFIRMED: ${pendingSign.intent.type} - "${pendingSign.sign}" added to query`);
+    }
+    setShowIntentConfirmation(false);
+    setPendingSign(null);
+  };
+
+  // Handle rejection of high-risk intent
+  const handleRejectIntent = () => {
+    setMessage(`❌ Action cancelled. "${pendingSign?.sign}" was NOT added to your query.`);
+    setShowIntentConfirmation(false);
+    setPendingSign(null);
+    setDetectedIntent(null);
   };
 
   // Clear last word from sentence
@@ -300,6 +368,9 @@ function SignRecognition() {
     
     try {
       const sentence = recognizedWords.join(' ');
+      console.log('📝 Sending to backend:');
+      console.log('   Sentence:', sentence);
+      console.log('   Words:', recognizedWords);
       
       // Call backend hybrid endpoint with the sentence
       const response = await axios.post(
@@ -317,9 +388,18 @@ function SignRecognition() {
         }
       );
 
+      console.log('✅ Backend response received:');
+      console.log('   Full response:', response.data);
+      console.log('   sign_language_data:', response.data.sign_language_data);
+
       const { sign_language_data } = response.data;
       const generatedQuery = sign_language_data?.query_generated || sentence;
       const intent = sign_language_data?.intent || 'general';
+      
+      console.log('📊 Extracted values:');
+      console.log('   Generated Query:', generatedQuery);
+      console.log('   Intent:', intent);
+      console.log('   SLM Used:', sign_language_data?.slm_used);
       
       setMessage(`✅ Ticket created! Intent: ${intent} | Query: "${generatedQuery}"`);
       
@@ -330,6 +410,8 @@ function SignRecognition() {
       
     } catch (err) {
       console.error('Prediction error:', err);
+      console.error('   Error message:', err.message);
+      console.error('   Response data:', err.response?.data);
       const errorMsg = err.response?.data?.message || 'Prediction failed';
       setMessage(`❌ ${errorMsg}`);
     } finally {
@@ -339,6 +421,50 @@ function SignRecognition() {
 
   return (
     <div className="sign-recognition-container">
+      {/* HIGH-RISK INTENT CONFIRMATION MODAL */}
+      {showIntentConfirmation && pendingSign && (
+        <div className="intent-confirmation-overlay">
+          <div className="intent-confirmation-modal">
+            <div className="intent-warning-icon">⚠️</div>
+            <h3>High-Risk Banking Action Detected</h3>
+            <div className="intent-details">
+              <p><strong>Sign Recognized:</strong> "{pendingSign.sign}"</p>
+              <p><strong>Confidence:</strong> {(pendingSign.confidence * 100).toFixed(1)}%</p>
+              <p><strong>Banking Intent:</strong> <span className="intent-type">{pendingSign.intent.type}</span></p>
+              <p><strong>Description:</strong> {pendingSign.intent.description || 'Sensitive banking operation'}</p>
+            </div>
+            
+            {/* Show warning if confidence is below threshold */}
+            {pendingSign.hasConfidenceWarning && (
+              <div className="confidence-warning">
+                <p>⚠️ <strong>Low Confidence Warning:</strong></p>
+                <p>The recognition confidence ({(pendingSign.confidence * 100).toFixed(1)}%) is below the recommended threshold for this high-risk action.</p>
+                <p>Please ensure this is the correct sign before confirming.</p>
+              </div>
+            )}
+            
+            <div className="intent-warning-message">
+              <p>🔒 This action requires your confirmation before proceeding.</p>
+              <p>Please verify this is the action you intended to perform.</p>
+            </div>
+            <div className="intent-confirmation-buttons">
+              <button 
+                className="confirm-btn" 
+                onClick={handleConfirmIntent}
+              >
+                ✅ Yes, I Confirm This Action
+              </button>
+              <button 
+                className="reject-btn" 
+                onClick={handleRejectIntent}
+              >
+                ❌ Cancel - This Was a Mistake
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
       <div className="sign-recognition-header">
         <h2>🤟 Sign Language Recognition - Build Your Query</h2>
         <button onClick={() => navigate('/support-tickets')} className="back-link">
