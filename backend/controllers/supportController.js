@@ -504,7 +504,7 @@ const submitHybridSignSentence = async (req, res) => {
       }
     }
 
-    // Insert ticket into database (WITHOUT sending emails)
+    // Insert ticket into database
     const ticketResult = await pool.query(
       `INSERT INTO support_tickets (user_id, user_email, query_text, query_source, status) 
        VALUES ($1, $2, $3, 'sign_language', 'pending') 
@@ -516,10 +516,67 @@ const submitHybridSignSentence = async (req, res) => {
 
     console.log(`✅ Ticket created: ID=${ticket.id}`);
     console.log(`   Query: "${generatedQuery}"`);
-    console.log(`   ⚠️ Email notifications DISABLED (manual submission)`);
+    console.log(`   User: ${user.username} (${user.email})`);
+
+    // Send email to bank support
+    let bankEmailSent = false;
+    let userEmailSent = false;
+
+    try {
+      console.log(`\n📧 Attempting to send email to bank support...`);
+      console.log(`   From: ${process.env.EMAIL_USER}`);
+      console.log(`   To: ${process.env.BANK_SUPPORT_EMAIL}`);
+      console.log(`   Ticket ID: #${ticket.id}`);
+      
+      bankEmailSent = await sendQueryToBank(
+        user.email,
+        user.username,
+        generatedQuery.trim(),
+        ticket.id
+      );
+      
+      if (bankEmailSent) {
+        console.log(`✅ Bank email sent successfully!`);
+      } else {
+        console.log(`❌ Bank email failed (returned false)`);
+      }
+    } catch (emailError) {
+      console.error('❌ Exception while sending email to bank:');
+      console.error(`   Error: ${emailError.message}`);
+      console.error(`   Stack: ${emailError.stack}`);
+    }
+
+    // Send confirmation to user
+    try {
+      console.log(`\n📧 Attempting to send confirmation to user...`);
+      console.log(`   From: ${process.env.EMAIL_USER}`);
+      console.log(`   To: ${user.email}`);
+      console.log(`   Ticket ID: #${ticket.id}`);
+      
+      userEmailSent = await sendQueryConfirmation(
+        user.email,
+        user.username,
+        generatedQuery.trim(),
+        ticket.id
+      );
+      
+      if (userEmailSent) {
+        console.log(`✅ User confirmation email sent successfully!`);
+      } else {
+        console.log(`❌ User confirmation email failed (returned false)`);
+      }
+    } catch (emailError) {
+      console.error('❌ Exception while sending confirmation to user:');
+      console.error(`   Error: ${emailError.message}`);
+      console.error(`   Stack: ${emailError.stack}`);
+    }
+
+    console.log(`\n📊 Email Summary:`);
+    console.log(`   Bank email sent: ${bankEmailSent}`);
+    console.log(`   User email sent: ${userEmailSent}\n`);
 
     res.status(201).json({
-      message: 'Support ticket created successfully (no email sent)',
+      message: 'Support ticket created successfully',
       ticket: {
         id: ticket.id,
         query_text: ticket.query_text,
@@ -532,6 +589,10 @@ const submitHybridSignSentence = async (req, res) => {
         query_generated: generatedQuery,
         intent: intent,
         slm_used: slmUsed
+      },
+      emails_sent: {
+        to_bank: bankEmailSent,
+        to_user: userEmailSent
       }
     });
 

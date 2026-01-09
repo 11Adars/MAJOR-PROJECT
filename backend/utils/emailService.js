@@ -37,6 +37,11 @@ const sendOTP = async (email, otp) => {
 const sendQueryToBank = async (userEmail, userName, queryText, ticketId) => {
   const bankEmail = process.env.BANK_SUPPORT_EMAIL || process.env.EMAIL_USER;
   
+  console.log(`[emailService] sendQueryToBank called`);
+  console.log(`  - Bank email: ${bankEmail}`);
+  console.log(`  - User: ${userName} (${userEmail})`);
+  console.log(`  - Ticket: #${ticketId}`);
+  
   const mailOptions = {
     from: process.env.EMAIL_USER,
     to: bankEmail,
@@ -91,16 +96,29 @@ const sendQueryToBank = async (userEmail, userName, queryText, ticketId) => {
   };
 
   try {
-    await transporter.sendMail(mailOptions);
+    console.log(`[emailService] Sending email via nodemailer...`);
+    const info = await transporter.sendMail(mailOptions);
+    console.log(`[emailService] ✅ Email sent successfully!`);
+    console.log(`  - MessageId: ${info.messageId}`);
+    console.log(`  - Response: ${info.response}`);
     return true;
   } catch (error) {
-    console.error('Failed to send query to bank:', error);
+    console.error('[emailService] ❌ Failed to send query to bank:');
+    console.error(`  - Error: ${error.message}`);
+    console.error(`  - Code: ${error.code}`);
+    if (error.response) {
+      console.error(`  - SMTP Response: ${error.response}`);
+    }
     return false;
   }
 };
 
 // Send confirmation to user that their query was submitted
 const sendQueryConfirmation = async (userEmail, userName, queryText, ticketId) => {
+  console.log(`[emailService] sendQueryConfirmation called`);
+  console.log(`  - To: ${userName} (${userEmail})`);
+  console.log(`  - Ticket: #${ticketId}`);
+  
   const mailOptions = {
     from: process.env.EMAIL_USER,
     to: userEmail,
@@ -150,10 +168,19 @@ const sendQueryConfirmation = async (userEmail, userName, queryText, ticketId) =
   };
 
   try {
-    await transporter.sendMail(mailOptions);
+    console.log(`[emailService] Sending confirmation email via nodemailer...`);
+    const info = await transporter.sendMail(mailOptions);
+    console.log(`[emailService] ✅ Confirmation email sent successfully!`);
+    console.log(`  - MessageId: ${info.messageId}`);
+    console.log(`  - Response: ${info.response}`);
     return true;
   } catch (error) {
-    console.error('Failed to send confirmation to user:', error);
+    console.error('[emailService] ❌ Failed to send confirmation to user:');
+    console.error(`  - Error: ${error.message}`);
+    console.error(`  - Code: ${error.code}`);
+    if (error.response) {
+      console.error(`  - SMTP Response: ${error.response}`);
+    }
     return false;
   }
 };

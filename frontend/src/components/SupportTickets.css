@@ -28,7 +28,7 @@
 }
 
 .back-button {
-  background: #f3f4f6;
+  background: #204fac;
   border: none;
   padding: 10px 20px;
   border-radius: 8px;
@@ -40,13 +40,13 @@
 }
 
 .back-button:hover {
-  background: #e5e7eb;
+  background: #2d5fc1;
   transform: translateX(-2px);
 }
 
 .new-ticket-btn {
   background: #667eea;
-  color: white;
+  color: rgb(168, 25, 25);
   border: none;
   padding: 12px 24px;
   border-radius: 8px;

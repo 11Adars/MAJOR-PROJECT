@@ -97,10 +97,11 @@
 @import '../index.css';
 
 .sign-recognition-container { 
-  padding: var(--space-4, 1.5rem); 
+  padding: 2rem;
   display: flex; 
-  flex-direction: column; 
-  height: 100vh;
+  flex-direction: column;
+  min-height: 100vh;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
   box-sizing: border-box;
   overflow-y: auto;
 }
@@ -109,14 +110,23 @@
   display: flex; 
   justify-content: space-between; 
   align-items: center; 
-  margin-bottom: var(--space-3, 1rem); 
+  margin-bottom: 2rem;
+  background: rgba(255, 255, 255, 0.95);
+  padding: 1.5rem;
+  border-radius: 15px;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+  backdrop-filter: blur(10px);
 }
 
 .sign-recognition-header h2 {
-  color: #1f2937;
-  font-size: 1.75rem;
-  font-weight: 700;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  font-size: 2rem;
+  font-weight: 800;
   margin: 0;
+  letter-spacing: -0.5px;
 }
 
 .header-controls {
@@ -147,8 +157,8 @@
 
 .sign-main-content {
   display: grid;
-  grid-template-columns: 1.5fr 1fr;
-  gap: 1.5rem;
+  grid-template-columns: 1.2fr 1fr;
+  gap: 2rem;
   flex: 1;
   align-items: start;
 }
@@ -156,17 +166,29 @@
 .webcam-section {
   display: flex;
   flex-direction: column;
-  gap: 1rem;
+  gap: 1.5rem;
+  background: rgba(255, 255, 255, 0.95);
+  padding: 2rem;
+  border-radius: 20px;
+  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.15);
+  backdrop-filter: blur(10px);
   overflow: visible;
   height: auto;
 }
 
 .webcam-wrapper {
   position: relative;
-  background: #000;
-  border-radius: 12px;
+  width: 100%;
+  max-width: 700px;
+  margin: 0 auto;
+  border-radius: 20px;
   overflow: hidden;
-  box-shadow: 0 8px 16px rgba(0, 0, 0, 0.2);
+  background: #000;
+  border: 5px solid transparent;
+  background-image: linear-gradient(#000, #000), linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  background-origin: border-box;
+  background-clip: padding-box, border-box;
+  box-shadow: 0 15px 50px rgba(102, 126, 234, 0.4), inset 0 0 20px rgba(102, 126, 234, 0.1);
   width: 100%;
   height: 400px;
 }
@@ -262,6 +284,100 @@
 @keyframes blink {
   0%, 100% { opacity: 1; }
   50% { opacity: 0.3; }
+}
+
+/* Auto-mode indicator */
+.auto-mode-indicator {
+  position: absolute;
+  bottom: 20px;
+  left: 50%;
+  transform: translateX(-50%);
+  background: rgba(59, 130, 246, 0.9);
+  color: white;
+  padding: 0.75rem 1.5rem;
+  border-radius: 25px;
+  font-weight: 600;
+  z-index: 10;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  transition: all 0.3s ease;
+  animation: fadeInUp 0.3s ease;
+}
+
+.auto-mode-indicator.hand-detected {
+  background: rgba(16, 185, 129, 0.95);
+  animation: pulseGlow 1s infinite;
+}
+
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateX(-50%) translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(-50%) translateY(0);
+  }
+}
+
+@keyframes pulseGlow {
+  0%, 100% { 
+    box-shadow: 0 0 10px rgba(16, 185, 129, 0.5);
+  }
+  50% { 
+    box-shadow: 0 0 25px rgba(16, 185, 129, 0.8);
+  }
+}
+
+/* Auto mode toggle button */
+.btn-auto-mode {
+  background: linear-gradient(135deg, #6b7280 0%, #4b5563 100%);
+  color: white;
+  padding: 0.875rem 1.75rem;
+  border-radius: 8px;
+  border: none;
+  font-size: 1rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  min-width: 150px;
+}
+
+.btn-auto-mode.active {
+  background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+}
+
+.btn-auto-mode:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+}
+
+/* Cancel button */
+.btn-cancel {
+  background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
+  color: white;
+  padding: 0.875rem 1.75rem;
+  border-radius: 8px;
+  border: none;
+  font-size: 1rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  min-width: 150px;
+  animation: shake 0.5s ease;
+}
+
+.btn-cancel:hover {
+  background: linear-gradient(135deg, #dc2626 0%, #b91c1c 100%);
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(239, 68, 68, 0.4);
+}
+
+@keyframes shake {
+  0%, 100% { transform: translateX(0); }
+  10%, 30%, 50%, 70%, 90% { transform: translateX(-2px); }
+  20%, 40%, 60%, 80% { transform: translateX(2px); }
 }
 
 .progress-container {
@@ -421,18 +537,153 @@
   border: 2px solid #3b82f6;
 }
 
-.instructions-panel {
-  background: white;
+/* Sentence Builder Section - Highly Visible */
+.sentence-builder {
+  background: linear-gradient(135deg, rgba(102, 126, 234, 0.08) 0%, rgba(118, 75, 162, 0.08) 100%);
+  border: 3px solid #667eea;
+  border-radius: 15px;
+  padding: 2rem;
+  min-height: 120px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 4px 20px rgba(102, 126, 234, 0.15);
+  transition: all 0.3s ease;
+}
+
+.sentence-builder:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 25px rgba(102, 126, 234, 0.25);
+}
+
+.empty-sentence {
+  color: #9ca3af;
+  font-size: 1.1rem;
+  font-style: italic;
+  text-align: center;
+  margin: 0;
+}
+
+.words-container {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1rem;
+  align-items: center;
+  justify-content: center;
+}
+
+.word-badge {
+  display: inline-flex;
+  align-items: center;
+  padding: 0.75rem 1.5rem;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: white;
+  border-radius: 12px;
+  font-size: 1.2rem;
+  font-weight: 700;
+  box-shadow: 0 4px 15px rgba(102, 126, 234, 0.3);
+  transition: all 0.3s ease;
+  letter-spacing: 0.5px;
+  animation: fadeIn 0.3s ease;
+}
+
+.word-badge:hover {
+  transform: translateY(-3px) scale(1.05);
+  box-shadow: 0 6px 20px rgba(102, 126, 234, 0.5);
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: scale(0.8);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+.last-recognition {
+  background: #f0f9ff;
+  border-left: 4px solid #3b82f6;
+  padding: 1rem 1.5rem;
   border-radius: 10px;
+  margin-top: 1rem;
+  font-size: 1rem;
+  color: #1e40af;
+  box-shadow: 0 2px 8px rgba(59, 130, 246, 0.1);
+}
+
+.last-recognition strong {
+  color: #1e3a8a;
+  font-weight: 700;
+}
+
+.sentence-preview {
+  background: white;
+  border: 3px solid #667eea;
+  border-radius: 15px;
+  padding: 1.5rem;
+  margin-top: 1rem;
+  box-shadow: 0 4px 20px rgba(102, 126, 234, 0.15);
+}
+
+.sentence-preview label {
+  display: block;
+  font-weight: 700;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  margin-bottom: 1rem;
+  font-size: 1.1rem;
+  letter-spacing: 0.5px;
+}
+
+.sentence-text {
+  background: linear-gradient(135deg, rgba(102, 126, 234, 0.05) 0%, rgba(118, 75, 162, 0.05) 100%);
+  padding: 1.5rem;
+  border-radius: 12px;
+  font-size: 1.3rem;
+  font-weight: 600;
+  color: #1f2937;
+  line-height: 1.8;
+  min-height: 80px;
+  border: 2px solid rgba(102, 126, 234, 0.2);
+  text-align: center;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  word-wrap: break-word;
+  box-shadow: inset 0 2px 8px rgba(102, 126, 234, 0.1);
+}
+
+.sentence-text:empty::before {
+  content: 'Build your sentence by recording signs...';
+  color: #9ca3af;
+  font-style: italic;
+  font-weight: 400;
+  font-size: 1.1rem;
+}
+
+.instructions-panel {
+  background: rgba(255, 255, 255, 0.95);
+  border-radius: 15px;
   padding: 1.5rem;
   margin-top: 1.5rem;
-  border: 1px solid #e5e7eb;
+  border: 2px solid rgba(102, 126, 234, 0.3);
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+  backdrop-filter: blur(10px);
 }
 
 .instructions-panel h3 {
   margin: 0 0 1rem 0;
-  color: #1f2937;
-  font-size: 1.125rem;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  font-size: 1.3rem;
+  font-weight: 700;
 }
 
 .instructions-panel ol {
@@ -450,10 +701,15 @@
 @media (max-width: 1200px) {
   .sign-main-content {
     grid-template-columns: 1fr;
+    gap: 2rem;
   }
   
   .webcam-wrapper-large {
     min-height: 360px;
+  }
+  
+  .recognition-section {
+    order: -1; /* Show sentence section first on mobile */
   }
 }
 
@@ -466,6 +722,11 @@
     flex-direction: column;
     align-items: flex-start;
     gap: 1rem;
+    padding: 1rem;
+  }
+  
+  .sign-recognition-header h2 {
+    font-size: 1.5rem;
   }
   
   .header-controls {
@@ -473,8 +734,22 @@
     justify-content: space-between;
   }
   
+  .webcam-section, .recognition-section {
+    padding: 1.5rem;
+  }
+  
   .webcam-wrapper-large {
     min-height: 280px;
+  }
+  
+  .sentence-text {
+    font-size: 1.1rem;
+    padding: 1rem;
+  }
+  
+  .word-badge {
+    font-size: 1rem;
+    padding: 0.6rem 1.2rem;
   }
   
   .control-buttons {
@@ -568,25 +843,32 @@
 
 /* New styles for Predict button */
 .btn-predict {
-  background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);
+  background: linear-gradient(135deg, #10b981 0%, #059669 100%);
   color: white;
-  padding: 0.875rem 1.75rem;
-  border-radius: 8px;
+  padding: 1.2rem 2.5rem;
+  border-radius: 15px;
   border: none;
-  font-size: 1rem;
-  font-weight: 600;
+  font-size: 1.2rem;
+  font-weight: 700;
   cursor: pointer;
   transition: all 0.3s ease;
-  flex: 1;
-  min-width: 150px;
-  visibility: visible !important;
-  display: inline-block !important;
+  width: 100%;
+  margin-top: 1rem;
+  box-shadow: 0 8px 25px rgba(16, 185, 129, 0.35);
+  text-transform: uppercase;
+  letter-spacing: 1px;
 }
 
 .btn-predict:hover:not(:disabled) {
-  background: linear-gradient(135deg, #d97706 0%, #b45309 100%);
-  transform: translateY(-2px);
-  box-shadow: 0 4px 12px rgba(245, 158, 11, 0.4);
+  background: linear-gradient(135deg, #059669 0%, #047857 100%);
+  transform: translateY(-3px);
+  box-shadow: 0 12px 35px rgba(16, 185, 129, 0.5);
+}
+
+.btn-predict:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+  transform: none !important;
 }
 
 .btn-record.recording {
@@ -735,15 +1017,25 @@ button:disabled {
 .recognition-section {
   display: flex;
   flex-direction: column;
-  gap: 1rem;
+  gap: 1.5rem;
   overflow-y: auto;
-  padding-right: 0.5rem;
+  padding: 2rem;
+  background: rgba(255, 255, 255, 0.95);
+  border-radius: 20px;
+  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.15);
+  backdrop-filter: blur(10px);
 }
 
 .recognition-section h3 {
   margin: 0;
-  color: #1f2937;
-  font-size: 1.25rem;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  font-size: 1.8rem;
+  font-weight: 800;
+  letter-spacing: -0.5px;
+  text-align: center;
 }
 
 .metrics-display {

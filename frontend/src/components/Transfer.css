@@ -1,24 +1,104 @@
 @import '../index.css';
 
-.container { margin: 0 auto; padding: var(--space-8) var(--space-6); max-width: 720px; }
-.container h2 { margin-bottom: var(--space-5); }
-.container form { display:flex; flex-direction:column; gap: var(--space-4); background: var(--gradient-surface); border:1px solid var(--color-border); border-radius: var(--radius-lg); padding: var(--space-6); box-shadow: var(--shadow-sm); }
-.container .action-btn { align-self:flex-start; }
+.container {
+  margin: 0 auto;
+  padding: var(--space-8) var(--space-6);
+  max-width: 800px;
+  min-height: 100vh;
+  background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%);
+}
+
+.container h2 {
+  margin-bottom: var(--space-6);
+  font-size: 2rem;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  text-align: center;
+  font-weight: 700;
+}
+
+.container form {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-5);
+  background: white;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-xl);
+  padding: var(--space-8);
+  box-shadow: 0 10px 40px rgba(102, 126, 234, 0.15);
+}
+
+.container .action-btn {
+  align-self: stretch;
+  padding: var(--space-4) var(--space-6);
+  font-size: 1.1rem;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  border: none;
+  border-radius: var(--radius-pill);
+  color: white;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  box-shadow: 0 4px 20px rgba(102, 126, 234, 0.3);
+}
+
+.container .action-btn:hover:not(:disabled) {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 30px rgba(102, 126, 234, 0.4);
+}
+
+.container .action-btn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.container label {
+  display: block;
+  margin-bottom: var(--space-2);
+  font-weight: 600;
+  color: #2d3748;
+  font-size: 0.95rem;
+}
+
+.container input,
+.container select {
+  width: 100%;
+  padding: var(--space-3) var(--space-4);
+  border: 2px solid #e2e8f0;
+  border-radius: var(--radius-lg);
+  font-size: 1rem;
+  transition: all 0.3s ease;
+  background: white;
+}
+
+.container input:focus,
+.container select:focus {
+  outline: none;
+  border-color: #667eea;
+  box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+}
 
 /* Biometric Authentication Styles */
 .biometric-auth-container {
-  background: var(--gradient-surface);
+  background: white;
   border: 1px solid var(--color-border);
-  border-radius: var(--radius-lg);
-  padding: var(--space-6);
-  box-shadow: var(--shadow-sm);
+  border-radius: var(--radius-xl);
+  padding: var(--space-8);
+  box-shadow: 0 10px 40px rgba(102, 126, 234, 0.15);
   text-align: center;
+  margin-top: var(--space-6);
 }
 
 .biometric-auth-container h3 {
-  color: var(--color-primary);
-  margin-bottom: var(--space-3);
-  font-size: 1.5rem;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  margin-bottom: var(--space-4);
+  font-size: 1.6rem;
+  font-weight: 700;
 }
 
 .auth-instruction {
@@ -30,12 +110,14 @@
 
 .webcam-wrapper {
   width: 100%;
-  max-width: 500px;
-  margin: 0 auto var(--space-4);
-  border-radius: var(--radius-lg);
+  max-width: 600px;
+  margin: 0 auto var(--space-6);
+  border-radius: var(--radius-xl);
   overflow: hidden;
-  border: 2px solid var(--color-primary);
-  box-shadow: 0 0 20px rgba(37, 99, 235, 0.3);
+  border: 4px solid #667eea;
+  box-shadow: 0 10px 40px rgba(102, 126, 234, 0.4), inset 0 0 20px rgba(102, 126, 234, 0.1);
+  background: #000;
+  position: relative;
 }
 
 .transfer-webcam {
@@ -50,21 +132,28 @@
 
 .auth-progress-bar {
   width: 100%;
-  height: 28px;
-  background: rgba(0, 0, 0, 0.3);
-  border-radius: 14px;
+  height: 32px;
+  background: linear-gradient(135deg, #f0f4ff 0%, #e8ecff 100%);
+  border-radius: 16px;
   overflow: hidden;
-  margin-bottom: var(--space-2);
-  border: 1px solid rgba(37, 99, 235, 0.3);
+  margin-bottom: var(--space-3);
+  border: 2px solid #667eea;
+  box-shadow: inset 0 2px 8px rgba(102, 126, 234, 0.1);
 }
 
 .auth-progress-fill {
   height: 100%;
-  background: linear-gradient(90deg, #2563eb, #3b82f6, #60a5fa);
+  background: linear-gradient(90deg, #667eea, #764ba2, #667eea);
+  background-size: 200% 100%;
   transition: width 0.3s ease;
   border-radius: 14px;
-  box-shadow: 0 0 20px rgba(37, 99, 235, 0.6);
-  animation: shimmer 1.5s ease-in-out infinite;
+  box-shadow: 0 0 20px rgba(102, 126, 234, 0.6);
+  animation: shimmer 1.5s ease-in-out infinite, gradientMove 2s ease infinite;
+}
+
+@keyframes gradientMove {
+  0%, 100% { background-position: 0% 50%; }
+  50% { background-position: 100% 50%; }
 }
 
 @keyframes shimmer {
@@ -81,17 +170,22 @@
 
 /* Biometric Scores Display */
 .biometric-scores {
-  margin-top: var(--space-4);
-  padding: var(--space-4);
-  background: rgba(37, 99, 235, 0.05);
-  border-radius: var(--radius-md);
-  border: 1px solid rgba(37, 99, 235, 0.2);
+  margin-top: var(--space-6);
+  padding: var(--space-5);
+  background: linear-gradient(135deg, #f8fafc 0%, #f0f4ff 100%);
+  border-radius: var(--radius-lg);
+  border: 2px solid #667eea;
+  box-shadow: 0 4px 20px rgba(102, 126, 234, 0.15);
 }
 
 .biometric-scores h4 {
-  color: var(--color-primary);
-  margin-bottom: var(--space-3);
-  font-size: 1.1rem;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  margin-bottom: var(--space-4);
+  font-size: 1.2rem;
+  font-weight: 700;
 }
 
 .score-grid {

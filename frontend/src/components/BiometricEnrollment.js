@@ -1,9 +1,12 @@
 import React, { useState, useRef } from 'react';
+import { useNavigate } from 'react-router-dom';
 import Webcam from 'react-webcam';
 import axios from 'axios';
+import { FaArrowLeft, FaCheckCircle, FaExclamationTriangle } from 'react-icons/fa';
 import './BiometricEnrollment.css';
 
 function BiometricEnrollment() {
+  const navigate = useNavigate();
   const [isCapturing, setIsCapturing] = useState(false);
   const [captureProgress, setCaptureProgress] = useState(0);
   const [message, setMessage] = useState('');
@@ -65,20 +68,76 @@ function BiometricEnrollment() {
   
   return (
     <div className="biometric-enrollment-container">
-      <h2>🔐 Biometric Enrollment</h2>
+      {/* Back Button */}
+      <button className="back-button" onClick={() => navigate('/dashboard')}>
+        <FaArrowLeft /> Back to Dashboard
+      </button>
+
+      <div className="enrollment-header">
+        <h2>🔐 Biometric Enrollment</h2>
+        <p className="subtitle">Set up secure authentication for PIN-free transfers</p>
+      </div>
       
-      <div className="info-card">
-        <h3>Why Enroll Biometrics?</h3>
-        <p>
-          Your biometric profile (face + hand + behavioral style) enables secure 
-          money transfers <strong>without requiring a PIN</strong>.
-        </p>
-        <ul>
-          <li>✅ Multi-modal authentication (Face + Hand + Style)</li>
-          <li>✅ Continuous monitoring during transactions</li>
-          <li>✅ Higher security than traditional PIN</li>
-          <li>✅ No password to remember</li>
-        </ul>
+      {/* User Guidelines */}
+      <div className="guidelines-card">
+        <h3>📋 Enrollment Guidelines</h3>
+        <div className="guidelines-grid">
+          <div className="guideline-item">
+            <div className="guideline-icon">💡</div>
+            <div className="guideline-content">
+              <h4>Lighting Requirements</h4>
+              <p>Ensure you're in a well-lit area with even lighting on your face. Avoid direct backlight or harsh shadows.</p>
+            </div>
+          </div>
+          
+          <div className="guideline-item">
+            <div className="guideline-icon">📍</div>
+            <div className="guideline-content">
+              <h4>Camera Position</h4>
+              <p>Position yourself centered in the frame with your face and hands clearly visible. Maintain 1-2 feet distance.</p>
+            </div>
+          </div>
+          
+          <div className="guideline-item">
+            <div className="guideline-icon">🎭</div>
+            <div className="guideline-content">
+              <h4>During Capture</h4>
+              <p>Make natural facial expressions, move your head slightly (left, right, up, down), and show hand movements naturally.</p>
+            </div>
+          </div>
+          
+          <div className="guideline-item">
+            <div className="guideline-icon">⏱️</div>
+            <div className="guideline-content">
+              <h4>Capture Duration</h4>
+              <p>The enrollment process takes ~3 seconds. Stay in frame and follow the on-screen instructions.</p>
+            </div>
+          </div>
+          
+          <div className="guideline-item">
+            <div className="guideline-icon">✋</div>
+            <div className="guideline-content">
+              <h4>Hand Gestures</h4>
+              <p>Show both hands clearly with natural movements. Open palms work best for accurate hand geometry capture.</p>
+            </div>
+          </div>
+          
+          <div className="guideline-item">
+            <div className="guideline-icon">🔒</div>
+            <div className="guideline-content">
+              <h4>Privacy & Security</h4>
+              <p>Your biometric data is encrypted and stored securely. It never leaves our secure servers.</p>
+            </div>
+          </div>
+        </div>
+
+        <div className="important-note">
+          <FaExclamationTriangle className="note-icon" />
+          <div>
+            <strong>Important:</strong> Ensure no one else is visible in the frame during enrollment. 
+            The system captures face, hand geometry, and behavioral patterns for multi-modal authentication.
+          </div>
+        </div>
       </div>
       
       <div className="webcam-section">
@@ -136,22 +195,6 @@ function BiometricEnrollment() {
           {message}
         </div>
       )}
-      
-      <div className="technical-details">
-        <details>
-          <summary>🔬 Technical Details (Novel Contribution)</summary>
-          <div className="tech-info">
-            <h4>Multi-Modal Biometric Fusion:</h4>
-            <ul>
-              <li><strong>Face Recognition (40%)</strong>: HOG + Histogram + Texture + Edge analysis</li>
-              <li><strong>Hand Geometry (35%)</strong>: Contour analysis + Color histograms + Hu moments</li>
-              <li><strong>Behavioral Style (25%)</strong>: Optical flow + Temporal motion patterns</li>
-            </ul>
-            <p><strong>Fusion Algorithm:</strong> Weighted score-level combination</p>
-            <p><strong>Threshold:</strong> 65% match required for authentication</p>
-          </div>
-        </details>
-      </div>
     </div>
   );
 }

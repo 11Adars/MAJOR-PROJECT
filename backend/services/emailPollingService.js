@@ -8,7 +8,7 @@ class EmailPollingService {
   constructor() {
     this.imap = null;
     this.isRunning = false;
-    this.pollInterval =20*60*1000;
+    this.pollInterval =1*60*1000;
     this.checkInterval = null;
   }
 

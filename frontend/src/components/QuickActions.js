@@ -18,7 +18,7 @@ function QuickActions() {
 			<button className="action-btn" onClick={() => navigate('/transfer')}>
 				<FaMoneyCheckAlt /> Transfer Money
 			</button>
-			<button className="action-btn biometric-btn" onClick={() => navigate('/biometric-enrollment')}>
+			<button className="biometric-btn" onClick={() => navigate('/biometric-enrollment')}>
 				<FaFingerprint /> Enroll Biometrics
 			</button>
 			<button className="action-btn" onClick={() => navigate('/history')}>

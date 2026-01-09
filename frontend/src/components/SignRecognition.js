@@ -1,4 +1,4 @@
-import React, { useState, useRef, useEffect } from 'react';
+import React, { useState, useRef, useEffect, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import Webcam from 'react-webcam';
 import axios from 'axios';
@@ -11,6 +11,9 @@ function SignRecognition() {
   const canvasRef = useRef(null);
   const animationRef = useRef(null);
   const processingRef = useRef(false); // Track if request is in flight
+  const framesRef = useRef([]); // Use ref for frames to avoid stale closure
+  const isRecordingRef = useRef(false); // Ref for recording state
+  const handDetectionCooldownRef = useRef(false); // Prevent rapid re-triggering
   
   const [isRecording, setIsRecording] = useState(false);
   const [currentFrames, setCurrentFrames] = useState([]);
@@ -21,6 +24,8 @@ function SignRecognition() {
   const [lastRecognition, setLastRecognition] = useState('');
   const [landmarksDetected, setLandmarksDetected] = useState(false);
   const [skeletonEnabled, setSkeletonEnabled] = useState(true);
+  const [autoMode, setAutoMode] = useState(true); // Auto-detect hand movements
+  const [handInFrame, setHandInFrame] = useState(false); // Track if hand is in frame
   
   // Intent verification states for banking security
   const [detectedIntent, setDetectedIntent] = useState(null);
@@ -46,7 +51,133 @@ function SignRecognition() {
     [13, 17], [17, 18], [18, 19], [19, 20], [0, 17]
   ];
 
-  // Draw skeleton overlay on canvas
+  // Auto-recognize when 50 frames are captured
+  const processRecognition = useCallback(async (frames) => {
+    if (processingRef.current || frames.length < 10) return;
+    
+    processingRef.current = true;
+    setIsProcessing(true);
+    setMessage('🔍 Recognizing sign...');
+    
+    try {
+      console.log('📤 Sending', frames.length, 'frames to API...');
+      const response = await axios.post(
+        'http://localhost:5003/api/sign/recognize',
+        { frames: frames },
+        {
+          headers: {
+            'Authorization': `Bearer ${localStorage.getItem('token')}`,
+            'Content-Type': 'application/json'
+          },
+          timeout: 30000
+        }
+      );
+
+      const recognizedSign = response.data.sign || 'Unknown';
+      const confidence = response.data.confidence || 0;
+      const intentData = response.data.intent || null;
+      
+      console.log('✅ Received response:', recognizedSign, confidence);
+      console.log('🏦 Intent data:', intentData);
+      
+      // Check if this is a HIGH-RISK banking intent that requires confirmation
+      if (intentData && HIGH_RISK_INTENTS.includes(intentData.type)) {
+        setPendingSign({ 
+          sign: recognizedSign, 
+          confidence, 
+          intent: intentData,
+          hasConfidenceWarning: !intentData.is_valid
+        });
+        setDetectedIntent(intentData);
+        setShowIntentConfirmation(true);
+        setMessage(`⚠️ HIGH-RISK ACTION DETECTED: ${intentData.description || intentData.type}`);
+        return;
+      }
+      
+      // Regular intent or no intent - add to sentence directly
+      if (intentData) {
+        setIntentHistory(prev => [...prev, { sign: recognizedSign, intent: intentData.type, confidence }]);
+        setDetectedIntent(intentData);
+      }
+      
+      // Add word to sentence
+      setRecognizedWords(prev => [...prev, recognizedSign]);
+      setLastRecognition(`${recognizedSign} (${(confidence * 100).toFixed(1)}%)`);
+      
+      const intentMsg = intentData ? ` | 🏦 Intent: ${intentData.type}` : '';
+      setMessage(`✅ Recognized: "${recognizedSign}" with ${(confidence * 100).toFixed(0)}% confidence${intentMsg}`);
+      
+    } catch (err) {
+      console.error('Sign recognition error:', err);
+      const errorMsg = err.response?.data?.error || err.response?.data?.message || err.message || 'Recognition failed';
+      setMessage(`❌ ${errorMsg}`);
+    } finally {
+      processingRef.current = false;
+      setIsProcessing(false);
+      // Reset for next sign after a short cooldown
+      handDetectionCooldownRef.current = true;
+      setTimeout(() => {
+        handDetectionCooldownRef.current = false;
+        setMessage('👋 Ready! Show your hand to start recording next sign...');
+      }, 2000);
+    }
+  }, []);
+
+  // Start auto-recording when hand is detected
+  const startAutoRecording = useCallback(() => {
+    if (isRecordingRef.current || processingRef.current || handDetectionCooldownRef.current) return;
+    
+    console.log('🎬 Auto-starting recording - hand detected!');
+    isRecordingRef.current = true;
+    setIsRecording(true);
+    setMessage('🎥 Recording... Perform ONE sign clearly');
+    setProgress(0);
+    framesRef.current = [];
+    setCurrentFrames([]);
+    
+    const totalFrames = 40;  // Reduced from 50 for faster recognition
+    let frameCount = 0;
+    
+    captureIntervalRef.current = setInterval(() => {
+      if (webcamRef.current && isRecordingRef.current) {
+        const screenshot = webcamRef.current.getScreenshot();
+        if (screenshot) {
+          const base64Frame = screenshot.split(',')[1];
+          framesRef.current.push(base64Frame);
+          frameCount++;
+          
+          const progressPercent = Math.round((frameCount / totalFrames) * 100);
+          setProgress(progressPercent);
+          setCurrentFrames([...framesRef.current]);
+          
+          if (frameCount >= totalFrames) {
+            clearInterval(captureIntervalRef.current);
+            isRecordingRef.current = false;
+            setIsRecording(false);
+            setMessage('✨ 40 frames captured! Processing...');
+            
+            // Auto-process recognition
+            const capturedFrames = [...framesRef.current];
+            framesRef.current = [];
+            setCurrentFrames([]);
+            setProgress(0);
+            processRecognition(capturedFrames);
+          }
+        }
+      }
+    }, 75);  // Reduced from 100ms for faster capture
+  }, [processRecognition]);
+
+  // Set initial message on mount
+  useEffect(() => {
+    if (autoMode) {
+      setMessage('👋 Auto Mode Active! Show your hand to start recording automatically...');
+    } else {
+      setMessage('👆 Manual Mode. Click "Start Recording" to begin.');
+    }
+  }, [autoMode]);
+
+  // Draw skeleton overlay on canvas and detect hands for auto-mode
   useEffect(() => {
     // Don't draw skeleton when disabled
     if (!skeletonEnabled) {
@@ -99,12 +230,37 @@ function SignRecognition() {
         const response = await axios.post(
           'http://localhost:5003/api/sign/extract-landmarks',
           { frame: base64Frame },
-          { timeout: 100 }
+          { timeout: 500 } // Increased timeout to 500ms
         );
 
         if (response.data.success && response.data.landmarks) {
           setLandmarksDetected(true);
           const landmarks = response.data.landmarks; // Array of {x, y, z}
+
+          // Check if hand landmarks are present (indices 33-74)
+          // Left hand: 33-53 (21 landmarks), Right hand: 54-74 (21 landmarks)
+          const leftHandLandmarks = landmarks.slice(33, 54);
+          const rightHandLandmarks = landmarks.slice(54, 75);
+          
+          // More robust hand detection - check if at least 5 hand landmarks are present and valid
+          const hasLeftHand = leftHandLandmarks.filter(lm => lm && (lm.x > 0 || lm.y > 0)).length >= 5;
+          const hasRightHand = rightHandLandmarks.filter(lm => lm && (lm.x > 0 || lm.y > 0)).length >= 5;
+          const handsDetected = hasLeftHand || hasRightHand;
+          
+          // Debug logging (only log changes)
+          if (handsDetected !== handInFrame) {
+            console.log('🖐️ Hand detection changed:', handsDetected ? 'DETECTED' : 'NOT DETECTED');
+            console.log('   Left hand landmarks:', leftHandLandmarks.filter(lm => lm && (lm.x > 0 || lm.y > 0)).length);
+            console.log('   Right hand landmarks:', rightHandLandmarks.filter(lm => lm && (lm.x > 0 || lm.y > 0)).length);
+          }
+          
+          setHandInFrame(handsDetected);
+
+          // AUTO-MODE: Start recording when hand is detected
+          if (autoMode && handsDetected && !isRecordingRef.current && !processingRef.current && !handDetectionCooldownRef.current) {
+            console.log('🎬 Triggering auto-recording!');
+            startAutoRecording();
+          }
 
           // Draw pose landmarks (0-32)
           ctx.strokeStyle = '#00FF00';
@@ -155,10 +311,15 @@ function SignRecognition() {
           });
         } else {
           setLandmarksDetected(false);
+          setHandInFrame(false);
         }
       } catch (err) {
-        // Silently fail for real-time drawing
+        // Log errors for debugging (but not timeout errors which are expected)
+        if (err.code !== 'ECONNABORTED' && !err.message.includes('timeout')) {
+          console.warn('⚠️ Landmark extraction error:', err.message);
+        }
         setLandmarksDetected(false);
+        setHandInFrame(false);
       }
 
       animationRef.current = requestAnimationFrame(drawSkeleton);
@@ -171,141 +332,64 @@ function SignRecognition() {
         cancelAnimationFrame(animationRef.current);
       }
     };
-  }, [skeletonEnabled]); // Only depends on skeletonEnabled, processingRef is checked inside
+  }, [skeletonEnabled, autoMode, startAutoRecording]); // Added autoMode and startAutoRecording
 
-  // Start recording frames
+  // Manual start recording (for manual mode)
   const handleStartRecording = () => {
-    if (isRecording) return;
+    if (isRecordingRef.current || processingRef.current) return;
     
-    setMessage('🎥 Recording... Perform ONE sign clearly');
+    console.log('🎬 Manual start recording');
+    isRecordingRef.current = true;
     setIsRecording(true);
+    setMessage('🎥 Recording... Perform ONE sign clearly');
     setProgress(0);
+    framesRef.current = [];
     setCurrentFrames([]);
     
-    const frames = [];
-    const totalFrames = 50;
+    const totalFrames = 40;  // Reduced from 50 for faster recognition
     let frameCount = 0;
     
     captureIntervalRef.current = setInterval(() => {
-      if (webcamRef.current) {
+      if (webcamRef.current && isRecordingRef.current) {
         const screenshot = webcamRef.current.getScreenshot();
         if (screenshot) {
           const base64Frame = screenshot.split(',')[1];
-          frames.push(base64Frame);
+          framesRef.current.push(base64Frame);
           frameCount++;
           
           const progressPercent = Math.round((frameCount / totalFrames) * 100);
           setProgress(progressPercent);
-          setCurrentFrames(frames);
+          setCurrentFrames([...framesRef.current]);
           
           if (frameCount >= totalFrames) {
             clearInterval(captureIntervalRef.current);
+            isRecordingRef.current = false;
             setIsRecording(false);
-            setMessage('✅ Recording complete! Click "Stop & Recognize" to process.');
+            setMessage('✨ 40 frames captured! Processing...');
+            
+            // Auto-process recognition
+            const capturedFrames = [...framesRef.current];
+            framesRef.current = [];
+            setCurrentFrames([]);
+            setProgress(0);
+            processRecognition(capturedFrames);
           }
         }
       }
     }, 100);
   };
 
-  // Stop recording and recognize the sign
-  const handleStopRecording = async () => {
-    // Prevent multiple simultaneous recognitions using ref (faster than state)
-    if (processingRef.current) {
-      console.log('⏳ Already processing, ignoring click...');
-      return;
-    }
-    
-    // Prevent multiple simultaneous recognitions
-    if (isProcessing) {
-      console.log('⏳ Already processing (state), please wait...');
-      return;
-    }
-    
+  // Cancel current recording
+  const handleCancelRecording = () => {
     if (captureIntervalRef.current) {
       clearInterval(captureIntervalRef.current);
     }
+    isRecordingRef.current = false;
     setIsRecording(false);
-    
-    if (currentFrames.length < 10) {
-      setMessage('❌ Not enough frames captured. Try again.');
-      return;
-    }
-    
-    // Set both ref and state
-    processingRef.current = true;
-    setIsProcessing(true);
-    setMessage('🔍 Recognizing sign...');
-    
-    try {
-      console.log('📤 Sending', currentFrames.length, 'frames to API...');
-      // Call NS-AGF API directly for single sign recognition (no ticket creation)
-      const response = await axios.post(
-        'http://localhost:5003/api/sign/recognize',
-        { frames: currentFrames },
-        {
-          headers: {
-            'Authorization': `Bearer ${localStorage.getItem('token')}`,
-            'Content-Type': 'application/json'
-          },
-          timeout: 10000 //ncreased to 30 seconds for MediaPipe processing
-        }
-      );
-
-      const recognizedSign = response.data.sign || 'Unknown';
-      const confidence = response.data.confidence || 0;
-      const intentData = response.data.intent || null;
-      
-      console.log('✅ Received response:', recognizedSign, confidence);
-      console.log('🏦 Intent data:', intentData);
-      
-      // Check if this is a HIGH-RISK banking intent that requires confirmation
-      if (intentData && HIGH_RISK_INTENTS.includes(intentData.type)) {
-        // HIGH-RISK intent detected - ALWAYS show confirmation dialog
-        // Let the user decide whether to proceed, even with lower confidence
-        const confidenceWarning = !intentData.is_valid 
-          ? `⚠️ Low confidence detected (${(confidence * 100).toFixed(0)}%). ` 
-          : '';
-        
-        setPendingSign({ 
-          sign: recognizedSign, 
-          confidence, 
-          intent: intentData,
-          hasConfidenceWarning: !intentData.is_valid
-        });
-        setDetectedIntent(intentData);
-        setShowIntentConfirmation(true);
-        setMessage(`⚠️ HIGH-RISK ACTION DETECTED: ${intentData.description || intentData.type}`);
-        setCurrentFrames([]);
-        setProgress(0);
-        return; // Don't add to sentence yet - wait for user confirmation
-      }
-      
-      // Regular intent or no intent - add to sentence directly
-      if (intentData) {
-        setIntentHistory(prev => [...prev, { sign: recognizedSign, intent: intentData.type, confidence }]);
-        setDetectedIntent(intentData);
-      }
-      
-      // Add word to sentence
-      setRecognizedWords(prev => [...prev, recognizedSign]);
-      setLastRecognition(`${recognizedSign} (${(confidence * 100).toFixed(1)}%)`);
-      
-      // Show intent information if detected
-      const intentMsg = intentData ? ` | 🏦 Intent: ${intentData.type}` : '';
-      setMessage(`✅ Recognized: "${recognizedSign}" with ${(confidence * 100).toFixed(0)}% confidence${intentMsg}`);
-      setCurrentFrames([]);
-      setProgress(0);
-      
-    } catch (err) {
-      console.error('Sign recognition error:', err);
-      console.log('Error response:', err.response);
-      const errorMsg = err.response?.data?.error || err.response?.data?.message || err.message || 'Recognition failed';
-      setMessage(`❌ ${errorMsg}`);
-    } finally {
-      processingRef.current = false;  // Clear ref
-      setIsProcessing(false);
-    }
+    framesRef.current = [];
+    setCurrentFrames([]);
+    setProgress(0);
+    setMessage('🛑 Recording cancelled. Show your hand to start again...');
   };
 
   // Handle confirmation of high-risk intent
@@ -345,15 +429,19 @@ function SignRecognition() {
 
   // Reset entire sentence
   const handleReset = () => {
-    setRecognizedWords([]);
-    setCurrentFrames([]);
-    setProgress(0);
-    setMessage('');
-    setLastRecognition('');
     if (captureIntervalRef.current) {
       clearInterval(captureIntervalRef.current);
     }
+    isRecordingRef.current = false;
     setIsRecording(false);
+    framesRef.current = [];
+    setRecognizedWords([]);
+    setCurrentFrames([]);
+    setProgress(0);
+    setMessage('🔄 Reset complete. Show your hand to start recording...');
+    setLastRecognition('');
+    setDetectedIntent(null);
+    setIntentHistory([]);
   };
 
   // Submit sentence for intent analysis and ticket creation
@@ -501,10 +589,16 @@ function SignRecognition() {
               </div>
             )}
             
+            {autoMode && !isRecording && !isProcessing && (
+              <div className={`auto-mode-indicator ${handInFrame ? 'hand-detected' : ''}`}>
+                {handInFrame ? '👋 Hand detected! Recording starting...' : '👋 Show your hand to start recording'}
+              </div>
+            )}
+            
             {isRecording && (
               <div className="recording-indicator">
                 <span className="recording-dot"></span>
-                <span>Recording...</span>
+                <span>Recording... {currentFrames.length}/50 frames</span>
               </div>
             )}
           </div>
@@ -520,27 +614,37 @@ function SignRecognition() {
 
           <div className="control-buttons">
             <button
+              onClick={() => setAutoMode(!autoMode)}
+              className={`btn-auto-mode ${autoMode ? 'active' : ''}`}
+            >
+              {autoMode ? '🤖 Auto Mode ON' : '👆 Manual Mode'}
+            </button>
+            
+            <button
               onClick={() => setSkeletonEnabled(!skeletonEnabled)}
               className="btn-toggle-skeleton"
             >
               {skeletonEnabled ? '👁️ Hide Skeleton' : '👁️‍🗨️ Show Skeleton'}
             </button>
             
-            <button
-              onClick={handleStartRecording}
-              disabled={isRecording || isProcessing}
-              className="btn-record"
-            >
-              🎥 Start Recording
-            </button>
+            {!autoMode && (
+              <button
+                onClick={handleStartRecording}
+                disabled={isRecording || isProcessing}
+                className="btn-record"
+              >
+                🎥 Start Recording
+              </button>
+            )}
             
-            <button
-              onClick={handleStopRecording}
-              disabled={!isRecording && currentFrames.length === 0 || isProcessing}
-              className="btn-stop"
-            >
-              ⏹️ Stop & Recognize
-            </button>
+            {isRecording && (
+              <button
+                onClick={handleCancelRecording}
+                className="btn-cancel"
+              >
+                🛑 Cancel Recording
+              </button>
+            )}
             
             <button
               onClick={handleClearLastWord}
@@ -608,15 +712,27 @@ function SignRecognition() {
 
       <div className="instructions-panel">
         <h3>📋 Instructions</h3>
-        <ol>
-          <li><strong>Start Recording:</strong> Click to begin capturing frames for one sign</li>
-          <li><strong>Perform Sign:</strong> Make your sign clearly (records for 5 seconds)</li>
-          <li><strong>Stop & Recognize:</strong> Processes the captured sign and adds to sentence</li>
-          <li><strong>Repeat:</strong> Record more signs to build your complete sentence</li>
-          <li><strong>Clear Last Word:</strong> Remove the most recent word if incorrect</li>
-          <li><strong>Reset All:</strong> Clear entire sentence and start over</li>
-          <li><strong>Predict & Submit:</strong> Sends sentence to Intent + SLM for analysis and creates ticket</li>
-        </ol>
+        {autoMode ? (
+          <ol>
+            <li><strong>Auto Mode Active:</strong> Recording starts automatically when hand is detected</li>
+            <li><strong>Perform Sign:</strong> Make your sign clearly (records 50 frames automatically)</li>
+            <li><strong>Auto Recognition:</strong> Sign is processed automatically after 50 frames</li>
+            <li><strong>Repeat:</strong> Show your hand again to record more signs</li>
+            <li><strong>Cancel Recording:</strong> Click to stop current recording if needed</li>
+            <li><strong>Clear Last Word:</strong> Remove the most recent word if incorrect</li>
+            <li><strong>Predict & Submit:</strong> Sends sentence to Intent + SLM for analysis</li>
+          </ol>
+        ) : (
+          <ol>
+            <li><strong>Start Recording:</strong> Click to begin capturing frames for one sign</li>
+            <li><strong>Perform Sign:</strong> Make your sign clearly (records for 5 seconds)</li>
+            <li><strong>Auto Recognition:</strong> Sign is processed automatically after 50 frames</li>
+            <li><strong>Repeat:</strong> Record more signs to build your complete sentence</li>
+            <li><strong>Clear Last Word:</strong> Remove the most recent word if incorrect</li>
+            <li><strong>Reset All:</strong> Clear entire sentence and start over</li>
+            <li><strong>Predict & Submit:</strong> Sends sentence to Intent + SLM for analysis</li>
+          </ol>
+        )}
         <p className="tip">💡 <strong>Tip:</strong> Build complete sentences like "I need help with loan" or "Check account balance"</p>
       </div>
     </div>
