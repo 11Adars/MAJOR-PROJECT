@@ -1,75 +1,205 @@
-# Virtual Environment
+# ============================================
+# NS-AGF Banking System - .gitignore
+# ============================================
+
+# ============================================
+# Python Virtual Environments
+# ============================================
 venv/
 env/
 ENV/
 .venv/
 **/.venv/
-.env
+virtualenv/
+.Python
 
-# Python packages and binaries
-*.dll
-*.lib
-*.pyd
-*.so
-*.pyc
+# ============================================
+# Python Cache & Compiled Files
+# ============================================
 __pycache__/
 *.py[cod]
 *$py.class
-dist/
-build/
-*.egg-info/
+*.so
+*.pyc
+*.pyo
+*.pyd
+*.dll
+*.lib
 
-# Node dependencies
+# ============================================
+# Python Build & Distribution
+# ============================================
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+pip-wheel-metadata/
+share/python-wheels/
+*.egg-info/
+.installed.cfg
+*.egg
+MANIFEST
+
+# ============================================
+# Environment Variables (CRITICAL - NEVER COMMIT)
+# ============================================
+.env
+.env.local
+.env.*.local
+backend/.env
+frontend/.env
+
+# ============================================
+# Node.js Dependencies & Cache
+# ============================================
 node_modules/
-package-lock.json
 npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
+lerna-debug.log*
+.pnpm-debug.log*
+package-lock.json
+yarn.lock
+.npm
+.yarn-integrity
+.node_repl_history
+*.tgz
 
-# Project specific
-uploads/
-python_service/__pycache__/
+# ============================================
+# Build Outputs
+# ============================================
 frontend/build/
-backend/uploads/
-ns_agf/models/ns_agcn.pth
-# Sign Language Project specific
-# Trained models (keep the final ones but ignore temporary/test models)
-*.pkl
-*.joblib
-test_models/
-temp_models/
+backend/dist/
+*.bundle.js
+*.bundle.css
 
-# Large data files
+# ============================================
+# Uploaded Files & Temporary Data
+# ============================================
+uploads/
+backend/uploads/
+*.jpg
+*.jpeg
+*.png
+*.wav
+*.mp3
+# Keep example files
+!**/example.jpg
+!**/example.png
+
+# ============================================
+# Pre-trained Models & Weights
+# ============================================
+# Sign Language Models (auto-downloaded)
+ns_agf/models/*.pth
+ns_agf/models/*.pt
+ns_agf/models/*.onnx
+!ns_agf/models/.gitkeep
+
+# SLM Models (TinyLlama - auto-downloaded)
+Sign/slm_model_cache/
+*.gguf
+*.bin
+*.safetensors
+
+# Speaker Verification Models (auto-downloaded)
+python_service/pretrained_models/
+!python_service/pretrained_models/.gitkeep
+
+# InsightFace Models (auto-downloaded)
+.insightface/
+~/.insightface/
+
+# HuggingFace Cache
+.cache/huggingface/
+~/.cache/huggingface/
+
+# ============================================
+# Biometric Data (SENSITIVE - NEVER COMMIT)
+# ============================================
+*.pkl
+*.pickle
+biometric_data.pkl
+biometric_data_enhanced.pkl
+biometric_users.db
+data/*.db
+
+# ============================================
+# Video Files (Large Files)
+# ============================================
 *.mp4
 *.avi
 *.mov
 *.wmv
 *.mkv
-*.h5
-*.weights
+*.flv
+# Keep small example/test videos
+!**/example.mp4
+!**/test_sample.mp4
 
-# Processed video data (comment out if you want to keep)
+# ============================================
+# Processed Data & Features
+# ============================================
+*.h5
+*.hdf5
+*.weights
 your_videos_processed/
 your_videos_gesture_data/
 your_vedeos/
 gesture_data/
-# Large CSV landmark files
 **/gesture_data/*.csv
 **/gesture_data/*_landmarks.csv
+processed_data/
+features/
+*.npy
+*.npz
+# Keep label files
+!**/labels.npy
+!**/sign_labels.npy
 
-# Database files
+# ============================================
+# Database Files
+# ============================================
 *.db
 *.sqlite
 *.sqlite3
+*.db-journal
 
-# IDE and editors
+# ============================================
+# Logs & Error Files
+# ============================================
+*.log
+logs/
+backend/backend_error.log
+backend/backend_output.log
+api_out.log
+*.out
+
+# ============================================
+# IDE & Editor Files
+# ============================================
 .vscode/
 .idea/
 *.swp
 *.swo
 *~
+*.sublime-project
+*.sublime-workspace
+.project
+.pydevproject
+.settings/
 
-# OS generated files
+# ============================================
+# OS Generated Files
+# ============================================
 .DS_Store
 .DS_Store?
 ._*
@@ -77,20 +207,78 @@ gesture_data/
 .Trashes
 ehthumbs.db
 Thumbs.db
+desktop.ini
 
-# Logs
-*.log
-logs/
-
-# Temporary files
+# ============================================
+# Temporary Files
+# ============================================
 tmp/
 temp/
 *.tmp
-.idea/
+*.temp
+*.bak
+*.swp
+*~.nib
+test_models/
+temp_models/
 
+# ============================================
+# Jupyter Notebooks (Optional)
+# ============================================
+.ipynb_checkpoints/
+*/.ipynb_checkpoints/*
 
+# ============================================
+# Testing & Coverage
+# ============================================
+.pytest_cache/
+.coverage
+htmlcov/
+.tox/
+.nox/
+coverage.xml
+*.cover
+.hypothesis/
 
-Sign/slm_model_cache/
+# ============================================
+# Documentation Build (Optional)
+# ============================================
+docs/_build/
+site/
 
-python_service/pretrained_models/speaker_verification/embedding_model.ckpt
-ns_agf/models/ns_agcn.pth
+# ============================================
+# Large Data & Model Files (Git LFS Alternative)
+# ============================================
+*.joblib
+*.model
+*.tar.gz
+*.zip
+# Keep small config files
+!requirements*.txt
+!package.json
+
+# ============================================
+# KEEP THESE IMPORTANT FILES
+# ============================================
+# Configuration templates
+!.env.template
+!backend/.env.template
+
+# Documentation
+!README*.md
+!*.md
+
+# Requirements
+!requirements.txt
+!requirements_complete.txt
+!backend/package.json
+!frontend/package.json
+
+# Database schemas
+!backend/database_schema*.sql
+
+# Batch scripts
+!*.bat
+!*.sh
+
+# ============================================

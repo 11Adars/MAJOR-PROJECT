@@ -63,14 +63,14 @@ const calculateBiometricMatch = (features1, features2) => {
 exports.registerFace = async (req, res) => {
   try {
     const { username, email } = req.body;
-    const image = req.file?.path;
+    const imageFile = req.file;
 
     // Validate input
     if (!username || !email) {
       return res.status(400).json({ error: 'Username and email are required' });
     }
 
-    if (!image) {
+    if (!imageFile) {
       return res.status(400).json({ error: 'Face image is required' });
     }
 
@@ -81,16 +81,16 @@ exports.registerFace = async (req, res) => {
     );
 
     if (existingUser.rows.length > 0) {
-      // Cleanup uploaded file
-      if (fs.existsSync(image)) {
-        fs.unlinkSync(image);
-      }
+      // No file cleanup needed - files are in memory
       return res.status(409).json({ error: 'User already exists with this email or username' });
     }
 
     // Extract face embedding using Python service
     const formData = new FormData();
-    formData.append('image', fs.createReadStream(image));
+    formData.append('image', imageFile.buffer, {
+      filename: imageFile.originalname,
+      contentType: imageFile.mimetype
+    });
 
     let faceEmbedding;
     try {
@@ -99,10 +99,7 @@ exports.registerFace = async (req, res) => {
       });
       faceEmbedding = data.embedding; // 512-dim array
     } catch (err) {
-      // Cleanup uploaded file
-      if (fs.existsSync(image)) {
-        fs.unlinkSync(image);
-      }
+      // No file cleanup needed
       console.error('Face embedding extraction failed:', err.message);
       return res.status(500).json({ 
         error: 'Face verification service unavailable',
@@ -110,13 +107,10 @@ exports.registerFace = async (req, res) => {
       });
     }
 
-    // Store face embedding as JSON string
-    const embeddingJson = JSON.stringify(faceEmbedding);
-
-    // Insert user into database
+    // Insert user into database with face embedding
     const result = await pool.query(
-      'INSERT INTO users (username, email, face_biometric) VALUES ($1, $2, $3) RETURNING id, username, email',
-      [username, email, embeddingJson]
+      'INSERT INTO users (username, email, face_embedding) VALUES ($1, $2, $3) RETURNING id, username, email',
+      [username, email, faceEmbedding]
     );
 
     const userId = result.rows[0].id;
@@ -124,10 +118,7 @@ exports.registerFace = async (req, res) => {
     // Generate JWT token
     const token = generateToken(userId);
 
-    // Cleanup uploaded file
-    if (fs.existsSync(image)) {
-      fs.unlinkSync(image);
-    }
+    // No file cleanup needed - files are processed in memory
 
     console.log(`✅ User registered successfully: ${username} (ID: ${userId})`);
 
@@ -145,10 +136,7 @@ exports.registerFace = async (req, res) => {
   } catch (err) {
     console.error('Face registration error:', err);
     
-    // Cleanup uploaded file on error
-    if (req.file?.path && fs.existsSync(req.file.path)) {
-      fs.unlinkSync(req.file.path);
-    }
+    // No file cleanup needed
 
     res.status(500).json({ 
       error: 'Face registration failed', 
@@ -160,42 +148,41 @@ exports.registerFace = async (req, res) => {
 exports.loginFace = async (req, res) => {
   try {
     const { username } = req.body;
-    const image = req.file?.path;
+    const imageFile = req.file;
 
     if (!username) {
       return res.status(400).json({ error: 'Username is required' });
     }
 
-    if (!image) {
+    if (!imageFile) {
       return res.status(400).json({ error: 'Face image is required' });
     }
 
     // Get user from database
     const userResult = await pool.query(
-      'SELECT id, username, email, face_biometric FROM users WHERE username = $1',
+      'SELECT id, username, email, face_embedding FROM users WHERE username = $1',
       [username]
     );
 
     if (userResult.rows.length === 0) {
-      if (fs.existsSync(image)) {
-        fs.unlinkSync(image);
-      }
+      // No file cleanup needed
       return res.status(404).json({ error: 'User not found' });
     }
 
     const user = userResult.rows[0];
 
     // Check if user has registered face
-    if (!user.face_biometric) {
-      if (fs.existsSync(image)) {
-        fs.unlinkSync(image);
-      }
+    if (!user.face_embedding) {
+      // No file cleanup needed
       return res.status(401).json({ error: 'No face biometric registered for this user' });
     }
 
     // Extract face embedding from login image
     const formData = new FormData();
-    formData.append('image', fs.createReadStream(image));
+    formData.append('image', imageFile.buffer, {
+      filename: imageFile.originalname,
+      contentType: imageFile.mimetype
+    });
 
     let loginEmbedding;
     try {
@@ -204,9 +191,7 @@ exports.loginFace = async (req, res) => {
       });
       loginEmbedding = data.embedding;
     } catch (err) {
-      if (fs.existsSync(image)) {
-        fs.unlinkSync(image);
-      }
+      // No file cleanup needed
       console.error('Face embedding extraction failed:', err.message);
       return res.status(500).json({ 
         error: 'Face verification failed',
@@ -215,7 +200,7 @@ exports.loginFace = async (req, res) => {
     }
 
     // Parse stored embedding
-    const storedEmbedding = JSON.parse(user.face_biometric);
+    const storedEmbedding = user.face_embedding;
 
     // Calculate cosine similarity between embeddings
     const dot = loginEmbedding.reduce((sum, val, i) => sum + val * storedEmbedding[i], 0);
@@ -225,10 +210,7 @@ exports.loginFace = async (req, res) => {
 
     console.log(`Face similarity for ${username}: ${similarity.toFixed(4)}`);
 
-    // Cleanup uploaded file
-    if (fs.existsSync(image)) {
-      fs.unlinkSync(image);
-    }
+    // No file cleanup needed
 
     // Check similarity threshold (0.5 = 50% match)
     if (similarity < 0.5) {
@@ -262,9 +244,7 @@ exports.loginFace = async (req, res) => {
   } catch (err) {
     console.error('Face login error:', err);
     
-    if (req.file?.path && fs.existsSync(req.file.path)) {
-      fs.unlinkSync(req.file.path);
-    }
+    // No file cleanup needed
 
     res.status(500).json({ 
       error: 'Face login failed', 
@@ -279,7 +259,7 @@ exports.loginFace = async (req, res) => {
 
 exports.registerVoice = async (req, res) => {
   const { username, email } = req.body;
-  const audioPath = req.file.path;
+  const audioFile = req.file;
   console.log('Starting voice registration...', { username, email });
 
   try {
@@ -289,16 +269,16 @@ exports.registerVoice = async (req, res) => {
       [username]
     );
 
-     console.log('Audio file:', {
-      path: audioPath,
-      size: fs.statSync(audioPath).size,
-      exists: fs.existsSync(audioPath)
+    console.log('Audio file received:', {
+      hasFile: !!audioFile,
+      size: audioFile?.size,
+      mimetype: audioFile?.mimetype
     });
 
     const formData = new FormData();
-    formData.append('audio', fs.createReadStream(audioPath), {
-      filename: 'voice.wav',
-      contentType: 'audio/wav'
+    formData.append('audio', audioFile.buffer, {
+      filename: audioFile.originalname,
+      contentType: audioFile.mimetype
     });
 
     const { data } = await axios.post('http://127.0.0.1:5001/voice-verify', formData, {
@@ -342,10 +322,6 @@ exports.registerVoice = async (req, res) => {
     res.status(500).json({ 
       error: 'Voice registration failed: ' + err.message 
     });
-  } finally {
-    if (fs.existsSync(audioPath)) {
-      fs.unlinkSync(audioPath);
-    }
   }
 };
 
@@ -353,7 +329,7 @@ exports.registerVoice = async (req, res) => {
 // Consolidated and hardened voice login implementation
 exports.loginVoice = async (req, res) => {
     const { username } = req.body;
-    const audioPath = req.file.path;
+    const audioFile = req.file;
 
     try {
         console.log('Starting voice login...', { username });
@@ -370,6 +346,14 @@ exports.loginVoice = async (req, res) => {
 
         const user = userResult.rows[0];
         
+        console.log('Voice login - User data retrieved:', {
+            username: user.username,
+            voice_registered: user.voice_registered,
+            hasVoiceData: !!user.voice_data,
+            voiceDataType: typeof user.voice_data,
+            voiceDataKeys: user.voice_data ? Object.keys(user.voice_data) : null
+        });
+
         // Validate voice data
         if (!user.voice_registered || !user.voice_data) {
             console.log('Voice data missing for user:', username);
@@ -383,9 +367,9 @@ exports.loginVoice = async (req, res) => {
 
         // Process login audio
         const formData = new FormData();
-    formData.append('audio', fs.createReadStream(audioPath), {
-      filename: 'voice.wav',
-      contentType: 'audio/wav'
+    formData.append('audio', audioFile.buffer, {
+      filename: audioFile.originalname,
+      contentType: audioFile.mimetype
     });
 
     // Call ML service and capture both success and error responses to aid debugging
@@ -490,10 +474,6 @@ exports.loginVoice = async (req, res) => {
     } catch (err) {
     console.error('Voice login error:', err);
     res.status(500).json({ error: 'Voice login failed: ' + err.message });
-    } finally {
-        if (fs.existsSync(audioPath)) {
-            fs.unlinkSync(audioPath);
-        }
     }
 };
 
@@ -515,6 +495,198 @@ const calculateSimilarity = (vec1, vec2) => {
 // Generate 6-digit OTP
 const generateOTP = () => {
   return Math.floor(100000 + Math.random() * 900000).toString();
+};
+
+// ===================== MULTI-AUTH REGISTRATION ===================== //
+
+/**
+ * Register user with Face, Voice, and OTP authentication
+ * All three methods are captured in a single flow
+ */
+exports.registerMultiAuth = async (req, res) => {
+  try {
+    const { username, email, phone } = req.body;
+    const faceFile = req.files?.face?.[0];
+    const voiceFile = req.files?.voice?.[0];
+
+    console.log('Multi-auth registration started:', { username, email, phone, hasFace: !!faceFile, hasVoice: !!voiceFile });
+
+    // Validate required fields
+    if (!username || !email) {
+      return res.status(400).json({ error: 'Username and email are required' });
+    }
+
+    // Face is required, voice is optional
+    if (!faceFile) {
+      return res.status(400).json({ error: 'Face image is required' });
+    }
+
+    // Check if user already exists
+    const existingUser = await pool.query(
+      'SELECT id FROM users WHERE email = $1 OR username = $2',
+      [email, username]
+    );
+
+    if (existingUser.rows.length > 0) {
+      return res.status(409).json({ error: 'User already exists with this email or username' });
+    }
+
+    // Process Face Authentication
+    let faceEmbedding = null;
+    if (faceFile) {
+      try {
+        const formData = new FormData();
+        formData.append('image', faceFile.buffer, {
+          filename: faceFile.originalname,
+          contentType: faceFile.mimetype
+        });
+
+        const { data } = await axios.post('http://127.0.0.1:5001/embed', formData, {
+          headers: formData.getHeaders(),
+        });
+        faceEmbedding = data.embedding;
+        console.log('✅ Face embedding extracted');
+      } catch (err) {
+        console.error('Face processing error:', err);
+        // Continue without face - user can enroll later
+      }
+    }
+
+    // Process Voice Authentication
+    let voiceData = null;
+    if (voiceFile) {
+      try {
+        const formData = new FormData();
+        formData.append('audio', voiceFile.buffer, {
+          filename: voiceFile.originalname,
+          contentType: voiceFile.mimetype
+        });
+
+        const { data } = await axios.post('http://127.0.0.1:5001/voice-verify', formData, {
+          headers: formData.getHeaders(),
+        });
+
+        voiceData = {
+          embedding: data.embedding,
+          voice_features: data.voice_features
+        };
+        console.log('✅ Voice features extracted:', {
+          hasEmbedding: !!voiceData.embedding,
+          hasFeatures: !!voiceData.voice_features,
+          embeddingLength: voiceData.embedding?.length
+        });
+      } catch (err) {
+        console.error('Voice processing error:', err.message);
+        console.error('Voice processing stack:', err.stack);
+        // Continue without voice - user can enroll later
+      }
+    }
+
+    // Create user with all authentication methods
+    console.log('Saving user with:', {
+      username,
+      email,
+      phone,
+      hasFaceEmbedding: !!faceEmbedding,
+      hasVoiceData: !!voiceData,
+      voiceRegistered: voiceData !== null
+    });
+
+    const result = await pool.query(
+      `INSERT INTO users (username, email, phone, face_embedding, voice_data, voice_registered)
+       VALUES ($1, $2, $3, $4, $5, $6)
+       RETURNING id, username, email, voice_registered`,
+      [username, email, phone, faceEmbedding, voiceData, voiceData !== null]
+    );
+
+    const user = result.rows[0];
+    console.log('User created in database:', {
+      id: user.id,
+      username: user.username,
+      voice_registered: user.voice_registered
+    });
+
+    // Log successful registration
+    await pool.query(
+      'INSERT INTO login_history (user_id, auth_method, success) VALUES ($1, $2, $3)',
+      [user.id, 'multi_auth_register', true]
+    );
+
+    // No file cleanup needed - files are processed in memory
+
+    const token = generateToken(user.id);
+
+    console.log('✅ Multi-auth registration successful:', user);
+
+    res.json({
+      success: true,
+      message: 'Registration successful with multi-factor authentication',
+      token,
+      user: {
+        id: user.id,
+        username: user.username,
+        email: user.email
+      }
+    });
+
+  } catch (err) {
+    console.error('Multi-auth registration error:', err);
+    res.status(500).json({ 
+      error: 'Registration failed', 
+      message: err.message 
+    });
+  }
+};
+
+/**
+ * Send OTP for registration (stores in temporary table)
+ */
+exports.sendOtpForRegistration = async (req, res) => {
+  const { email } = req.body;
+
+  try {
+    if (!email || !email.includes('@')) {
+      return res.status(400).json({ error: 'Valid email is required' });
+    }
+
+    // Check if user already exists
+    const existingUser = await pool.query(
+      'SELECT id FROM users WHERE email = $1',
+      [email]
+    );
+
+    if (existingUser.rows.length > 0) {
+      return res.status(409).json({ error: 'User already exists with this email' });
+    }
+
+    const otp = generateOTP();
+    const otpExpires = new Date(Date.now() + 5 * 60 * 1000); // 5 minutes
+
+    // Store in temporary registration table
+    await pool.query(
+      `INSERT INTO temp_registrations (email, otp, otp_expires)
+       VALUES ($1, $2, $3)
+       ON CONFLICT (email) 
+       DO UPDATE SET otp = $2, otp_expires = $3`,
+      [email, otp, otpExpires]
+    );
+
+    // Send OTP via email
+    const emailSent = await sendOTP(email, otp);
+    if (!emailSent) {
+      throw new Error('Failed to send OTP email');
+    }
+
+    res.json({
+      success: true,
+      message: 'OTP sent successfully',
+      email: email
+    });
+
+  } catch (err) {
+    console.error('Send OTP for registration error:', err);
+    res.status(500).json({ error: 'Failed to send OTP: ' + err.message });
+  }
 };
 
 exports.sendOtp = async (req, res) => {
@@ -624,6 +796,7 @@ exports.getUserData = async (req, res) => {
                 username, 
                 email,
                 voice_registered,
+                face_embedding,
                 COALESCE(voice_data, '{}') as voice_data
             FROM users 
             WHERE id = $1`,
@@ -637,10 +810,10 @@ exports.getUserData = async (req, res) => {
         // Transform data for frontend
         const userData = {
             ...userResult.rows[0],
-            face_registered: false, // Default to false for now
+            face_registered: !!userResult.rows[0].face_embedding,
             auth_methods: {
-                voice: userResult.rows[0].voice_registered,
-                face: false // Default to false for now
+                voice: userResult.rows[0].voice_registered || false,
+                face: !!userResult.rows[0].face_embedding
             }
         };
 

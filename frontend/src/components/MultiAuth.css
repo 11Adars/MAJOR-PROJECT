@@ -1,0 +1,533 @@
+/* Multi-Auth Registration & Login Styles */
+
+.register-container, .login-container {
+  max-width: 600px;
+  margin: 50px auto;
+  padding: 30px;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  border-radius: 20px;
+  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.2);
+  color: white;
+  position: relative;
+}
+
+.back-btn {
+  position: absolute;
+  top: 20px;
+  left: 20px;
+  background: rgba(255, 255, 255, 0.2);
+  border: none;
+  padding: 10px 15px;
+  border-radius: 10px;
+  color: white;
+  cursor: pointer;
+  font-size: 14px;
+  transition: all 0.3s ease;
+}
+
+.back-btn:hover {
+  background: rgba(255, 255, 255, 0.3);
+  transform: translateX(-5px);
+}
+
+.register-container h2, .login-container h1 {
+  text-align: center;
+  margin-top: 20px;
+  margin-bottom: 10px;
+  font-size: 32px;
+  font-weight: bold;
+}
+
+.subtitle {
+  text-align: center;
+  margin-bottom: 30px;
+  opacity: 0.9;
+  font-size: 16px;
+}
+
+/* Step Indicator */
+.step-indicator {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 40px;
+  position: relative;
+}
+
+.step-indicator::before {
+  content: '';
+  position: absolute;
+  top: 20px;
+  left: 10%;
+  right: 10%;
+  height: 2px;
+  background: rgba(255, 255, 255, 0.3);
+  z-index: 0;
+}
+
+.step {
+  flex: 1;
+  text-align: center;
+  position: relative;
+  z-index: 1;
+  opacity: 0.5;
+  transition: all 0.3s ease;
+}
+
+.step.active {
+  opacity: 1;
+}
+
+.step.completed {
+  opacity: 1;
+}
+
+.step span {
+  display: block;
+  width: 40px;
+  height: 40px;
+  line-height: 40px;
+  margin: 0 auto 10px;
+  background: rgba(255, 255, 255, 0.3);
+  border-radius: 50%;
+  font-weight: bold;
+}
+
+.step.active span {
+  background: #fff;
+  color: #667eea;
+  box-shadow: 0 0 20px rgba(255, 255, 255, 0.5);
+}
+
+.step.completed span {
+  background: #4CAF50;
+  color: white;
+}
+
+/* Form Elements */
+.register-form, .form-section {
+  width: 100%;
+}
+
+.step-content {
+  animation: fadeIn 0.5s ease;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+input[type="text"],
+input[type="email"],
+input[type="tel"] {
+  width: 100%;
+  padding: 15px;
+  margin: 10px 0;
+  border: none;
+  border-radius: 10px;
+  font-size: 16px;
+  background: rgba(255, 255, 255, 0.9);
+  color: #333;
+}
+
+input:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.step-content h3 {
+  text-align: center;
+  margin-bottom: 20px;
+  font-size: 24px;
+}
+
+.instruction {
+  text-align: center;
+  margin-bottom: 20px;
+  opacity: 0.9;
+}
+
+/* Webcam Section */
+.webcam-section {
+  margin: 20px 0;
+  text-align: center;
+}
+
+.webcam, .webcam-preview {
+  width: 100%;
+  max-width: 400px;
+  border-radius: 15px;
+  margin: 0 auto 20px;
+  display: block;
+  box-shadow: 0 5px 20px rgba(0, 0, 0, 0.3);
+}
+
+.captured-image {
+  width: 100%;
+  max-width: 400px;
+  border-radius: 15px;
+  margin: 0 auto 20px;
+  display: block;
+  box-shadow: 0 5px 20px rgba(0, 0, 0, 0.3);
+}
+
+.webcam-container {
+  margin: 20px 0;
+}
+
+.captured-preview img {
+  width: 100%;
+  max-width: 300px;
+  border-radius: 10px;
+  margin: 20px auto;
+  display: block;
+}
+
+/* Voice Section */
+.voice-section {
+  margin: 20px 0;
+  text-align: center;
+}
+
+.recording-controls {
+  margin: 20px 0;
+}
+
+.recording-indicator {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 20px 0;
+  font-size: 18px;
+  font-weight: bold;
+}
+
+.pulse {
+  display: inline-block;
+  width: 20px;
+  height: 20px;
+  background: #ff0000;
+  border-radius: 50%;
+  margin-right: 10px;
+  animation: pulse 1s infinite;
+}
+
+@keyframes pulse {
+  0%, 100% {
+    opacity: 1;
+    transform: scale(1);
+  }
+  50% {
+    opacity: 0.5;
+    transform: scale(1.2);
+  }
+}
+
+.voice-preview {
+  margin: 20px 0;
+}
+
+.voice-preview audio {
+  width: 100%;
+  max-width: 400px;
+  margin: 10px 0;
+}
+
+/* OTP Section */
+.otp-section {
+  margin: 20px 0;
+  text-align: center;
+}
+
+.otp-input {
+  width: 100%;
+  max-width: 200px;
+  padding: 15px;
+  margin: 20px auto;
+  display: block;
+  border: none;
+  border-radius: 10px;
+  font-size: 24px;
+  font-weight: bold;
+  text-align: center;
+  letter-spacing: 5px;
+  background: rgba(255, 255, 255, 0.9);
+  color: #333;
+}
+
+/* Auth Method Selector */
+.auth-method-selector {
+  display: flex;
+  gap: 10px;
+  margin: 20px 0;
+  justify-content: center;
+}
+
+.method-btn {
+  flex: 1;
+  padding: 15px;
+  border: 2px solid rgba(255, 255, 255, 0.3);
+  background: rgba(255, 255, 255, 0.1);
+  color: white;
+  border-radius: 10px;
+  cursor: pointer;
+  font-size: 16px;
+  transition: all 0.3s ease;
+}
+
+.method-btn:hover {
+  background: rgba(255, 255, 255, 0.2);
+}
+
+.method-btn.active {
+  background: rgba(255, 255, 255, 0.9);
+  color: #667eea;
+  border-color: white;
+  font-weight: bold;
+}
+
+.method-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+/* Buttons */
+button {
+  width: 100%;
+  padding: 15px;
+  margin: 10px 0;
+  border: none;
+  border-radius: 10px;
+  font-size: 16px;
+  font-weight: bold;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.capture-btn, .record-btn {
+  background: #4CAF50;
+  color: white;
+}
+
+.capture-btn:hover, .record-btn:hover {
+  background: #45a049;
+  transform: translateY(-2px);
+  box-shadow: 0 5px 15px rgba(76, 175, 80, 0.4);
+}
+
+.stop-btn {
+  background: #f44336;
+  color: white;
+}
+
+.stop-btn:hover {
+  background: #da190b;
+}
+
+.retake-btn {
+  background: #ff9800;
+  color: white;
+}
+
+.retake-btn:hover {
+  background: #e68900;
+}
+
+.next-btn {
+  background: #2196F3;
+  color: white;
+}
+
+.next-btn:hover {
+  background: #0b7dda;
+}
+
+.send-otp-btn {
+  background: #9C27B0;
+  color: white;
+}
+
+.send-otp-btn:hover {
+  background: #7b1fa2;
+}
+
+.resend-btn {
+  background: rgba(255, 255, 255, 0.2);
+  color: white;
+  font-size: 14px;
+  padding: 10px;
+}
+
+.resend-btn:hover {
+  background: rgba(255, 255, 255, 0.3);
+}
+
+.skip-btn {
+  background: rgba(255, 255, 255, 0.15);
+  color: white;
+  font-size: 14px;
+  padding: 12px;
+  margin-top: 10px;
+  border: 2px dashed rgba(255, 255, 255, 0.4);
+}
+
+.skip-btn:hover {
+  background: rgba(255, 255, 255, 0.25);
+  border-color: rgba(255, 255, 255, 0.6);
+}
+
+.note {
+  text-align: center;
+  font-size: 14px;
+  opacity: 0.8;
+  margin-bottom: 15px;
+  font-style: italic;
+}
+
+.register-button, .login-button {
+  background: linear-gradient(45deg, #4CAF50, #45a049);
+  color: white;
+  font-size: 18px;
+  padding: 18px;
+}
+
+.register-button:hover, .login-button:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 8px 25px rgba(76, 175, 80, 0.4);
+}
+
+button:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+  transform: none !important;
+}
+
+.btn-group {
+  display: flex;
+  gap: 10px;
+  margin: 20px 0;
+}
+
+.btn-group button {
+  flex: 1;
+}
+
+/* Success Screen */
+.success-screen {
+  text-align: center;
+  padding: 40px 20px;
+}
+
+.success-icon {
+  font-size: 80px;
+  margin-bottom: 20px;
+  animation: scaleIn 0.5s ease;
+}
+
+@keyframes scaleIn {
+  from {
+    transform: scale(0);
+  }
+  to {
+    transform: scale(1);
+  }
+}
+
+.auth-methods-list {
+  list-style: none;
+  padding: 0;
+  margin: 20px 0;
+  text-align: left;
+  max-width: 300px;
+  margin: 20px auto;
+}
+
+.auth-methods-list li {
+  padding: 10px;
+  margin: 10px 0;
+  background: rgba(255, 255, 255, 0.2);
+  border-radius: 10px;
+  font-size: 16px;
+}
+
+/* Messages */
+.message {
+  padding: 15px;
+  margin: 20px 0;
+  border-radius: 10px;
+  text-align: center;
+  font-weight: bold;
+  animation: slideIn 0.3s ease;
+}
+
+@keyframes slideIn {
+  from {
+    opacity: 0;
+    transform: translateY(-10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.message.success {
+  background: rgba(76, 175, 80, 0.8);
+  color: white;
+}
+
+.message.error {
+  background: rgba(244, 67, 54, 0.8);
+  color: white;
+}
+
+/* Links */
+.login-link, .register-link {
+  text-align: center;
+  margin-top: 20px;
+  font-size: 16px;
+}
+
+.login-link span, .register-link span {
+  color: #fff;
+  text-decoration: underline;
+  cursor: pointer;
+  font-weight: bold;
+}
+
+.login-link span:hover, .register-link span:hover {
+  opacity: 0.8;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+  .register-container, .login-container {
+    margin: 20px;
+    padding: 20px;
+  }
+
+  .step-indicator {
+    font-size: 12px;
+  }
+
+  .step span {
+    width: 30px;
+    height: 30px;
+    line-height: 30px;
+    font-size: 14px;
+  }
+
+  .webcam, .captured-image, .webcam-preview {
+    max-width: 100%;
+  }
+
+  .auth-method-selector {
+    flex-direction: column;
+  }
+}

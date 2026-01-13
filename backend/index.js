@@ -2,7 +2,21 @@ const express = require('express');
 const multer = require('multer');
 const cors = require('cors');
 const dotenv = require('dotenv');
-const { registerFace, loginFace, registerVoice, loginVoice,getUserData,getLoginHistory,logout,sendOtp,verifyOtp,enrollBiometrics,recognizeSignLanguage } = require('./controllers/userController');
+const { 
+  registerFace, 
+  loginFace, 
+  registerVoice, 
+  loginVoice,
+  getUserData,
+  getLoginHistory,
+  logout,
+  sendOtp,
+  verifyOtp,
+  enrollBiometrics,
+  recognizeSignLanguage,
+  registerMultiAuth,
+  sendOtpForRegistration
+} = require('./controllers/userController');
 const path = require('path');
 const authMiddleware = require('./middleware/authMiddleware');
 const emailPollingService = require('./services/emailPollingService');
@@ -19,21 +33,15 @@ const app = express();
 app.use(cors());
 app.use(express.json({ limit: '50mb' })); // Increased limit for biometric enrollment
 app.use(express.urlencoded({ limit: '50mb', extended: true }));
-const storage = multer.diskStorage({
-  destination: (req, file, cb) => {
-    cb(null, 'uploads/');
-  },
-  filename: (req, file, cb) => {
-    cb(null, Date.now() + path.extname(file.originalname));
-  }
+// Use memory storage to avoid saving files to disk
+const storage = multer.memoryStorage();
+
+const upload = multer({ 
+  storage,
+  limits: { fileSize: 10 * 1024 * 1024 } // 10MB limit
 });
 
-const upload = multer({ storage });
-
 const fs = require('fs');
-if (!fs.existsSync('uploads')) {
-  fs.mkdirSync('uploads');
-}
 
 // ========= Face Auth Routes ========= //
 app.post('/api/register', upload.single('image'), registerFace);
@@ -168,7 +176,20 @@ app.use((err, req, res, next) => {
   res.status(500).json({ message: 'Internal server error.' });
 });
 
-// OTP Auth Routes
+// ==================== Multi-Auth Registration & Login Routes ====================
+// Register with Face + Voice (memory storage - no disk saving)
+const multiAuthUpload = multer({
+  storage: multer.memoryStorage(),
+  limits: { fileSize: 10 * 1024 * 1024 } // 10MB limit
+}).fields([
+  { name: 'face', maxCount: 1 },
+  { name: 'voice', maxCount: 1 }
+]);
+
+app.post('/api/auth/register-multi', multiAuthUpload, registerMultiAuth);
+app.post('/api/auth/send-otp-register', sendOtpForRegistration);
+
+// OTP Auth Routes (Login)
 app.post('/api/otp/send', sendOtp);
 app.post('/api/otp/verify', verifyOtp);
 

@@ -421,15 +421,22 @@ import numpy as np
 import cv2
 import insightface
 import os
-# import torch
-# from speechbrain.inference.speaker import SpeakerRecognition
-# Note: Removed unused 'EncoderClassifier'
 import logging
-# Note: Removed unused 'torchaudio', 'soundfile', and 'io'
-# import librosa
-# from scipy.stats import skew, kurtosis
 import warnings
 warnings.filterwarnings('ignore')
+
+# Conditional imports for voice authentication
+try:
+    import torch
+    from speechbrain.inference.speaker import SpeakerRecognition
+    import librosa
+    from scipy.stats import skew, kurtosis
+    VOICE_ENABLED = True
+    print("✅ Voice authentication libraries loaded successfully")
+except Exception as e:
+    VOICE_ENABLED = False
+    print(f"⚠️ Voice authentication disabled: {str(e)}")
+    print("   Face authentication will still work.")
 
 app = Flask(__name__)
 CORS(app)
@@ -456,18 +463,19 @@ face_model.prepare(ctx_id=0, det_size=(640, 640))
 logging.basicConfig(level=logging.DEBUG)
 logger = logging.getLogger(__name__)
 
-# Load ECAPA-TDNN voice model
-# (Voice code is unchanged, as requested)
-try:
-   # Use SpeakerRecognition model specifically for speaker verification
-    # voice_model = SpeakerRecognition.from_hparams(
-    #     source="speechbrain/spkrec-ecapa-voxceleb",
-    #     savedir="pretrained_models/spkrec-ecapa-voxceleb"
-    # )
-    pass
-except Exception as e:
-    logger.error(f"Model initialization error: {str(e)}")
-    raise
+# Load ECAPA-TDNN voice model (only if voice is enabled)
+voice_model = None
+if VOICE_ENABLED:
+    try:
+        voice_model = SpeakerRecognition.from_hparams(
+            source="speechbrain/spkrec-ecapa-voxceleb",
+            savedir="pretrained_models/spkrec-ecapa-voxceleb"
+        )
+        logger.info("✅ Voice model loaded successfully")
+    except Exception as e:
+        logger.error(f"❌ Voice model initialization error: {str(e)}")
+        logger.info("   Face authentication will still work.")
+        voice_model = None
 
 def extract_voice_features(waveform, sample_rate):
     """Extract comprehensive voice features for speaker verification"""
@@ -625,74 +633,80 @@ def get_face_embedding():
 
 
 # ---------------- VOICE VERIFICATION ROUTE (UPDATED) ------------------
-# @app.route('/voice-verify', methods=['POST'])
-# def verify_voice():
-#     temp_path = 'temp_audio.wav'
-#     if 'audio' not in request.files:
-#         return jsonify({'error': 'No audio file provided'}), 400
+@app.route('/voice-verify', methods=['POST'])
+def verify_voice():
+    # Check if voice authentication is enabled
+    if not VOICE_ENABLED or voice_model is None:
+        return jsonify({
+            'error': 'Voice authentication is currently disabled due to missing dependencies',
+            'success': False
+        }), 503
+    
+    temp_path = 'temp_audio.wav'
+    if 'audio' not in request.files:
+        return jsonify({'error': 'No audio file provided'}), 400
 
-#     try:
-#         audio_file = request.files['audio']
-#         audio_file.save(temp_path)
+    try:
+        audio_file = request.files['audio']
+        audio_file.save(temp_path)
 
-#         # FIX: Removed stray 'g'
-#         # Load and preprocess audio
-#         waveform, sample_rate = librosa.load(temp_path, sr=16000)
+        # Load and preprocess audio
+        waveform, sample_rate = librosa.load(temp_path, sr=16000)
 
-#         # Voice activity detection
-#         intervals = librosa.effects.split(waveform, top_db=20)
-#         if len(intervals) == 0:
-#             return jsonify({'error': 'No voice detected'}), 400
+        # Voice activity detection
+        intervals = librosa.effects.split(waveform, top_db=20)
+        if len(intervals) == 0:
+            return jsonify({'error': 'No voice detected'}), 400
 
-#         # FIX: Removed stray 's'
-#         # Extract voiced segments
-#         voiced_segments = []
-#         for start, end in intervals:
-#             voiced_segments.append(waveform[start:end])
+        # Extract voiced segments
+        voiced_segments = []
+        for start, end in intervals:
+            voiced_segments.append(waveform[start:end])
         
-#         if not voiced_segments:
-#              return jsonify({'error': 'No voiced segments found after VAD'}), 400
+        if not voiced_segments:
+             return jsonify({'error': 'No voiced segments found after VAD'}), 400
         
-#         waveform = np.concatenate(voiced_segments)
+        waveform = np.concatenate(voiced_segments)
 
-#         # Normalize audio
-#         waveform = librosa.util.normalize(waveform)
+        # Normalize audio
+        waveform = librosa.util.normalize(waveform)
 
-#         # --- 1. Extract Biometric Features ---
-#         voice_features, success = extract_voice_features(waveform, sample_rate)
-#         if not success:
-#             return jsonify({'error': 'Failed to extract voice features'}), 400
+        # --- 1. Extract Biometric Features ---
+        voice_features, success = extract_voice_features(waveform, sample_rate)
+        if not success:
+            return jsonify({'error': 'Failed to extract voice features'}), 400
 
-#         # --- 2. Passive Liveness Check ---
-#         is_live, failure_reason = check_voice_liveness(voice_features)
-#         if not is_live:
-#             logger.warning(f"SPOOF ATTEMPT DETECTED (VOICE). Reason: {failure_reason}")
-#             return jsonify({'error': f'Liveness check failed: {failure_reason}'}), 403 # 403 Forbidden
+        # --- 2. Passive Liveness Check ---
+        is_live, failure_reason = check_voice_liveness(voice_features)
+        if not is_live:
+            logger.warning(f"SPOOF ATTEMPT DETECTED (VOICE). Reason: {failure_reason}")
+            return jsonify({'error': f'Liveness check failed: {failure_reason}'}), 403
 
-#         logger.info("Voice liveness check passed.")
+        logger.info("Voice liveness check passed.")
 
-#         # --- 3. Get Speaker Embedding (Only if Liveness Check Passed) ---
-#         waveform_tensor = torch.FloatTensor(waveform).unsqueeze(0)
-#         with torch.no_grad():
-#             embedding = voice_model.encode_batch(waveform_tensor)
-#             embedding_vector = embedding.squeeze().cpu().numpy()
+        # --- 3. Get Speaker Embedding (Only if Liveness Check Passed) ---
+        if voice_model is None:
+            return jsonify({'error': 'Voice model not loaded'}), 500
+            
+        waveform_tensor = torch.FloatTensor(waveform).unsqueeze(0)
+        with torch.no_grad():
+            embedding = voice_model.encode_batch(waveform_tensor)
+            embedding_vector = embedding.squeeze().cpu().numpy()
 
-#         response_data = {
-#             'embedding': embedding_vector.tolist(),
-#             # FIX: Removed stray 'e'
-#             'voice_features': voice_features,
-#             'success': True
-#         }
+        response_data = {
+            'embedding': embedding_vector.tolist(),
+            'voice_features': voice_features,
+            'success': True
+        }
 
-#         return jsonify(response_data)
+        return jsonify(response_data)
 
-#     except Exception as e:
-#         logger.error(f"Error processing voice: {str(e)}")
-#         return jsonify({'error': str(e), 'success': False}), 500
-#     finally:
-#         if os.path.exists(temp_path):
-#             # FIX: Removed stray 'M'
-#             os.remove(temp_path)
+    except Exception as e:
+        logger.error(f"Error processing voice: {str(e)}")
+        return jsonify({'error': str(e), 'success': False}), 500
+    finally:
+        if os.path.exists(temp_path):
+            os.remove(temp_path)
 
 
 if __name__ == '__main__':

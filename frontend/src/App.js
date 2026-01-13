@@ -3,6 +3,8 @@ import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-d
 import Home from './components/Home';
 import Register from './components/Register';
 import Login from './components/Login';
+import MultiAuthRegister from './components/MultiAuthRegister';
+import MultiAuthLogin from './components/MultiAuthLogin';
 import Dashboard from './components/Dashboard';
 import OTPLogin from './components/OTPLogin';
 import Beneficiaries from './components/Beneficiaries';
@@ -54,8 +56,14 @@ function App() {
       <Routes>
         {/* Public Routes */}
         <Route path="/" element={<Home />} />
-        <Route path="/register" element={<Register mode="face" />} />
-        <Route path="/login" element={<Login mode="face" />} />
+        
+        {/* Multi-Auth Routes (Face + Voice + OTP) */}
+        <Route path="/register" element={<MultiAuthRegister />} />
+        <Route path="/login" element={<MultiAuthLogin />} />
+        
+        {/* Legacy Single-Auth Routes (kept for backwards compatibility) */}
+        <Route path="/register-face" element={<Register mode="face" />} />
+        <Route path="/login-face" element={<Login mode="face" />} />
         <Route path="/voice/register" element={<Register mode="voice" />} />
         <Route path="/voice/login" element={<Login mode="voice" />} />
         <Route path="/otp-login" element={<OTPLogin />} />
